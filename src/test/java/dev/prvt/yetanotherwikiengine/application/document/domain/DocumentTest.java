@@ -36,7 +36,7 @@ class DocumentTest {
         // given
 
         // when
-        givenDoc.updateDocument(givenRev, givenDoc.getEditToken(), validator);
+        givenDoc.updateDocument(givenRev);
 
         // then
         assertThat(givenDoc.getCurrentRevision()).isSameAs(givenRev);
@@ -45,12 +45,12 @@ class DocumentTest {
     @Test
     void should_rev_version_incremented_when_updated() {
         // given
-        givenDoc.updateDocument(givenRev, givenDoc.getEditToken(), validator);
+        givenDoc.updateDocument(givenRev);
         long givenVersion = givenDoc.getCurrentRevision().getRevVersion();
         Revision givenRev = new Revision();
 
         // when
-        givenDoc.updateDocument(givenRev, givenDoc.getEditToken(), validator);
+        givenDoc.updateDocument(givenRev);
 
         // then
         assertThat(givenDoc.getCurrentRevision().getRevVersion())
