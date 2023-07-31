@@ -1,15 +1,10 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain;
+package dev.prvt.yawiki.application.domain.wikipage;
 
-import dev.prvt.yetanotherwikiengine.Fixture;
-import dev.prvt.yetanotherwikiengine.application.document.domain.dependency.DocumentEditValidator;
-import dev.prvt.yetanotherwikiengine.application.document.domain.exception.EditValidationException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static dev.prvt.yetanotherwikiengine.Fixture.*;
+import static dev.prvt.yawiki.Fixture.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RevisionTest {
     Revision testRev;
@@ -52,7 +47,7 @@ class RevisionTest {
         assertThat(testRev.getRevVersion()).isEqualTo(1L);
 
         // when
-        Revision newerRev = new Revision();
+        Revision newerRev = new Revision(testDoc, randString());
         newerRev.setRevVersionAfter(testRev);
 
         // then

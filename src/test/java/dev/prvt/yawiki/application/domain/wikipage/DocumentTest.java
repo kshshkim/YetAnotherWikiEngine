@@ -1,12 +1,11 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain;
+package dev.prvt.yawiki.application.domain.wikipage;
 
-import dev.prvt.yetanotherwikiengine.application.document.domain.dependency.DocumentEditValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static dev.prvt.yetanotherwikiengine.Fixture.randString;
+import static dev.prvt.yawiki.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DocumentTest {
@@ -47,7 +46,7 @@ class DocumentTest {
         // given
         givenDoc.updateDocument(givenRev);
         long givenVersion = givenDoc.getCurrentRevision().getRevVersion();
-        Revision givenRev = new Revision();
+        Revision givenRev = new Revision(givenDoc, randString());
 
         // when
         givenDoc.updateDocument(givenRev);

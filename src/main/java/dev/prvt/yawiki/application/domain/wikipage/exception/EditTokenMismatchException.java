@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain.exception;
+package dev.prvt.yawiki.application.domain.wikipage.exception;
 
 public class EditTokenMismatchException extends EditValidationException {
     public EditTokenMismatchException() {

@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine;
+package dev.prvt.yawiki;
 
 import net.bytebuddy.utility.RandomString;
 

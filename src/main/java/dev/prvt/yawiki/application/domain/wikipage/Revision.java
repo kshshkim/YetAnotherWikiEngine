@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain;
+package dev.prvt.yawiki.application.domain.wikipage;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -59,7 +59,12 @@ public class Revision {
     }
 
     public Revision(Document document, String comment) {
+        this(document, comment, null);
+    }
+
+    public Revision(Document document, String comment, RawContent rawContent) {
         this.document = document;
+        this.rawContent = rawContent;
         this.comment = comment;
     }
 }

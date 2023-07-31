@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine;
+package dev.prvt.yawiki;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

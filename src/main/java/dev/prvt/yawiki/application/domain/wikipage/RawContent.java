@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain;
+package dev.prvt.yawiki.application.domain.wikipage;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,7 +14,9 @@ public class RawContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(updatable = false)
     private Integer size;
+    @Column(updatable = false)
     private String content;
 
     public RawContent(String content) {

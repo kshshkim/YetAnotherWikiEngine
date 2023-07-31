@@ -1,12 +1,10 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain;
+package dev.prvt.yawiki.application.domain.wikipage;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -43,9 +41,6 @@ public class Document {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) // 새 버전을 할당하면 알아서 저장돼야함. 리비전은 거의 수정되지 않으므로 그 이상의 cascade 는 필요 없음.
     @JoinColumn(name = "current_revision_id")
     private Revision currentRevision;  // todo Revision.document 필드를 통해서 양방향 참조가 일어나고 있는데, 바람직하지 않아보임. 다른 방법으로 해결할것.
-
-    @OneToMany(mappedBy = "referer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DocumentReference> innerLinks = new ArrayList<>();
 
     // 무작위 UUID 를 사용하나, 변경 가능함.
     private void updateEditToken() {

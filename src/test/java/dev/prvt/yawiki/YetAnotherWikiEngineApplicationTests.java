@@ -1,4 +1,4 @@
-package dev.prvt.yetanotherwikiengine;
+package dev.prvt.yawiki;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

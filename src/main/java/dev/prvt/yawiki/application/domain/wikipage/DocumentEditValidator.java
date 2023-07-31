@@ -1,8 +1,6 @@
-package dev.prvt.yetanotherwikiengine.application.document.domain.dependency;
+package dev.prvt.yawiki.application.domain.wikipage;
 
-import dev.prvt.yetanotherwikiengine.application.document.domain.Document;
-import dev.prvt.yetanotherwikiengine.application.document.domain.Revision;
-import dev.prvt.yetanotherwikiengine.application.document.domain.exception.EditValidationException;
+import dev.prvt.yawiki.application.domain.wikipage.exception.EditValidationException;
 
 /**
  * 문서 수정시 수정 토큰 체크, 리비전 체크, 수정자 체크
