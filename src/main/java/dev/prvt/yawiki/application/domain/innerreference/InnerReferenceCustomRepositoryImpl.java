@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
 @Repository
-public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomRepository {
+public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomRepository<UUID> {
     private final JPAQueryFactory queryFactory;
     static private final QInnerReference innerRef = QInnerReference.innerReference;
 
@@ -19,7 +20,7 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    private BooleanExpression refererIdMatches(Long documentId) {
+    private BooleanExpression refererIdMatches(UUID documentId) {
         return innerRef.refererId.eq(documentId);
     }
 
@@ -32,7 +33,7 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
     }
 
     @Override
-    public Set<String> findReferredTitlesByRefererId(Long refererId) {
+    public Set<String> findReferredTitlesByRefererId(UUID refererId) {
             return queryFactory
                     .select(innerRef.referredTitle).from(innerRef)
                     .where(refererIdMatches(refererId))
@@ -41,15 +42,7 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
     }
 
     @Override
-    public long delete(Long refererId) {
-        return queryFactory
-                .delete(innerRef)
-                .where(refererIdMatches(refererId))
-                .execute();
-    }
-
-    @Override
-    public long delete(Long refererId, Collection<String> titlesToDelete) {
+    public long delete(UUID refererId, Collection<String> titlesToDelete) {
         return queryFactory
                 .delete(innerRef)
                 .where(
@@ -60,7 +53,7 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
     }
 
     @Override
-    public long deleteExcept(Long refererId, Collection<String> titlesNotToDelete) {
+    public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
         return queryFactory
                 .delete(innerRef)
                 .where(

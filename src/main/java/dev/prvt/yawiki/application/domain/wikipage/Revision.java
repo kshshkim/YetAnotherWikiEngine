@@ -3,8 +3,13 @@ package dev.prvt.yawiki.application.domain.wikipage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+
+import java.util.UUID;
+
+import static dev.prvt.uuid.Const.UUID_V7;
 
 
 /**
@@ -23,8 +28,10 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Revision {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid-v7")
+    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @Column(name = "rev_id", columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @Column(name = "rev_version", updatable = false)
     private long revVersion;  // JPA 낙관적 락의 버전이 아님.

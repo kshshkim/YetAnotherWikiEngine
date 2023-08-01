@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -27,7 +28,7 @@ public class WikiPageUpdatedReferenceServiceImpl implements WikiPageUpdatedRefer
         return toRemove;
     }
 
-    void createRefs(Long documentId, Set<String> existingRefs, Set<String> updatedRefs) {
+    void createRefs(UUID documentId, Set<String> existingRefs, Set<String> updatedRefs) {
         innerReferenceRepository.saveAll(
                 titlesToCreate(existingRefs, updatedRefs).stream()
                         .map(title -> new InnerReference(documentId, title)).toList()
@@ -38,7 +39,7 @@ public class WikiPageUpdatedReferenceServiceImpl implements WikiPageUpdatedRefer
      * 삭제할 레퍼런스의 숫자와 전체 레퍼런스의 숫자를 비교하여 비용이 적은 쿼리를 실행함.
      * 만약 문서의 레퍼런스가 굉장히 많을 경우, count 쿼리를 사용하는 것도 고려해봐야함.
      */
-    void deleteRefs(Long documentId, Set<String> existingRefs, Set<String> updatedRefs) {
+    void deleteRefs(UUID documentId, Set<String> existingRefs, Set<String> updatedRefs) {
         Set<String> toDelete = titlesToDelete(existingRefs, updatedRefs);
         if (updatedRefs.size() < toDelete.size()) {
             // delete ... not in :updatedRefs
@@ -56,7 +57,7 @@ public class WikiPageUpdatedReferenceServiceImpl implements WikiPageUpdatedRefer
      * @param updatedRefTitles InnerReference.referredTitle
      */
     @Override
-    public void updateReferences(Long documentId, Set<String> updatedRefTitles) {
+    public void updateReferences(UUID documentId, Set<String> updatedRefTitles) {
         Set<String> existingRefTitles = innerReferenceRepository.findReferredTitlesByRefererId(documentId);
         deleteRefs(documentId, existingRefTitles, updatedRefTitles);
         createRefs(documentId, existingRefTitles, updatedRefTitles);

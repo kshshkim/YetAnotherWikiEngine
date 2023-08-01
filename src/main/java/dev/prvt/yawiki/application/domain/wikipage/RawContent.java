@@ -3,8 +3,13 @@ package dev.prvt.yawiki.application.domain.wikipage;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+
+import java.util.UUID;
+
+import static dev.prvt.uuid.Const.UUID_V7;
 
 @Entity
 @Getter
@@ -12,8 +17,10 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RawContent {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid-v7")
+    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @Column(name = "raw_id", columnDefinition = "BINARY(16)")
+    private UUID id;
     @Column(updatable = false)
     private Integer size;
     @Column(updatable = false)
