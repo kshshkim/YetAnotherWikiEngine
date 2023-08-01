@@ -2,9 +2,9 @@ package dev.prvt.yawiki.application.domain.wikipage;
 
 import dev.prvt.yawiki.application.domain.wikipage.exception.EditValidationException;
 
-public class DummyValidator implements DocumentEditValidator {
+public class DummyValidator implements EditValidator {
     @Override
-    public void validate(Document document, Revision revision, String editToken) throws EditValidationException {
+    public void validate(WikiPage wikiPage, Revision revision, String editToken) throws EditValidationException {
 
     }
 }

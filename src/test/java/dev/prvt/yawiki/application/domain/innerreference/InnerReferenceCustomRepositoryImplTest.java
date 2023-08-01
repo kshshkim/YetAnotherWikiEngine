@@ -1,8 +1,7 @@
 package dev.prvt.yawiki.application.domain.innerreference;
 
-import dev.prvt.yawiki.application.domain.wikipage.Document;
+import dev.prvt.yawiki.application.domain.wikipage.WikiPage;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,18 +32,18 @@ class InnerReferenceCustomRepositoryImplTest {
     EntityManager em;
 
 
-    private Document givenDocument;
+    private WikiPage givenWikiPage;
 
     private List<String> givenRefTitles;
 
     @BeforeEach
     void initData() {
-        givenDocument = Document.create(randString());
-        em.persist(givenDocument);
+        givenWikiPage = WikiPage.create(randString());
+        em.persist(givenWikiPage);
         log.info("persisted");
         List<InnerReference> refs = IntStream.range(0, 10)
                 .mapToObj(i -> UUID.randomUUID().toString())
-                .map(title -> new InnerReference(givenDocument.getId(), title))
+                .map(title -> new InnerReference(givenWikiPage.getId(), title))
                 .toList();
         givenRefTitles = refs.stream()
                 .map(InnerReference::getReferredTitle)
@@ -60,7 +59,7 @@ class InnerReferenceCustomRepositoryImplTest {
     @Test
     void findReferredTitlesByRefererId() {
         // when
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isNotEmpty();
@@ -74,10 +73,10 @@ class InnerReferenceCustomRepositoryImplTest {
         List<String> toDelete = givenRefTitles.subList(0, 1);
 
         // when
-        innerReferenceCustomRepository.delete(givenDocument.getId(), toDelete);
+        innerReferenceCustomRepository.delete(givenWikiPage.getId(), toDelete);
 
         // then
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("toDelete 에 포함된 요소가 제거되어야함.")
                 .doesNotContainAnyElementsOf(toDelete);
@@ -89,10 +88,10 @@ class InnerReferenceCustomRepositoryImplTest {
         List<String> notToDelete = givenRefTitles.subList(0, 1);
 
         // when
-        innerReferenceCustomRepository.deleteExcept(givenDocument.getId(), notToDelete);
+        innerReferenceCustomRepository.deleteExcept(givenWikiPage.getId(), notToDelete);
 
         // then
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("notToDelete 에 포함된 요소만 남아야함.")
                 .containsExactlyInAnyOrderElementsOf(notToDelete);

@@ -20,10 +20,10 @@ import static dev.prvt.uuid.Const.UUID_V7;
 @Entity
 @Getter
 @Table(
-        name = "REVISION",
+        name = "revision",
         indexes = @Index(
-                name = "idx__revision__document_id__rev_version",
-                columnList = "document_id, rev_version",
+                name = "idx__revision__page_id__rev_version",
+                columnList = "page_id, rev_version",
                 unique = true))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Revision {
@@ -37,8 +37,8 @@ public class Revision {
     private long revVersion;  // JPA 낙관적 락의 버전이 아님.
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", updatable = false)
-    private Document document;
+    @JoinColumn(name = "page_id", updatable = false)
+    private WikiPage wikiPage;
 
     @Getter(AccessLevel.NONE)
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)  // 마찬가지로 수정될 일이 거의 없음.
@@ -65,12 +65,12 @@ public class Revision {
         return beforeRev == null ? 1L : beforeRev.getRevVersion() + 1L;
     }
 
-    public Revision(Document document, String comment) {
-        this(document, comment, null);
+    public Revision(WikiPage wikiPage, String comment) {
+        this(wikiPage, comment, null);
     }
 
-    public Revision(Document document, String comment, RawContent rawContent) {
-        this.document = document;
+    public Revision(WikiPage wikiPage, String comment, RawContent rawContent) {
+        this.wikiPage = wikiPage;
         this.rawContent = rawContent;
         this.comment = comment;
     }

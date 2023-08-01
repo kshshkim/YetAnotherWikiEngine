@@ -1,8 +1,6 @@
 package dev.prvt.yawiki.application.domain.innerreference;
 
-import dev.prvt.yawiki.Fixture;
-import dev.prvt.yawiki.application.domain.wikipage.Document;
-import org.assertj.core.api.Assertions;
+import dev.prvt.yawiki.application.domain.wikipage.WikiPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import java.util.stream.IntStream;
 
 import static dev.prvt.yawiki.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
@@ -34,17 +31,17 @@ class WikiPageUpdatedReferenceServiceImplTest {
     @Autowired
     EntityManager em;
 
-    private Document givenDocument;
+    private WikiPage givenWikiPage;
     private Set<String> givenRefTitles;
 
     @BeforeEach
     void initData() {
-        givenDocument = Document.create(randString());
-        em.persist(givenDocument);
+        givenWikiPage = WikiPage.create(randString());
+        em.persist(givenWikiPage);
 
         List<InnerReference> givenReferences = IntStream.range(0, 10)
                 .mapToObj(i -> randString())
-                .map(title -> new InnerReference(givenDocument.getId(), title))
+                .map(title -> new InnerReference(givenWikiPage.getId(), title))
                 .toList();
 
         givenRefTitles = givenReferences.stream()
@@ -65,10 +62,10 @@ class WikiPageUpdatedReferenceServiceImplTest {
         updatedRefs.addAll(newRefs);
 
         // when
-        service.createRefs(givenDocument.getId(), givenRefTitles, updatedRefs);
+        service.createRefs(givenWikiPage.getId(), givenRefTitles, updatedRefs);
 
         // then
-        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
 
         assertThat(found)
                 .containsAll(newRefs);
@@ -82,10 +79,10 @@ class WikiPageUpdatedReferenceServiceImplTest {
                 .collect(Collectors.toSet());
 
         // when
-        service.deleteRefs(givenDocument.getId(), givenRefTitles, updatedRefs);
+        service.deleteRefs(givenWikiPage.getId(), givenRefTitles, updatedRefs);
 
         // then
-        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .containsExactlyInAnyOrderElementsOf(updatedRefs);
     }
@@ -98,10 +95,10 @@ class WikiPageUpdatedReferenceServiceImplTest {
                 .collect(Collectors.toSet());
 
         // when
-        service.deleteRefs(givenDocument.getId(), givenRefTitles, updatedRefs);
+        service.deleteRefs(givenWikiPage.getId(), givenRefTitles, updatedRefs);
 
         // then
-        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .containsExactlyInAnyOrderElementsOf(updatedRefs);
     }
@@ -116,10 +113,10 @@ class WikiPageUpdatedReferenceServiceImplTest {
         updatedRefs.addAll(newRefs);
 
         // when
-        service.updateReferences(givenDocument.getId(), updatedRefs);
+        service.updateReferences(givenWikiPage.getId(), updatedRefs);
 
         // then
-        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenDocument.getId());
+        Set<String> found = innerReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .containsExactlyInAnyOrderElementsOf(updatedRefs);
     }

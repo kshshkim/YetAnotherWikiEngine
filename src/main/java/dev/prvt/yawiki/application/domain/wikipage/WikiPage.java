@@ -12,20 +12,20 @@ import static dev.prvt.uuid.Const.UUID_V7;
 
 @Entity
 @Table(
-        name = "DOCUMENT",
+        name = "wiki_page",
         indexes = {
                 @Index(
-                        name = "idx__document_title",
+                        name = "idx__page_title",
                         columnList = "title",
                         unique = true
                 )})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Document {
+public class WikiPage {
     @Id
     @GeneratedValue(generator = "uuid-v7")
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
-    @Column(name = "document_id", columnDefinition = "BINARY(16)")
+    @Column(name = "page_id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     // unique 제약조건 설정됨.
@@ -63,15 +63,15 @@ public class Document {
         this.isActive = true;
     }
 
-    public Document(String title, boolean isActive, Revision currentRevision) {
+    public WikiPage(String title, boolean isActive, Revision currentRevision) {
         this.title = title;
         this.isActive = isActive;
         this.currentRevision = currentRevision;
     }
 
-    public static Document create(String title) {
-        Document document = new Document(title, false, null);
-        document.updateEditToken();
-        return document;
+    public static WikiPage create(String title) {
+        WikiPage wikiPage = new WikiPage(title, false, null);
+        wikiPage.updateEditToken();
+        return wikiPage;
     }
 }

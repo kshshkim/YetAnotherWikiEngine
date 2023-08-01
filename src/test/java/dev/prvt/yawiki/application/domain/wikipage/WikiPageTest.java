@@ -8,15 +8,15 @@ import java.util.UUID;
 import static dev.prvt.yawiki.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DocumentTest {
+class WikiPageTest {
 
-    Document givenDoc;
+    WikiPage givenDoc;
     Revision givenRev;
-    DocumentEditValidator validator = new DummyValidator();
+    EditValidator validator = new DummyValidator();
 
     @BeforeEach
     void beforeEach() {
-        givenDoc = Document.create(randString());
+        givenDoc = WikiPage.create(randString());
         givenRev = new Revision(givenDoc, randString());
     }
 

@@ -8,10 +8,10 @@ import static org.assertj.core.api.Assertions.*;
 
 class RevisionTest {
     Revision testRev;
-    Document testDoc;
+    WikiPage testDoc;
     @BeforeEach
     void beforeEach() {
-        testDoc = Document.create(randString());
+        testDoc = WikiPage.create(randString());
         testRev = new Revision(testDoc, randString());
     }
 

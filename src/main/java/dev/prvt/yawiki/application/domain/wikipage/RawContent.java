@@ -13,7 +13,7 @@ import static dev.prvt.uuid.Const.UUID_V7;
 
 @Entity
 @Getter
-@Table(name = "RAW_CONTENT")
+@Table(name = "raw_content")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RawContent {
     @Id
