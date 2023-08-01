@@ -11,13 +11,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WikiPageTest {
 
     WikiPage givenDoc;
-    Revision givenRev;
-    EditValidator validator = new DummyValidator();
+    String givenComment;
+    String givenContent;
 
     @BeforeEach
     void beforeEach() {
         givenDoc = WikiPage.create(randString());
-        givenRev = new Revision(givenDoc, randString());
+
+        givenComment = "comment " + randString();
+        givenContent = "content " + randString();
+    }
+
+    @Test
+    void creationTest() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString());
+        String comment = "comment " + randString();
+        String content = "content" + randString();
+        // when
+        wikiPage.updateDocument(comment, content);
+
+        // then
+        Revision rev = wikiPage.getCurrentRevision();
+
+        assertThat(rev).isNotNull();
+        assertThat(rev.getWikiPage())
+                .isNotNull()
+                .isSameAs(wikiPage);
+        assertThat(rev.getRevVersion()).isEqualTo(1);
+        assertThat(rev.getComment()).isEqualTo(comment);
+
+        RawContent raw = rev.getRawContent();
+        assertThat(raw.getContent()).isEqualTo(content);
+
     }
 
     @Test
@@ -35,25 +61,61 @@ class WikiPageTest {
         // given
 
         // when
-        givenDoc.updateDocument(givenRev);
+        givenDoc.updateDocument(givenComment, givenContent);
 
         // then
-        assertThat(givenDoc.getCurrentRevision()).isSameAs(givenRev);
+        Revision rev = givenDoc.getCurrentRevision();
+        assertThat(rev)
+                .isNotNull();
+        assertThat(rev.getWikiPage())
+                .isNotNull()
+                .isSameAs(givenDoc);
+        assertThat(rev.getRevVersion())
+                .isEqualTo(1);
+
+        RawContent raw = rev.getRawContent();
+
+        assertThat(raw)
+                .isNotNull();
+        assertThat(raw.getContent())
+                .isEqualTo(givenContent);
+
     }
 
     @Test
     void should_rev_version_incremented_when_updated() {
         // given
-        givenDoc.updateDocument(givenRev);
-        long givenVersion = givenDoc.getCurrentRevision().getRevVersion();
-        Revision givenRev = new Revision(givenDoc, randString());
+        givenDoc.updateDocument(givenComment, givenContent);
+        Revision givenRev = givenDoc.getCurrentRevision();
+        RawContent givenRaw = givenRev.getRawContent();
+        String newComment = "comment " + randString();
+        String newContent = "content " + randString() + randString();
 
         // when
-        givenDoc.updateDocument(givenRev);
+        givenDoc.updateDocument(newComment, newContent);
 
         // then
-        assertThat(givenDoc.getCurrentRevision().getRevVersion())
-                .isEqualTo(givenVersion+1L);
+        Revision newRev = givenDoc.getCurrentRevision();
+        assertThat(newRev)
+                .isNotNull()
+                .isNotSameAs(givenRev);
+
+        assertThat(newRev.getRevVersion())
+                .isGreaterThan(givenRev.getRevVersion());
+        assertThat(newRev.getWikiPage())
+                .isNotNull()
+                .isSameAs(givenDoc);
+        assertThat(newRev.getComment())
+                .isEqualTo(newComment);
+
+        RawContent newRaw = newRev.getRawContent();
+        assertThat(newRaw)
+                .isNotNull()
+                .isNotSameAs(givenRaw);
+        assertThat(newRaw.getContent())
+                .isEqualTo(newContent)
+                .isNotEqualTo(givenRaw.getContent());
+
     }
 
 }

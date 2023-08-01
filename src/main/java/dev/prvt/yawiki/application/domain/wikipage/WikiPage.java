@@ -28,6 +28,9 @@ public class WikiPage {
     @Column(name = "page_id", columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Version
+    private int version;
+
     // unique 제약조건 설정됨.
     private String title;
 
@@ -42,7 +45,8 @@ public class WikiPage {
     private String editToken;
 
     // 현재 버전.
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST) // 새 버전을 할당하면 알아서 저장돼야함. 리비전은 거의 수정되지 않으므로 그 이상의 cascade 는 필요 없음.
+    // 새 버전을 할당하면 알아서 저장돼야함. 리비전은 거의 수정되지 않으므로 그 이상의 cascade 는 필요 없음.
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "current_revision_id")
     private Revision currentRevision;  // todo Revision.document 필드를 통해서 양방향 참조가 일어나고 있는데, 바람직하지 않아보임. 다른 방법으로 해결할것.
 
@@ -58,9 +62,14 @@ public class WikiPage {
 
     // 검증 로직과 reference setting 로직을 분리하였음.
     // DocumentReference 등, 다른 클래스에 대한 책임을 지지 않음.
-    public void updateDocument(Revision newRevision) {
+    private void updateDocument(Revision newRevision) {
         replaceCurrentRevisionWith(newRevision);
         this.isActive = true;
+    }
+
+    public void updateDocument(String comment, String content) {
+        Revision newRev = new Revision(this, comment, new RawContent(content));
+        updateDocument(newRev);
     }
 
     public WikiPage(String title, boolean isActive, Revision currentRevision) {

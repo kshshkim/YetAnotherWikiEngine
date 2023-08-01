@@ -37,12 +37,11 @@ public class Revision {
     private long revVersion;  // JPA 낙관적 락의 버전이 아님.
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id", updatable = false)
+    @JoinColumn(name = "page_id", updatable = false, nullable = false)
     private WikiPage wikiPage;
 
-    @Getter(AccessLevel.NONE)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)  // 마찬가지로 수정될 일이 거의 없음.
-    @JoinColumn(name = "raw_content", updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)  // 마찬가지로 수정될 일이 거의 없음.
+    @JoinColumn(name = "raw_content", updatable = false, nullable = false)
     private RawContent rawContent;
 
     private String comment;
