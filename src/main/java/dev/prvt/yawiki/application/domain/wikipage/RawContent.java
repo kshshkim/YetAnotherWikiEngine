@@ -23,7 +23,7 @@ public class RawContent {
     private UUID id;
     @Column(updatable = false)
     private Integer size;
-    @Column(updatable = false)
+    @Column(updatable = false, columnDefinition = "LONGTEXT")
     private String content;
 
     public RawContent(String content) {
