@@ -10,7 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnitUtil;
 import java.util.Optional;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -19,23 +19,6 @@ class WikiPageRepositoryTest {
     EntityManager em;
     @Autowired
     WikiPageRepository wikiPageRepository;
-
-    private void assertEqualDocument(WikiPage given, WikiPage found) {
-        assertThat(found.getId()).isEqualTo(given.getId());
-        assertThat(found.getTitle()).isEqualTo(given.getTitle());
-    }
-
-    private void assertEqualRevision(Revision given, Revision found) {
-        assertThat(found.getComment()).isEqualTo(given.getComment());
-        assertThat(found.getRevVersion()).isEqualTo(given.getRevVersion());
-        assertThat(found.getWikiPage().getId()).isEqualTo(given.getWikiPage().getId());
-        assertThat(found.getRawContent().getId()).isEqualTo(given.getRawContent().getId());
-    }
-
-    private void assertEqualRawContent(RawContent given, RawContent found) {
-        assertThat(found.getId()).isEqualTo(given.getId());
-        assertThat(found.getContent()).isEqualTo(given.getContent());
-    }
 
     @Test
     @Transactional
@@ -51,7 +34,7 @@ class WikiPageRepositoryTest {
         WikiPage foundWikiPage = wikiPageRepository.findById(givenWikiPage.getId()).orElseThrow();
 
         // then
-        assertEqualDocument(givenWikiPage, foundWikiPage);
+        assertEqualWikiPage(foundWikiPage, givenWikiPage);
     }
 
     @Test
@@ -68,7 +51,7 @@ class WikiPageRepositoryTest {
         WikiPage foundWikiPage = wikiPageRepository.findByTitle(givenWikiPage.getTitle()).orElseThrow();
 
         // then
-        assertEqualDocument(givenWikiPage, foundWikiPage);
+        assertEqualWikiPage(foundWikiPage, givenWikiPage);
     }
 
     @Test
@@ -97,9 +80,9 @@ class WikiPageRepositoryTest {
                 .satisfies(persistenceUnitUtil::isLoaded);
 
 
-        assertEqualDocument(givenWikiPage, foundGet);
-        assertEqualRevision(givenWikiPage.getCurrentRevision(), foundGet.getCurrentRevision());
-        assertEqualRawContent(givenWikiPage.getCurrentRevision().getRawContent(), foundGet.getCurrentRevision().getRawContent());
+        assertEqualWikiPage(foundGet, givenWikiPage);
+        assertEqualRevision(foundGet.getCurrentRevision(), givenWikiPage.getCurrentRevision());
+        assertEqualRawContent(foundGet.getCurrentRevision().getRawContent(), givenWikiPage.getCurrentRevision().getRawContent());
     }
 
 }
