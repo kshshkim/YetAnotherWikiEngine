@@ -11,6 +11,12 @@ public interface InnerReferenceCustomRepository<ID> {
     Set<String> findReferredTitlesByRefererId(ID refererId);
 
     /**
+     * @param refererId wiki page id
+     * @return referer 가 참조하고 있는 문서 제목 중에, 실제로 존재하는 문서만 추려서 반환함.
+     */
+    Set<String> findExistingWikiPageTitlesByRefererId(ID refererId);
+
+    /**
      * @param refererId refererId 가 일치하는 InnerReference 중에서
      * @param titlesToDelete 삭제할 titles
      * @return affected rows

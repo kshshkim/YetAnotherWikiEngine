@@ -68,6 +68,64 @@ class InnerReferenceCustomRepositoryImplTest {
     }
 
     @Test
+    void should_find_nothing_when_document_does_not_exists() {
+        // when
+        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        // then
+        assertThat(found).isEmpty();
+    }
+
+
+    @Test
+    void should_find_nothing_when_document_is_not_active() {
+        // given
+        List<WikiPage> createdWikiPage = givenRefTitles.stream()
+                .limit(3)
+                .map(WikiPage::create)
+                .toList();
+
+        for (WikiPage wikiPage : createdWikiPage) {
+            em.persist(wikiPage);
+        }
+        em.flush();
+        em.clear();
+
+        // when
+        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+
+        // then
+        assertThat(found).isEmpty();
+    }
+
+    @Test
+    void should_find_only_active_wiki_pages() {
+        // given
+        List<WikiPage> createdWikiPage = givenRefTitles.stream()
+                .limit(3)
+                .map(WikiPage::create)
+                .toList();
+
+        for (WikiPage wikiPage : createdWikiPage) {
+            wikiPage.updateDocument(randString(), randString());
+            em.persist(wikiPage);
+        }
+        em.flush();
+        em.clear();
+
+        List<String> activeWikiTitles = createdWikiPage.stream()
+                .map(WikiPage::getTitle)
+                .toList();
+
+        // when
+        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+
+        // then
+        assertThat(found)
+                .hasSize(3)
+                .containsExactlyInAnyOrderElementsOf(activeWikiTitles);
+    }
+
+    @Test
     void delete() {
         // given
         List<String> toDelete = givenRefTitles.subList(0, 1);

@@ -28,7 +28,7 @@ public class InnerReference {
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
     @Column(name = "ref_id", columnDefinition = "BINARY(16)")
     private UUID id;
-    @Column(name = "referer_id", columnDefinition = "BINARY(16)")  // 주의! UUID 참조시 BINARY(16) 으로 설정되었는지 확인할것.
+    @Column(name = "referer_id", columnDefinition = "BINARY(16)", nullable = false, updatable = false)  // 주의! UUID 참조시 BINARY(16) 으로 설정되었는지 확인할것.
     private UUID refererId;
     @Column(name = "referred_title", nullable = false, updatable = false)
     private String referredTitle;

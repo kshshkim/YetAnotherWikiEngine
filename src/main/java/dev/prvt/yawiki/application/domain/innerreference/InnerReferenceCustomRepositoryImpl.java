@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static dev.prvt.yawiki.application.domain.wikipage.QWikiPage.wikiPage;
+
 
 @Repository
 public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomRepository<UUID> {
@@ -18,6 +20,58 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
 
     public InnerReferenceCustomRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
+    }
+
+
+    @Override
+    public Set<String> findReferredTitlesByRefererId(UUID refererId) {
+        return queryFactory
+                .select(innerRef.referredTitle).from(innerRef)
+                    .where(refererIdMatches(refererId))
+                .stream()
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId) {
+        return queryFactory
+                .select(innerRef.referredTitle)
+                    .from(innerRef)
+                        .innerJoin(wikiPage)
+                            .on(titleMatches(), wikiPageIsActive())
+                    .where(refererIdMatches(refererId))
+                .stream()
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public long delete(UUID refererId, Collection<String> titlesToDelete) {
+        return queryFactory
+                .delete(innerRef)
+                    .where(
+                            refererIdMatches(refererId),
+                            titleIn(titlesToDelete)
+                    )
+                .execute();
+    }
+
+    @Override
+    public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
+        return queryFactory
+                .delete(innerRef)
+                    .where(
+                            refererIdMatches(refererId),
+                            titleNotIn(titlesNotToDelete)
+                    )
+                .execute();
+    }
+
+    private BooleanExpression titleMatches() {
+        return innerRef.referredTitle.eq(wikiPage.title);
+    }
+
+    private BooleanExpression wikiPageIsActive() {
+        return wikiPage.isActive.isTrue();
     }
 
     private BooleanExpression refererIdMatches(UUID documentId) {
@@ -30,36 +84,5 @@ public class InnerReferenceCustomRepositoryImpl implements InnerReferenceCustomR
 
     private BooleanExpression titleIn(Collection<String> titles) {
         return innerRef.referredTitle.in(titles);
-    }
-
-    @Override
-    public Set<String> findReferredTitlesByRefererId(UUID refererId) {
-            return queryFactory
-                    .select(innerRef.referredTitle).from(innerRef)
-                    .where(refererIdMatches(refererId))
-                    .stream()
-                    .collect(Collectors.toSet());
-    }
-
-    @Override
-    public long delete(UUID refererId, Collection<String> titlesToDelete) {
-        return queryFactory
-                .delete(innerRef)
-                .where(
-                        refererIdMatches(refererId),
-                        titleIn(titlesToDelete)
-                )
-                .execute();
-    }
-
-    @Override
-    public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
-        return queryFactory
-                .delete(innerRef)
-                .where(
-                        refererIdMatches(refererId),
-                        titleNotIn(titlesNotToDelete)
-                )
-                .execute();
     }
 }
