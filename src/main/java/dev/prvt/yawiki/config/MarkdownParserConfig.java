@@ -39,6 +39,7 @@ public class MarkdownParserConfig {
                 .set(WikiLinkExtension.LINK_PREFIX, "w/")
                 .set(WikiLinkExtension.LINK_ESCAPE_CHARS, " +/<>")
                 .set(WikiLinkExtension.LINK_REPLACE_CHARS, " ----")
+                .set(WikiLinkExtension.LINK_FIRST_SYNTAX, true)
                 .set(HtmlRenderer.SOFT_BREAK, "<br />\n")
         ;
         return Parser.builder(options).build();
