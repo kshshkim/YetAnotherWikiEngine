@@ -1,8 +1,8 @@
 package dev.prvt.yawiki;
 
-import dev.prvt.yawiki.application.domain.wikipage.RawContent;
-import dev.prvt.yawiki.application.domain.wikipage.Revision;
-import dev.prvt.yawiki.application.domain.wikipage.WikiPage;
+import dev.prvt.yawiki.app.wikipage.domain.RawContent;
+import dev.prvt.yawiki.app.wikipage.domain.Revision;
+import dev.prvt.yawiki.app.wikipage.domain.WikiPage;
 import net.bytebuddy.utility.RandomString;
 
 import static org.assertj.core.api.Assertions.assertThat;

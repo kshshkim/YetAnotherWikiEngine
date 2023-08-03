@@ -1,0 +1,12 @@
+package dev.prvt.yawiki.app.wikipage.domain;
+
+import java.util.Set;
+import java.util.UUID;
+
+
+/**
+ * 위키 페이지가 업데이트 될 때, InnerReference 변동 사항을 적절히 업데이트하기 위해 사용됨.
+ */
+public interface WikiPageUpdatedReferenceService {
+    void updateReferences(UUID documentId, Set<String> referencedTitles);
+}

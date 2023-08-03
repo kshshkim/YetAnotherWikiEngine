@@ -11,8 +11,8 @@ import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import dev.prvt.yawiki.application.domain.markdownparser.FlexMarkReferenceExtractor;
-import dev.prvt.yawiki.application.domain.wikipage.InnerReferenceExtractor;
+import dev.prvt.yawiki.app.markdownparser.infra.FlexMarkReferenceExtractor;
+import dev.prvt.yawiki.app.wikipage.domain.InnerReferenceExtractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,6 +44,7 @@ public class MarkdownParserConfig {
         ;
         return Parser.builder(options).build();
     }
+
     @Bean
     public InnerReferenceExtractor documentReferenceExtractor() {
         return new FlexMarkReferenceExtractor(flexmarkParser());
