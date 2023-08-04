@@ -109,7 +109,7 @@ class InnerReferenceCustomRepositoryImplTest {
                 .toList();
 
         for (WikiPage wikiPage : createdWikiPage) {
-            wikiPage.updateDocument(randString(), randString());
+            wikiPage.update(UUID.randomUUID(), randString(), randString());
             em.persist(wikiPage);
         }
         em.flush();

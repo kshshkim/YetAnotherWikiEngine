@@ -5,12 +5,28 @@ import dev.prvt.yawiki.app.wikipage.domain.Revision;
 import dev.prvt.yawiki.app.wikipage.domain.WikiPage;
 import net.bytebuddy.utility.RandomString;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Fixture {
     public static String randString() {
         return RandomString.make();
+    }
+
+    public static RawContent aRawContent() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            sb.append(UUID.randomUUID());
+        }
+        return new RawContent(sb.toString());
+    }
+
+    public static Revision.RevisionBuilder aRevision() {
+        return Revision.builder()
+                .rawContent(aRawContent())
+                .comment(randString());
     }
 
     public static void assertEqualRawContent(RawContent actual, RawContent expected) {

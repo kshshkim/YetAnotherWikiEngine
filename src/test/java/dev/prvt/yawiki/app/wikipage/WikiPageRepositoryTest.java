@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnitUtil;
 import java.util.Optional;
+import java.util.UUID;
 
 import static dev.prvt.yawiki.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +62,7 @@ class WikiPageRepositoryTest {
     void findByTitleWithRevisionAndRawContent() {
         // given
         WikiPage givenWikiPage = WikiPage.create(randString());
-        givenWikiPage.updateDocument(randString(), randString() + randString() + randString());
+        givenWikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
         wikiPageRepository.save(givenWikiPage);
 
         em.flush();

@@ -16,6 +16,7 @@ class WikiPageTest {
     WikiPage givenDoc;
     String givenComment;
     String givenContent;
+    UUID givenContributorId;
 
     @BeforeEach
     void beforeEach() {
@@ -23,6 +24,7 @@ class WikiPageTest {
 
         givenComment = "comment " + randString();
         givenContent = "content " + randString();
+        givenContributorId = UUID.randomUUID();
     }
 
     @Test
@@ -32,7 +34,7 @@ class WikiPageTest {
         String comment = "comment " + randString();
         String content = "content" + randString();
         // when
-        wikiPage.updateDocument(comment, content);
+        wikiPage.update(givenContributorId, comment, content);
 
         // then
         Revision rev = wikiPage.getCurrentRevision();
@@ -64,7 +66,7 @@ class WikiPageTest {
         // given
 
         // when
-        givenDoc.updateDocument(givenComment, givenContent);
+        givenDoc.update(givenContributorId, givenComment, givenContent);
 
         // then
         Revision rev = givenDoc.getCurrentRevision();
@@ -82,20 +84,32 @@ class WikiPageTest {
                 .isNotNull();
         assertThat(raw.getContent())
                 .isEqualTo(givenContent);
+    }
 
+    @Test
+    void should_regenerate_edit_token_when_successfully_updated() {
+        // given
+        String givenEditToken = givenDoc.getEditToken();
+        assertThat(givenEditToken).isNotNull();
+
+        // when
+        givenDoc.update(givenContributorId, givenComment, givenContent);
+
+        // then
+        assertThat(givenDoc.getEditToken()).isNotEqualTo(givenEditToken);
     }
 
     @Test
     void should_rev_version_incremented_when_updated() {
         // given
-        givenDoc.updateDocument(givenComment, givenContent);
+        givenDoc.update(givenContributorId, givenComment, givenContent);
         Revision givenRev = givenDoc.getCurrentRevision();
         RawContent givenRaw = givenRev.getRawContent();
         String newComment = "comment " + randString();
         String newContent = "content " + randString() + randString();
 
         // when
-        givenDoc.updateDocument(newComment, newContent);
+        givenDoc.update(givenContributorId, newComment, newContent);
 
         // then
         Revision newRev = givenDoc.getCurrentRevision();

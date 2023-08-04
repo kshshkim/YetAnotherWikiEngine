@@ -62,17 +62,27 @@ public class WikiPage {
 
     // 검증 로직과 reference setting 로직을 분리하였음.
     // DocumentReference 등, 다른 클래스에 대한 책임을 지지 않음.
-    private void updateDocument(Revision newRevision) {
+    public void update(Revision newRevision) {
         replaceCurrentRevisionWith(newRevision);
         this.isActive = true;
+        updateEditToken();
     }
 
-    public void updateDocument(String comment, String content) {
-        Revision newRev = new Revision(this, comment, new RawContent(content));
-        updateDocument(newRev);
+    public void update(UUID contributorId, String comment, String content) {
+        Revision newRev = buildNewRevision(contributorId, comment, content);
+        update(newRev);
     }
 
-    public WikiPage(String title, boolean isActive, Revision currentRevision) {
+    private Revision buildNewRevision(UUID contributorId, String comment, String content) {
+        return Revision.builder()
+                .wikiPage(this)
+                .contributorId(contributorId)
+                .comment(comment)
+                .rawContent(new RawContent(content))
+                .build();
+    }
+
+    private WikiPage(String title, boolean isActive, Revision currentRevision) {
         this.title = title;
         this.isActive = isActive;
         this.currentRevision = currentRevision;

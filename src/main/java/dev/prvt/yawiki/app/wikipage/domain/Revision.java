@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.app.wikipage.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -21,10 +22,18 @@ import static dev.prvt.uuid.Const.UUID_V7;
 @Getter
 @Table(
         name = "revision",
-        indexes = @Index(
-                name = "idx__revision__page_id__rev_version",
-                columnList = "page_id, rev_version",
-                unique = true))
+        indexes = {
+                @Index(
+                        name = "idx__revision__page_id__rev_version",
+                        columnList = "page_id, rev_version",
+                        unique = true),
+                @Index(
+                        name = "idx__revision__contributor_id",
+                        columnList = "contributor_id"
+                )
+        }
+
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Revision {
     @Id
@@ -33,15 +42,18 @@ public class Revision {
     @Column(name = "rev_id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "rev_version", updatable = false)
+    @Column(name = "contributor_id", columnDefinition = "BINARY(16)", nullable = false, updatable = false)
+    private UUID contributorId;
+
+    @Column(name = "rev_version", nullable = false, updatable = false)
     private long revVersion;  // JPA 낙관적 락의 버전이 아님.
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id", updatable = false, nullable = false)
+    @JoinColumn(name = "page_id", nullable = false, updatable = false)
     private WikiPage wikiPage;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)  // 마찬가지로 수정될 일이 거의 없음.
-    @JoinColumn(name = "raw_content", updatable = false, nullable = false)
+    @JoinColumn(name = "raw_content", nullable = false, updatable = false)
     private RawContent rawContent;
 
     private String comment;
@@ -64,11 +76,9 @@ public class Revision {
         return beforeRev == null ? 1L : beforeRev.getRevVersion() + 1L;
     }
 
-    public Revision(WikiPage wikiPage, String comment) {
-        this(wikiPage, comment, null);
-    }
-
-    public Revision(WikiPage wikiPage, String comment, RawContent rawContent) {
+    @Builder
+    protected Revision(UUID contributorId, WikiPage wikiPage, RawContent rawContent, String comment) {
+        this.contributorId = contributorId;
         this.wikiPage = wikiPage;
         this.rawContent = rawContent;
         this.comment = comment;

@@ -6,16 +6,22 @@ import dev.prvt.yawiki.app.wikipage.domain.WikiPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static dev.prvt.yawiki.Fixture.*;
 import static org.assertj.core.api.Assertions.*;
 
 class RevisionTest {
     Revision testRev;
-    WikiPage testDoc;
+    WikiPage testWikiPage;
+    UUID testContributorId;
     @BeforeEach
     void beforeEach() {
-        testDoc = WikiPage.create(randString());
-        testRev = new Revision(testDoc, randString());
+        testWikiPage = WikiPage.create(randString());
+        testRev = aRevision()
+                .contributorId(testContributorId)
+                .wikiPage(testWikiPage)
+                .build();
     }
 
     @Test
@@ -33,6 +39,12 @@ class RevisionTest {
 
     @Test
     void rawContentCannotBeChanged() {
+        // given
+        testRev = aRevision()
+                .rawContent(null)
+                .wikiPage(testWikiPage)
+                .build();
+
         // when
         assertThatCode(() -> testRev.setRawContent(new RawContent(randString())))
                 .describedAs("should success when rawContent is null")
@@ -50,7 +62,11 @@ class RevisionTest {
         assertThat(testRev.getRevVersion()).isEqualTo(1L);
 
         // when
-        Revision newerRev = new Revision(testDoc, randString());
+        Revision newerRev = aRevision()
+                .contributorId(testContributorId)
+                .wikiPage(testWikiPage)
+                .build();
+
         newerRev.setRevVersionAfter(testRev);
 
         // then
