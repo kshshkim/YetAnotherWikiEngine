@@ -1,8 +1,8 @@
 package dev.prvt.yawiki;
 
-import dev.prvt.yawiki.app.wikipage.domain.RawContent;
-import dev.prvt.yawiki.app.wikipage.domain.Revision;
-import dev.prvt.yawiki.app.wikipage.domain.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
+import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import net.bytebuddy.utility.RandomString;
 
 import java.util.UUID;
