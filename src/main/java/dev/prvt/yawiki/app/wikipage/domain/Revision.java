@@ -56,6 +56,7 @@ public class Revision {
     @JoinColumn(name = "raw_content", nullable = false, updatable = false)
     private RawContent rawContent;
 
+    @Column(name = "comment", nullable = false, updatable = false)
     private String comment;
 
     public void setRevVersionAfter(Revision beforeRev) {
