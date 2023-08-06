@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
@@ -19,7 +20,7 @@ class WikiPageUpdaterTest {
     private final String EXCEPTION_TRIGGER = randString();
     private final String EXCEPTION_TRIGGERED_MESSAGE = randString();
     private boolean wikiReferenceUpdaterCalled;
-    private WikiReferenceUpdater wikiReferenceUpdater = new WikiReferenceUpdater() {
+    private final WikiReferenceUpdater wikiReferenceUpdater = new WikiReferenceUpdater() {
         @Override
         public void updateReferences(UUID documentId, Set<String> referencedTitles) {
             wikiReferenceUpdaterCalled = true;
@@ -34,9 +35,9 @@ class WikiPageUpdaterTest {
         wikiReferenceUpdaterCalled = false;
     }
 
-    private WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
+    private final WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
 
-    private WikiPageUpdater wikiPageUpdater = new WikiPageUpdater(wikiPageRepository, wikiReferenceUpdater);
+    private final WikiPageUpdater wikiPageUpdater = new WikiPageUpdater(wikiPageRepository, wikiReferenceUpdater);
 
     @Test
     void update_should_fail_when_wiki_page_does_not_exist() {
@@ -63,5 +64,33 @@ class WikiPageUpdaterTest {
 
         assertThat(wikiReferenceUpdaterCalled)
                 .isTrue();
+    }
+
+    @Test
+    void should_update_with_proper_parameters() {
+        WikiPage saved = wikiPageRepository.save(WikiPage.create(randString()));
+
+        UUID contributorId = UUID.randomUUID();
+        String title = saved.getTitle();
+        String content = randString();
+        String comment = randString();
+
+        wikiPageUpdater.update(contributorId, title, content, comment, Set.of());
+
+        Revision updatedRev = saved.getCurrentRevision();
+
+        // then
+        assertThat(wikiReferenceUpdaterCalled)
+                .isTrue();
+        assertThat(saved.getTitle())
+                .isEqualTo(title);
+        assertThat(updatedRev)
+                .isNotNull();
+        assertThat(updatedRev.getComment())
+                .isEqualTo(comment);
+        assertThat(updatedRev.getRawContent())
+                .isNotNull();
+        assertThat(updatedRev.getRawContent().getContent())
+                .isEqualTo(content);
     }
 }
