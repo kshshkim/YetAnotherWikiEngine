@@ -15,11 +15,13 @@ class RevisionTest {
     @BeforeEach
     void beforeEach() {
         testWikiPage = WikiPage.create(randString());
+        testContributorId = UUID.randomUUID();
         testRev = aRevision()
                 .contributorId(testContributorId)
                 .wikiPage(testWikiPage)
                 .build();
     }
+
 
     @Test
     void versionCannotBeChanged() {
@@ -68,5 +70,20 @@ class RevisionTest {
 
         // then
         assertThat(newerRev.getRevVersion()).isEqualTo(2L);
+    }
+
+    @Test
+    void contributorId_should_be_set() {
+        assertThat(testRev.getContributorId())
+                .isNotNull()
+                .isEqualTo(testContributorId)
+        ;
+    }
+
+    @Test
+    void should_throw_exception_if_contributorId_is_null() {
+        Revision.builder()
+                .contributorId(null)
+                .build();
     }
 }

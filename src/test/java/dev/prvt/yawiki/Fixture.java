@@ -29,6 +29,14 @@ public class Fixture {
                 .comment(randString());
     }
 
+    public static void updateWikiPageRandomly(WikiPage wikiPage) {
+        wikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
+    }
+
+    public static void updateWikiPageRandomlyWithContributorId(WikiPage wikiPage, UUID contributorId) {
+        wikiPage.update(contributorId, randString(), randString() + randString() + randString());
+    }
+
     public static void assertEqualRawContent(RawContent actual, RawContent expected) {
         assertNotNull(actual);
         assertNotNull(expected);

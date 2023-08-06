@@ -1,6 +1,9 @@
 package dev.prvt.yawiki.core.wikipage.domain.repository;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
+import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,51 +16,49 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.Fixture.*;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Transactional
 class WikiPageRepositoryTest {
     @PersistenceContext
     EntityManager em;
     @Autowired
     WikiPageRepository wikiPageRepository;
+    WikiPage testWikiPage;
+
+    @BeforeEach
+    void initGivenWikiPage() {
+        testWikiPage = WikiPage.create(randString());
+        testWikiPage = wikiPageRepository.save(testWikiPage);
+        em.flush();
+        em.clear();
+    }
 
     @Test
-    @Transactional
     void findById() {
         // given
-        WikiPage givenWikiPage = WikiPage.create(randString());
-        WikiPage save = wikiPageRepository.save(givenWikiPage);
-
-        em.flush();
-        em.clear();
 
         // when
-        WikiPage foundWikiPage = wikiPageRepository.findById(givenWikiPage.getId()).orElseThrow();
+        WikiPage foundWikiPage = wikiPageRepository.findById(testWikiPage.getId()).orElseThrow();
 
         // then
-        assertEqualWikiPage(foundWikiPage, givenWikiPage);
+        assertEqualWikiPage(foundWikiPage, testWikiPage);
     }
 
     @Test
-    @Transactional
     void findByTitle() {
         // given
-        WikiPage givenWikiPage = WikiPage.create(randString());
-        WikiPage save = wikiPageRepository.save(givenWikiPage);
-
-        em.flush();
-        em.clear();
 
         // when
-        WikiPage foundWikiPage = wikiPageRepository.findByTitle(givenWikiPage.getTitle()).orElseThrow();
+        WikiPage foundWikiPage = wikiPageRepository.findByTitle(testWikiPage.getTitle()).orElseThrow();
 
         // then
-        assertEqualWikiPage(foundWikiPage, givenWikiPage);
+        assertEqualWikiPage(foundWikiPage, testWikiPage);
     }
 
     @Test
-    @Transactional
     void findByTitleWithRevisionAndRawContent() {
         // given
         WikiPage givenWikiPage = WikiPage.create(randString());
@@ -87,4 +88,42 @@ class WikiPageRepositoryTest {
         assertEqualRawContent(foundGet.getCurrentRevision().getRawContent(), givenWikiPage.getCurrentRevision().getRawContent());
     }
 
+    @Test
+    void ids_should_be_generated_when_flush_aggregate_root() {
+        // given
+        WikiPage givenWikiPage = wikiPageRepository.findById(testWikiPage.getId())
+                .orElseThrow();
+        updateWikiPageRandomly(givenWikiPage);
+        Revision givenRevision = givenWikiPage.getCurrentRevision();
+        RawContent givenRawContent = givenRevision.getRawContent();
+
+        // when
+        em.flush();
+
+        // then
+        assertThat(givenWikiPage.getId())
+                .isNotNull();
+        assertThat(givenRevision.getId())
+                .isNotNull();
+        assertThat(givenRawContent.getId())
+                .isNotNull();
+    }
+
+    @Test
+    void version_should_be_updated() {
+        // given
+        WikiPage givenWikiPage = wikiPageRepository.findById(testWikiPage.getId())
+                .orElseThrow();
+        updateWikiPageRandomly(givenWikiPage);
+
+        // when
+        em.flush();
+
+        int oldVersion = testWikiPage.getVersion();
+        int updatedVersion = givenWikiPage.getVersion();
+
+        // then
+        assertThat(updatedVersion)
+                .isGreaterThan(oldVersion);
+    }
 }

@@ -156,4 +156,20 @@ class WikiPageTest {
 
     }
 
+    @Test
+    void isActive_should_be_set_false_when_created() {
+        assertThat(givenDoc.isActive())
+                .isFalse();
+    }
+
+    @Test
+    void isActive_should_be_true_after_update() {
+        // when
+        givenDoc.update(givenContributorId, givenComment, givenContent);
+
+        // then
+        assertThat(givenDoc.isActive())
+                .isTrue();
+    }
+
 }
