@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.Fixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WikiPageTest {
@@ -170,6 +171,39 @@ class WikiPageTest {
         // then
         assertThat(givenDoc.isActive())
                 .isTrue();
+    }
+
+    @Test
+    void getContent_should_return_blank_string_if_current_rev_is_null() {
+        // given
+        WikiPage givenWikiPage = WikiPage.create(randString());
+        assertThat(givenWikiPage.getCurrentRevision())
+                .describedAs("테스트 선행 조건 만족")
+                .isNull();
+
+        // when
+        String content = givenWikiPage.getContent();
+
+        // then
+        assertThat(content).isEqualTo("");
+    }
+
+    @Test
+    void getContent_should_return_correct_string() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString());
+        updateWikiPageRandomly(wikiPage);
+        updateWikiPageRandomly(wikiPage);
+
+        // when
+        String content = wikiPage.getContent();
+
+        // then
+        assertThat(content)
+                .isEqualTo(wikiPage
+                        .getCurrentRevision()
+                        .getRawContent()
+                        .getContent());
     }
 
 }

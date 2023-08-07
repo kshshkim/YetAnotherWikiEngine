@@ -86,4 +86,18 @@ class RevisionTest {
                 .contributorId(null)
                 .build();
     }
+
+    @Test
+    void getContent_test() {
+        RawContent givenRaw = aRawContent();
+        Revision givenRev = aRevision()
+                .rawContent(givenRaw).build();
+
+        // when
+        String content = givenRev.getContent();
+
+        // then
+        assertThat(content)
+                .isEqualTo(givenRaw.getContent());
+    }
 }

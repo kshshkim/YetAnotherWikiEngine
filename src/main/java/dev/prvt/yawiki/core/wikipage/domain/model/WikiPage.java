@@ -80,6 +80,15 @@ public class WikiPage {
     private Revision currentRevision;
 
     /**
+     * <p>객체 그래프를 타고 현재 content 를 반환함.</p>
+     * @return 렌더링 되지 않은 본문
+     */
+    public String getContent() {
+        return this.currentRevision == null ? "" : this.currentRevision
+                .getContent();
+    }
+
+    /**
      * 편집 성공시 버전 토큰을 재생성함.
      */
     private void updateVersionToken() {

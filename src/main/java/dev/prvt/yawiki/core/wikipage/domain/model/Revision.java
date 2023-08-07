@@ -59,6 +59,11 @@ public class Revision {
     @Column(name = "comment", nullable = false, updatable = false)
     private String comment;
 
+    public String getContent() {
+        return this.rawContent == null ? "" :
+                rawContent.getContent();
+    }
+
     public void setRevVersionAfter(Revision beforeRev) {
         if (this.revVersion != 0L) {
             throw new IllegalStateException("cannot change finalized field: revVersion="+this.revVersion);
