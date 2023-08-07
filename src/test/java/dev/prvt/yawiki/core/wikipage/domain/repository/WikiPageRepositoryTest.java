@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.Fixture.*;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -130,5 +129,32 @@ class WikiPageRepositoryTest {
         // then
         assertThat(updatedVersion)
                 .isGreaterThan(oldVersion);
+    }
+
+    @Test
+    void findOrCreate_should_create() {
+        // given
+        String givenTitle = randString();
+
+        // when
+        WikiPage created = wikiPageRepository.findOrCreate(givenTitle);
+
+        // then
+        assertThat(created.getTitle())
+                .isEqualTo(givenTitle);
+        assertThat(created.getId())
+                .isNotNull();
+
+        em.flush();
+        em.clear();
+
+        WikiPage found = em.find(WikiPage.class, created.getId());
+        assertEqualWikiPage(found, created);
+    }
+
+    @Test
+    void findOrCreate_should_get() {
+        WikiPage found = wikiPageRepository.findOrCreate(testWikiPage.getTitle());
+        assertEqualWikiPage(found, testWikiPage);
     }
 }
