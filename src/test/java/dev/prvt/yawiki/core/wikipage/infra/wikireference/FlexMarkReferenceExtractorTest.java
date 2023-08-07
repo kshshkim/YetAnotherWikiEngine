@@ -2,6 +2,7 @@ package dev.prvt.yawiki.core.wikipage.infra.wikireference;
 
 import com.vladsch.flexmark.parser.Parser;
 import dev.prvt.yawiki.config.MarkdownParserConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 class FlexMarkReferenceExtractorTest {
     MarkdownParserConfig conf = new MarkdownParserConfig();
     Parser parser = conf.flexmarkParser();
@@ -34,15 +36,11 @@ class FlexMarkReferenceExtractorTest {
                 .containsExactlyInAnyOrderElementsOf(givenRefs);
 
     }
-    @Test
-    void extractReferencedTitless() throws IOException {
-        // given
-
+//    @Test
+    void extractingBenchmark() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader("src/test/resources/namu_raw_2022년_230802.txt"));
-
-
-        String sample = "";
         StringBuilder stringBuilder = new StringBuilder();
+
         while (true) {
             String read = bufferedReader.readLine();
             if (read == null) {
@@ -51,14 +49,13 @@ class FlexMarkReferenceExtractorTest {
             stringBuilder.append(bufferedReader.readLine());
             stringBuilder.append("\n");
         }
-        sample = stringBuilder.toString();
-//        System.out.println("sample = " + sample);
+        String sample = stringBuilder.toString();
+
         long start = System.currentTimeMillis();
         Set<String> titles = extractor.extractReferencedTitles(sample);
         long end = System.currentTimeMillis();
-        System.out.println("end - start = " + (end - start));
-//        System.out.println("titles.toString() = " + titles.toString());
+        log.info("finished in {}ms", end - start);
         int size = titles.size();
-        System.out.println("size = " + size);
+        log.info("total links = {}", size);
     }
 }
