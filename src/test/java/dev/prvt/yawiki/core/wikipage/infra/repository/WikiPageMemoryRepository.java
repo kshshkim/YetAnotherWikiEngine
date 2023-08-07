@@ -46,11 +46,6 @@ public class WikiPageMemoryRepository implements WikiPageRepository {
     // 이하 미구현
 
     @Override
-    public String findVersionTokenByTitle(String title) {
-        return null;
-    }
-
-    @Override
     public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title) {
         return Optional.empty();
     }

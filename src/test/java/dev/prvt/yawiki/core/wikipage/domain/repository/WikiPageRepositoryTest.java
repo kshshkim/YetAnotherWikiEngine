@@ -63,7 +63,12 @@ class WikiPageRepositoryTest {
         // given
         WikiPage givenWikiPage = WikiPage.create(randString());
         givenWikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
+
+        WikiPage testWikiPage1 = WikiPage.create(randString());
+        updateWikiPageRandomly(testWikiPage1);  // where 문이 누락되어있었는데, ID 내림차순 기준으로 1개만 불러오는 바람에 테스트에 성공했음. 걸러낼 수 있도록 추가함.
+
         wikiPageRepository.save(givenWikiPage);
+        wikiPageRepository.save(testWikiPage1);
 
         em.flush();
         em.clear();

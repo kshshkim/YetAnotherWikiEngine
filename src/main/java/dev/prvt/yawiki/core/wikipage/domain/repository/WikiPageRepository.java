@@ -13,9 +13,6 @@ import java.util.UUID;
 public interface WikiPageRepository extends JpaRepository<WikiPage, UUID> {
     Optional<WikiPage> findByTitle(String title);
 
-    @Query("select wp.versionToken from WikiPage wp where wp.title = :title")
-    String findVersionTokenByTitle(@Param("title") String title);
-
-    @Query("select wp from WikiPage wp join fetch wp.currentRevision cr join fetch cr.rawContent")
-    Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title);
+    @Query("select wp from WikiPage wp join fetch wp.currentRevision cr join fetch cr.rawContent where wp.title = :title")
+    Optional<WikiPage> findByTitleWithRevisionAndRawContent(@Param("title") String title);
 }
