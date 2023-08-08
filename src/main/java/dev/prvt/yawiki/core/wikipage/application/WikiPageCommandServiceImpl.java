@@ -1,11 +1,9 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
-import dev.prvt.yawiki.core.wikipage.domain.WikiPageUpdateValidator;
-import dev.prvt.yawiki.core.wikipage.domain.WikiPageUpdater;
+import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,24 +14,20 @@ import java.util.UUID;
 
 @Service
 public class WikiPageCommandServiceImpl implements WikiPageCommandService {
-    private final WikiPageUpdateValidator wikiPageUpdateValidator;
     private final ReferencedTitleExtractor referencedTitleExtractor;
-    private final WikiPageUpdater wikiPageUpdater;
+    private final WikiPageDomainService wikiPageDomainService;
+    private final WikiPageMapper wikiPageMapper;
     private final TransactionTemplate transactionTemplate;
-    private final TransactionTemplate readOnlyTransactionTemplate;
 
-    public WikiPageCommandServiceImpl(WikiPageUpdateValidator wikiPageUpdateValidator, ReferencedTitleExtractor referencedTitleExtractor, WikiPageUpdater wikiPageUpdater, PlatformTransactionManager platformTransactionManager) {
-        this.wikiPageUpdateValidator = wikiPageUpdateValidator;
+    public WikiPageCommandServiceImpl(ReferencedTitleExtractor referencedTitleExtractor, WikiPageDomainService wikiPageDomainService, PlatformTransactionManager platformTransactionManager, WikiPageMapper wikiPageMapper) {
         this.referencedTitleExtractor = referencedTitleExtractor;
-        this.wikiPageUpdater = wikiPageUpdater;
+        this.wikiPageDomainService = wikiPageDomainService;
         this.transactionTemplate = new TransactionTemplate(platformTransactionManager);
-        this.readOnlyTransactionTemplate = new TransactionTemplate(platformTransactionManager);
-        this.readOnlyTransactionTemplate.setReadOnly(true);
+        this.wikiPageMapper = wikiPageMapper;
     }
 
     /**
      * 마크다운 파싱 작업이 오래 걸릴 수 있기 때문에 트랜잭션을 분리함.
-     * 검증(트랜잭션1) -> 마크다운 파싱 -> 업데이트(트랜잭션2) -> todo 렌더링(트랜잭션3, 비동기)
      * @param contributorId 편집자 ID
      * @param title 문서 제목
      * @param comment 편집 코멘트
@@ -41,39 +35,36 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
      * @param content 본문
      */
     @Override
-    public void updateWikiPage(UUID contributorId, String title, String comment, String versionToken, String content) {
-        // 트랜잭션 1 (읽기 전용) 시작
-        validate(contributorId, title, versionToken);
-
-        // 트랜잭션 1 종료, markdown parsing 작업 시작
+    public void commitUpdate(UUID contributorId, String title, String comment, String versionToken, String content) {
+        // MarkDown 파싱은 트랜잭션의 범위 바깥에서 실행돼야함.
         Set<String> references = extractReferences(content);
         
-        // 트랜잭션 2 시작
-        update(contributorId, title, comment, content, references);
-
-        // todo 렌더링
+        // 트랜잭션 시작
+        executeCommit(contributorId, title, comment, content, versionToken, references);
     }
 
+    /**
+     * <p>수정 요청 데이터 반환 이전에 이루어져야할 작업이 수행됨. 이후 수정 요청에 필요한 데이터를 반환함.</p>
+     * <p>수정 요청을 위해 필요한 데이터를 반환함.</p>
+     * @param contributorId 편집 요청자 ID
+     * @param wikiPageTitle 편집할 문서 제목
+     * @return 편집에 필요한 DTO
+     */
     @Override
     @Transactional
-    public WikiPageDataForUpdate getWikiPageForUpdate(UUID contributorId, String title) {
-        return null;  // todo 구현
+    public WikiPageDataForUpdate proclaimUpdate(UUID contributorId, String wikiPageTitle) {
+        WikiPage wikiPage = wikiPageDomainService.proclaimUpdate(contributorId, wikiPageTitle);
+        return wikiPageMapper.mapFrom(wikiPage);
     }
+
 
     private Set<String> extractReferences(String content) {
         return referencedTitleExtractor.extractReferencedTitles(content);
     }
 
-    private void update(UUID contributorId, String title, String comment, String content, Set<String> refs) {
+    private void executeCommit(UUID contributorId, String title, String comment, String content, String versionToken, Set<String> refs) {
         transactionTemplate.executeWithoutResult(
-                status -> wikiPageUpdater.update(contributorId, title, content, comment, refs)
+                status -> wikiPageDomainService.update(contributorId, title, content, comment, versionToken, refs)
         );
     }
-
-    private void validate(UUID contributorId, String title, String versionToken) {
-        readOnlyTransactionTemplate.executeWithoutResult(status -> {
-            wikiPageUpdateValidator.validate(contributorId, title, versionToken);
-        });
-    }
-
 }

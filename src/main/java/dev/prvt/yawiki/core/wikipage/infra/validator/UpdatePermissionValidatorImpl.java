@@ -13,4 +13,9 @@ public class UpdatePermissionValidatorImpl implements UpdatePermissionValidator 
     @Override
     public void validateUpdate(UUID wikiPageId, UUID actorId) {  // todo implement
     }
+
+    @Override
+    public void validateUpdateProclaim(UUID actorId, UUID wikiPageId) {  // todo implement
+
+    }
 }

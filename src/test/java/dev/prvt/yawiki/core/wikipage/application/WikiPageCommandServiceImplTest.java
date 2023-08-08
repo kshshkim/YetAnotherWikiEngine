@@ -1,13 +1,11 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
-import com.zaxxer.hikari.HikariDataSource;
-import dev.prvt.yawiki.core.wikipage.domain.WikiPageUpdateValidator;
-import dev.prvt.yawiki.core.wikipage.domain.WikiPageUpdater;
+import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
+import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.sql.DataSource;
 import java.util.Set;
 import java.util.UUID;
 
@@ -65,9 +62,6 @@ class WikiPageCommandServiceImplTest {
     private UUID updaterFailTrigger;
     private String updaterFailMessage;
 
-    private String updateValidatorFailTrigger;
-    private String updateValidatorFailMessage;
-
     private UUID givenContributorId;
     private String givenTitle;
     private String givenContent;
@@ -75,36 +69,16 @@ class WikiPageCommandServiceImplTest {
     private Set<String> givenReferences;
     private String givenVersionToken;
 
-    private boolean validatingExecuted;
     private boolean extractingExecuted;
     private boolean updatingExecuted;
-
-    /**
-     * HikariDataSource 를 DataSource 구현체로 사용하고, 테스트를 병렬 실행하지 않을 경우에만 올바르게 수행됨.
-     */
-    void assertDbConnectionIsReleased() {
-        if (this.dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
-
-            int activeConnections = hikariDataSource.getHikariPoolMXBean().getActiveConnections();
-            SoftAssertions softly = new SoftAssertions();
-
-            softly.assertThat(activeConnections)
-                    .describedAs("DB 커넥션 반환 테스트. 테스트를 병렬 실행할 경우, 다른 테스트 케이스에서 DB 커넥션을 점유하여 테스트가 실패할 수 있음.")
-                    .isEqualTo(0);
-        } else {
-            log.warn("DB Connection 반환이 적절하게 테스트되지 않았음. 지원하지 않는 DataSource 구현체 {}", dataSource.getClass());
-        }
-    }
-
-    class TestWikiPageUpdater extends WikiPageUpdater {
-        public TestWikiPageUpdater() {
-            super(null, null);
+    private boolean proclaimingExecuted;
+    class TestWikiPageDomainService extends WikiPageDomainService {
+        public TestWikiPageDomainService() {
+            super(null, null, null);
         }
 
         @Override
-        public void update(UUID contributorId, String title, String content, String comment, Set<String> references) {
-//            super.update(contributorId, title, content, comment, references);
+        public void update(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
             updatingExecuted = true;
             if (updaterFailTrigger.equals(contributorId)) {
                 throw new WikiPageUpdaterException(updaterFailMessage);
@@ -124,6 +98,12 @@ class WikiPageCommandServiceImplTest {
                     .describedAs(PARAMETER_CHECK)
                     .isEqualTo(tuple(givenContributorId, givenTitle, givenContent, givenComment, givenReferences));
         }
+
+        @Override
+        public WikiPage proclaimUpdate(UUID contributorId, String wikiPageTitle) {
+            proclaimingExecuted = true;
+            return WikiPage.create(wikiPageTitle);
+        }
     }
 
     class DummyReferenceTitleExtractor implements ReferencedTitleExtractor {
@@ -138,8 +118,6 @@ class WikiPageCommandServiceImplTest {
 
             boolean isInTransaction = TransactionSynchronizationManager.isActualTransactionActive();
 
-            assertDbConnectionIsReleased();
-
             assertThat(isInTransaction)
                     .describedAs("위키 레퍼런스 추출은 트랜잭션 도중에 일어나선 안 됨.")
                     .isFalse();
@@ -151,39 +129,9 @@ class WikiPageCommandServiceImplTest {
         }
     }
 
-    class TestWikiPageUpdateValidator extends WikiPageUpdateValidator {
-        public TestWikiPageUpdateValidator() {
-            super(null, null, null);
-        }
-
-        @SneakyThrows
-        @Override
-        public void validate(UUID actorId, String wikiPageTitle, String versionToken) {
-//            super.validate(actorId, wikiPageTitle, versionToken);
-
-            validatingExecuted = true;
-
-            if (versionToken.equals(updateValidatorFailTrigger)) {
-                throw new RuntimeException(updateValidatorFailMessage);
-            }
-
-            boolean isReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
-
-            assertThat(isReadOnly)
-                    .describedAs("읽기 전용 트랜잭션에서 일어나야함.")
-                    .isTrue();
-
-            assertThat(tuple(actorId, wikiPageTitle, versionToken))
-                    .describedAs(PARAMETER_CHECK)
-                    .isEqualTo(tuple(givenContributorId, givenTitle, givenVersionToken));
-        }
-    }
 
     @Autowired
     private PlatformTransactionManager platformTransactionManager;  // platformTransactionManager 만 테스트용 추상화를 못 했음. todo
-
-    @Autowired
-    private DataSource dataSource;
 
     private WikiPageCommandServiceImpl wikiPageCommandServiceImpl;
 
@@ -196,9 +144,6 @@ class WikiPageCommandServiceImplTest {
         updaterFailTrigger = UUID.randomUUID();
         updaterFailMessage = UUID.randomUUID().toString();
 
-        updateValidatorFailTrigger = UUID.randomUUID().toString();
-        updateValidatorFailMessage = UUID.randomUUID().toString();
-
         // given 인자들 초기화. 하위 모듈에서 파라미터를 적절하게 넘겨받는지 확인하기 위해 사용됨.
         givenContributorId = UUID.randomUUID();
         givenTitle = UUID.randomUUID().toString();
@@ -208,65 +153,56 @@ class WikiPageCommandServiceImplTest {
         givenVersionToken = UUID.randomUUID().toString();
 
         // wikiPageCommandService 재생성
-        wikiPageCommandServiceImpl = new WikiPageCommandServiceImpl(new TestWikiPageUpdateValidator(), new DummyReferenceTitleExtractor(), new TestWikiPageUpdater(), platformTransactionManager);
+        wikiPageCommandServiceImpl = new WikiPageCommandServiceImpl(new DummyReferenceTitleExtractor(), new TestWikiPageDomainService(), platformTransactionManager, new WikiPageMapper());
 
-        // 마크다운 파싱이 일어났는지 여부
-        validatingExecuted = false;
+        // 참조하고 있는 클래스들의 호출이 적절하게 일어났는지 여부
         extractingExecuted = false;
         updatingExecuted = false;
+        proclaimingExecuted = false;
     }
 
     @Test
     void should_success() {
-        assertThatCode(() -> wikiPageCommandServiceImpl.updateWikiPage(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
+        assertThatCode(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
                 .describedAs("should success")
                 .doesNotThrowAnyException();
 
-        assertThat(tuple(validatingExecuted, extractingExecuted, updatingExecuted))
+        assertThat(tuple(extractingExecuted, updatingExecuted))
                 .describedAs("모두 호출되었음.")
-                .isEqualTo(tuple(true, true, true));
+                .isEqualTo(tuple(true, true));
     }
 
     @Test
     void should_fail_when_updater_fails() {
         givenContributorId = updaterFailTrigger;
 
-        assertThatThrownBy(() -> wikiPageCommandServiceImpl.updateWikiPage(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
+        assertThatThrownBy(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
                 .describedAs("업데이터에서만 문제가 터져야함.")
                 .hasMessageContaining(updaterFailMessage);
 
-        assertThat(tuple(validatingExecuted, extractingExecuted, updatingExecuted))
+        assertThat(tuple(extractingExecuted, updatingExecuted))
                 .describedAs("모두 호출되었음.")
-                .isEqualTo(tuple(true, true, true));
+                .isEqualTo(tuple(true, true));
     }
 
     @Test
     void should_fail_when_extractor_fails() {
         givenContent = extractorFailTrigger;
 
-        assertThatThrownBy(() -> wikiPageCommandServiceImpl.updateWikiPage(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
+        assertThatThrownBy(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
                 .describedAs("extractor 에서만 문제가 터져야함.")
                 .hasMessageContaining(extractorFailMessage);
 
-        assertThat(tuple(validatingExecuted, extractingExecuted, updatingExecuted))
+        assertThat(tuple(extractingExecuted, updatingExecuted))
                 .describedAs("extracting 과정에 문제가 생겨서 업데이터는 호출되지 않았음.")
-                .isEqualTo(tuple(true, true, false));
+                .isEqualTo(tuple(true, false));
     }
 
     @Test
-    void should_fail_when_update_validator_fails() {
-        givenVersionToken = updateValidatorFailTrigger;
+    void should_success_proclaim() {
+        WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandServiceImpl.proclaimUpdate(givenContributorId, givenTitle);
 
-        assertThatThrownBy(() -> wikiPageCommandServiceImpl.updateWikiPage(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
-                .describedAs("validator 에서만 문제가 터져야함.")
-                .hasMessageContaining(updateValidatorFailMessage);
-
-        assertThat(extractingExecuted)
-                .describedAs("검증이 실패한 경우 레퍼런스 extraction 이 일어나서는 안 됨.")
-                .isFalse();
-
-        assertThat(tuple(validatingExecuted, extractingExecuted, updatingExecuted))
-                .describedAs("validator 에서 문제가 생기면 다음 단계로 넘어가지 않고 바로 중단되어야함.")
-                .isEqualTo(tuple(true, false, false));
+        assertThat(proclaimingExecuted).isTrue();
+        assertThat(wikiPageDataForUpdate).isNotNull();
     }
 }

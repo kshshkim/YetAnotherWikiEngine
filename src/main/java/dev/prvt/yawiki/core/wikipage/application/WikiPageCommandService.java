@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 
 import java.util.UUID;
 
@@ -15,14 +14,15 @@ public interface WikiPageCommandService {
      * @param editToken 편집 충돌 방지용 토큰
      * @param content 본문
      */
-    void updateWikiPage(UUID contributorId, String title, String comment, String editToken, String content);
+    void commitUpdate(UUID contributorId, String title, String comment, String editToken, String content);
 
     /**
-     * <p>편집을 시작하기 위해서 사용되는 요청. DTO 형태로 반환하는 것을 고려할것.</p>
+     * <p>편집을 시작하기 위해서 사용됨. DTO 형태로 반환하는 것을 고려할것.</p>
      * <p>편집 권한이 있는지 체크해서 통과하면 문서를 VersionToken 과 함께 반환함.</p>
      * @param contributorId 편집 요청자 ID
      * @param title 편집할 문서 제목
-     * @return WikiPage will be created if not present, else return WikiPage with RawData
+     * @return WikiPageDataForUpdate
+     * @see WikiPageDataForUpdate
      */
-    WikiPageDataForUpdate getWikiPageForUpdate(UUID contributorId, String title);
+    WikiPageDataForUpdate proclaimUpdate(UUID contributorId, String title);
 }
