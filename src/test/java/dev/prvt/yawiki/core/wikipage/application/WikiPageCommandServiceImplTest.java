@@ -2,7 +2,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
-import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +26,10 @@ import static org.assertj.core.api.Assertions.*;
  * 트랜잭션이 적절히 구성되었는지
  *     <ul>
  *     <li>
- *         편집 이전 검증 작업이 읽기 전용 트랜잭션에서 실행되는지
- *     </li>
- *     <li>
- *         <p>마크다운 파싱 작업 중에 트랜잭션이 활성화되지 않아야하며, DB 커넥션 역시 반환해야함.</p>
+ *         마크다운 파싱 작업이 트랜잭션의 바깥에서 실행되는지
  *     </li>
  *     <li>
  *         업데이트 작업이 트랜잭션 범위 안에서 실행되는지
- *     </li>
- *     <li>
- *         트랜잭션이 순차적으로 이루어지는지
  *     </li>
  *     </ul>
  * </li>
@@ -74,14 +68,14 @@ class WikiPageCommandServiceImplTest {
     private boolean proclaimingExecuted;
     class TestWikiPageDomainService extends WikiPageDomainService {
         public TestWikiPageDomainService() {
-            super(null, null, null);
+            super(null, null, null, null);
         }
 
         @Override
-        public void update(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
+        public void commitUpdate(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
             updatingExecuted = true;
             if (updaterFailTrigger.equals(contributorId)) {
-                throw new WikiPageUpdaterException(updaterFailMessage);
+                throw new WikiPageReferenceUpdaterException(updaterFailMessage);
             }
 
             boolean isInTransaction = TransactionSynchronizationManager.isActualTransactionActive();

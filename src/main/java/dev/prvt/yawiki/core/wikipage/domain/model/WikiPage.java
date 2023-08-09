@@ -14,7 +14,7 @@ import static dev.prvt.uuid.Const.UUID_V7;
  * <h2>WikiPage</h2>
  * <p>위키의 문서 도메인 엔티티로, {@link dev.prvt.yawiki.core.wikipage.domain} 애그리거트의 Root 역할을 함.</p>
  * <p>문서 생성과 조회, 업데이트 이외의 부가적인 책임(권한 검증, 마크다운 파싱, 내부 레퍼런스 업데이트 등)은 도메인 객체의 바깥에 있음.</p>
- * <p>적절하게 InnerReference 업데이트가 이루어질 수 있도록, 모든 업데이트 작업은 WikiUpdater 를 통해 이루어져야함.</p>
+ * <p>적절하게 InnerReference 업데이트가 이루어질 수 있도록, 모든 업데이트 작업은 도메인 서비스를 통해 이루어져야함.</p>
  * @see dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService
  */
 

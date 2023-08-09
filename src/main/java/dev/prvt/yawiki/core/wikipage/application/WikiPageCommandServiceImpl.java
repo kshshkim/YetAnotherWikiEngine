@@ -64,7 +64,7 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
 
     private void executeCommit(UUID contributorId, String title, String comment, String content, String versionToken, Set<String> refs) {
         transactionTemplate.executeWithoutResult(
-                status -> wikiPageDomainService.update(contributorId, title, content, comment, versionToken, refs)
+                status -> wikiPageDomainService.commitUpdate(contributorId, title, content, comment, versionToken, refs)
         );
     }
 }
