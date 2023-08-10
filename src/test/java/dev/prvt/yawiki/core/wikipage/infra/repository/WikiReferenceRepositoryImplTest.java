@@ -1,14 +1,18 @@
-package dev.prvt.yawiki.core.wikireference;
+package dev.prvt.yawiki.core.wikipage.infra.repository;
 
+import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
-import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceCustomRepositoryImpl;
+import dev.prvt.yawiki.core.wikipage.infra.repository.WikiReferenceRepositoryImpl;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -23,17 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @Transactional
-class WikiReferenceCustomRepositoryImplTest {
-
-    @Autowired
-    WikiReferenceRepository wikiReferenceRepository;
-
-    @Autowired
-    WikiReferenceCustomRepositoryImpl innerReferenceCustomRepository;
+class WikiReferenceRepositoryImplTest {
 
     @Autowired
     EntityManager em;
 
+    @Autowired
+    WikiReferenceRepositoryImpl wikiReferenceRepository;
 
     private WikiPage givenWikiPage;
 
@@ -62,7 +62,7 @@ class WikiReferenceCustomRepositoryImplTest {
     @Test
     void findReferredTitlesByRefererId() {
         // when
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isNotEmpty();
@@ -73,7 +73,7 @@ class WikiReferenceCustomRepositoryImplTest {
     @Test
     void should_find_nothing_when_document_does_not_exists() {
         // when
-        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
         // then
         assertThat(found).isEmpty();
     }
@@ -82,19 +82,16 @@ class WikiReferenceCustomRepositoryImplTest {
     @Test
     void should_find_nothing_when_document_is_not_active() {
         // given
-        List<WikiPage> createdWikiPage = givenRefTitles.stream()
+        givenRefTitles.stream()
                 .limit(3)
                 .map(WikiPage::create)
-                .toList();
+                .forEach(em::persist);
 
-        for (WikiPage wikiPage : createdWikiPage) {
-            em.persist(wikiPage);
-        }
         em.flush();
         em.clear();
 
         // when
-        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isEmpty();
@@ -120,7 +117,7 @@ class WikiReferenceCustomRepositoryImplTest {
                 .toList();
 
         // when
-        Set<String> found = innerReferenceCustomRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found)
@@ -134,10 +131,10 @@ class WikiReferenceCustomRepositoryImplTest {
         List<String> toDelete = givenRefTitles.subList(0, 1);
 
         // when
-        innerReferenceCustomRepository.delete(givenWikiPage.getId(), toDelete);
+        wikiReferenceRepository.delete(givenWikiPage.getId(), toDelete);
 
         // then
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("toDelete 에 포함된 요소가 제거되어야함.")
                 .doesNotContainAnyElementsOf(toDelete);
@@ -149,12 +146,26 @@ class WikiReferenceCustomRepositoryImplTest {
         List<String> notToDelete = givenRefTitles.subList(0, 1);
 
         // when
-        innerReferenceCustomRepository.deleteExcept(givenWikiPage.getId(), notToDelete);
+        wikiReferenceRepository.deleteExcept(givenWikiPage.getId(), notToDelete);
 
         // then
-        Set<String> found = innerReferenceCustomRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("notToDelete 에 포함된 요소만 남아야함.")
                 .containsExactlyInAnyOrderElementsOf(notToDelete);
+    }
+
+    @Test
+    void bulkInsert() {
+        // given
+        UUID givenRefererId = UUID.randomUUID();
+
+        // when
+        wikiReferenceRepository.bulkInsert(givenRefererId, givenRefTitles);
+
+        // then
+        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenRefererId);
+        assertThat(found)
+                .containsExactlyInAnyOrderElementsOf(givenRefTitles);
     }
 }

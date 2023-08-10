@@ -1,11 +1,21 @@
-package dev.prvt.yawiki.core.wikireference.infra;
+package dev.prvt.yawiki.core.wikipage.infra.repository;
 
+import com.fasterxml.uuid.impl.UUIDUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
+import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.sql.PreparedStatement;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,11 +25,20 @@ import static dev.prvt.yawiki.core.wikireference.domain.QWikiReference.wikiRefer
 
 
 @Repository
-public class WikiReferenceCustomRepositoryImpl implements WikiReferenceCustomRepository<UUID> {
+@Slf4j
+@Transactional(readOnly = true)
+public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     private final JPAQueryFactory queryFactory;
+    private final WikiReferenceJpaRepository wikiReferenceJpaRepository;
+    private final JdbcTemplate jdbcTemplate;
+    private final UuidGenerator uuidGenerator;
 
-    public WikiReferenceCustomRepositoryImpl(EntityManager em) {
+
+    public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate, UuidGenerator uuidGenerator) {
         this.queryFactory = new JPAQueryFactory(em);
+        this.wikiReferenceJpaRepository = wikiReferenceJpaRepository;
+        this.jdbcTemplate = jdbcTemplate;
+        this.uuidGenerator = uuidGenerator;
     }
 
 
@@ -45,6 +64,7 @@ public class WikiReferenceCustomRepositoryImpl implements WikiReferenceCustomRep
     }
 
     @Override
+    @Transactional
     public long delete(UUID refererId, Collection<String> titlesToDelete) {
         return queryFactory
                 .delete(wikiReference)
@@ -56,6 +76,7 @@ public class WikiReferenceCustomRepositoryImpl implements WikiReferenceCustomRep
     }
 
     @Override
+    @Transactional
     public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
         return queryFactory
                 .delete(wikiReference)
@@ -64,6 +85,33 @@ public class WikiReferenceCustomRepositoryImpl implements WikiReferenceCustomRep
                             titleNotIn(titlesNotToDelete)
                     )
                 .execute();
+    }
+
+    @Override
+    @Transactional
+    public Iterable<WikiReference> saveAll(Iterable<WikiReference> entities) {
+        return wikiReferenceJpaRepository.saveAll(entities);
+    }
+
+    /**
+     * <p>ANSI 표준 SQL 문을 사용함.</p>
+     * <p>SpringDataJPA 에서 제공하는 saveAll() 보다, JDBC Bulk Update 를 사용하여 구현했을 때 10 배 가량 더 빠름.</p>
+     * <p>단, rewriteBatchedStatements 옵션이 활성화되지 않았으면 별 차이가 없음.</p>
+     */
+    @Override
+    @Transactional
+    public void bulkInsert(UUID refererId, List<String> titles) {
+        String sql = "INSERT INTO wiki_reference (ref_id, referer_id, referred_title) VALUES (?, ?, ?)";
+        byte[] byteRefererId = UUIDUtil.asByteArray(refererId);
+        jdbcTemplate.batchUpdate(sql,
+                titles,
+                titles.size(),
+                (PreparedStatement ps, String title) -> {
+                    ps.setBytes(1, UUIDUtil.asByteArray(uuidGenerator.generate()));
+                    ps.setBytes(2, byteRefererId);
+                    ps.setString(3, title);
+                }
+        );
     }
 
     private BooleanExpression titleMatches() {

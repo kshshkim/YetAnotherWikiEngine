@@ -1,4 +1,4 @@
-package dev.prvt.uuid;
+package dev.prvt.yawiki.common.uuid;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.NoArgGenerator;

@@ -1,10 +1,13 @@
-package dev.prvt.yawiki.core.wikireference.domain;
+package dev.prvt.yawiki.core.wikipage.infra.wikireference;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -114,7 +117,9 @@ class WikiReferenceUpdaterImplTest {
 
         // when
         service.updateReferences(givenWikiPage.getId(), updatedRefs);
-
+        em.flush();
+        em.clear();
+        System.out.println("givenWikiPage = " + givenWikiPage.getId());
         // then
         Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)

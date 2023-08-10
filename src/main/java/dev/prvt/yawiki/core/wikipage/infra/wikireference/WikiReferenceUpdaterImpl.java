@@ -1,11 +1,13 @@
-package dev.prvt.yawiki.core.wikireference.domain;
+package dev.prvt.yawiki.core.wikipage.infra.wikireference;
 
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,11 +30,20 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
         return toRemove;
     }
 
-    void createRefs(UUID documentId, Set<String> existingRefs, Set<String> updatedRefs) {
-        wikiReferenceRepository.saveAll(
-                titlesToCreate(existingRefs, updatedRefs).stream()
-                        .map(title -> new WikiReference(documentId, title)).toList()
-        );
+    /**
+     * @param refererId 참조를 포함하고 있는 WikiPage 의 ID
+     * @param existingRefs 기존에 존재하고 있는 레퍼런스
+     * @param updatedRefs 현재 수정된 문서에 포함된 레퍼런스
+     */
+    void createRefs(UUID refererId, Set<String> existingRefs, Set<String> updatedRefs) {
+        List<String> titles = titlesToCreate(existingRefs, updatedRefs)
+                .stream()
+                .toList();
+        wikiReferenceRepository.bulkInsert(refererId, titles);
+//        wikiReferenceRepository.saveAll(
+//                titlesToCreate(existingRefs, updatedRefs).stream()
+//                        .map(title -> new WikiReference(refererId, title)).toList()
+//        );
     }
 
     /**
@@ -59,6 +70,7 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
     @Override
     public void updateReferences(UUID documentId, Set<String> updatedRefTitles) {
         Set<String> existingRefTitles = wikiReferenceRepository.findReferredTitlesByRefererId(documentId);
+
         deleteRefs(documentId, existingRefTitles, updatedRefTitles);
         createRefs(documentId, existingRefTitles, updatedRefTitles);
     }

@@ -10,7 +10,7 @@ import javax.persistence.*;
 
 import java.util.UUID;
 
-import static dev.prvt.uuid.Const.UUID_V7;
+import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 
 /**

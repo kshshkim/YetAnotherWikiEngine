@@ -1,4 +1,4 @@
-package dev.prvt.uuid;
+package dev.prvt.yawiki.common.uuid;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
@@ -15,6 +15,10 @@ import java.io.Serializable;
 import java.util.Properties;
 import java.util.UUID;
 
+/**
+ * <p>UUIDGenerator 의 Strategy 만 재지정하는 방식은 Annotation 이 굉장히 지저분해지는 문제가 있어서 IdentifierGenerator 구현체를 구성함.</p>
+ * @see org.hibernate.id.UUIDGenerator
+ */
 public class UuidV7Generator implements IdentifierGenerator {
     private static final CoreMessageLogger LOG = CoreLogging.messageLogger( org.hibernate.id.UUIDGenerator.class );
 

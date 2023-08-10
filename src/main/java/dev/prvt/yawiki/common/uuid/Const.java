@@ -1,7 +1,7 @@
-package dev.prvt.uuid;
+package dev.prvt.yawiki.common.uuid;
 
 public class Const {
-    static final public String UUID_V7 = "dev.prvt.uuid.UuidV7Generator";
+    static final public String UUID_V7 = "dev.prvt.yawiki.common.uuid.UuidV7Generator";
     /*
     @Id
     @GeneratedValue(generator = "uuid-v7")
