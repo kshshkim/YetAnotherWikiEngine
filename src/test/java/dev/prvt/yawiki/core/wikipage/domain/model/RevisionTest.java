@@ -22,7 +22,6 @@ class RevisionTest {
                 .build();
     }
 
-
     @Test
     void versionCannotBeChanged() {
         // when
@@ -88,7 +87,7 @@ class RevisionTest {
     }
 
     @Test
-    void getContent_test() {
+    void getContent_test_not_null() {
         RawContent givenRaw = aRawContent();
         Revision givenRev = aRevision()
                 .rawContent(givenRaw).build();
@@ -99,5 +98,20 @@ class RevisionTest {
         // then
         assertThat(content)
                 .isEqualTo(givenRaw.getContent());
+    }
+
+    @Test
+    void getContent_test_null() {
+        Revision givenRev = aRevision()
+                .rawContent(null)
+                .build();
+
+        // when
+        String content = givenRev.getContent();
+
+        // then
+        assertThat(content)
+                .isNotNull()
+                .isEqualTo("");
     }
 }
