@@ -1,21 +1,18 @@
 package dev.prvt.yawiki.core.wikipage.infra.repository;
 
-import dev.prvt.yawiki.common.uuid.UuidGenerator;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
-import dev.prvt.yawiki.core.wikipage.infra.repository.WikiReferenceRepositoryImpl;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
+import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -168,4 +165,101 @@ class WikiReferenceRepositoryImplTest {
         assertThat(found)
                 .containsExactlyInAnyOrderElementsOf(givenRefTitles);
     }
+
+    @Test
+    void findBackReferencesByWikiPageTitle_paging_not_triggered() {
+        // given
+        List<WikiPage> givenWikiPages = IntStream.range(0, 10)
+                .mapToObj(i -> WikiPage.create(randString()))
+                .toList();
+
+        List<String> givenWikiPageTitles = givenWikiPages.stream()
+                .map(WikiPage::getTitle)
+                .sorted(String::compareToIgnoreCase)
+                .toList();
+
+
+        givenWikiPages.forEach(em::persist);
+
+        List<WikiReference> givenRefs = givenWikiPages.stream()
+                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle()))
+                .toList();
+
+        wikiReferenceRepository.saveAll(givenRefs);
+        em.flush();
+        em.clear();
+
+        // when
+        Pageable pageable = Pageable.ofSize(givenWikiPages.size() + 10);
+        Page<String> result = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable);
+
+        // then
+        assertThat(result.getTotalPages())
+                .describedAs("페이지 크기가 주어진 given 값보다 크게 설정되었기 때문에, 총 페이지 개수는 10개임.")
+                .isEqualTo(1);
+        assertThat(result.getNumber())
+                .describedAs("페이지 번호")
+                .isEqualTo(0);
+        String expected = Arrays.toString(givenWikiPageTitles.toArray());
+        System.out.println("expected = " + expected);
+        String res = Arrays.toString(result.getContent().toArray());
+        System.out.println("string = " + res);
+        assertThat(result.getContent())
+                .describedAs("참조자 WikiPage 의 제목이 모두 포함되어야하며, 오름차순으로 정렬되어 있어야함.")
+                .containsExactlyElementsOf(givenWikiPageTitles);
+    }
+
+    @Test
+    void findBackReferencesByWikiPageTitle_paging_triggered() {
+        // given
+        List<WikiPage> givenWikiPages = IntStream.range(0, 10)
+                .mapToObj(i -> WikiPage.create(randString()))
+                .toList();
+
+        List<String> givenWikiPageTitles = givenWikiPages.stream()
+                .map(WikiPage::getTitle)
+                .sorted(String::compareToIgnoreCase)
+                .toList();
+
+
+        givenWikiPages.forEach(em::persist);
+
+        List<WikiReference> givenRefs = givenWikiPages.stream()
+                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle()))
+                .toList();
+
+        wikiReferenceRepository.saveAll(givenRefs);
+        em.flush();
+        em.clear();
+
+        // when
+        int pageSize = givenWikiPages.size() / 2 + 1;
+
+        Pageable pageable1 = Pageable.ofSize(pageSize);  // 첫번째 페이지
+        Pageable pageable2 = Pageable.ofSize(pageSize).withPage(1);  // 두번째 페이지
+
+        Page<String> result1 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable1);
+        Page<String> result2 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable2);
+
+        // then
+        // 첫번째 페이지 테스트
+        assertThat(result1.getTotalPages())
+                .describedAs("페이지 크기가 (주어진 값 * 1/2 + 1) 으로 설정되었기 때문에, 총 페이지 수는 2개임.")
+                .isEqualTo(2);
+        assertThat(result1.getNumber())
+                .describedAs("페이지 번호는 0")
+                .isEqualTo(0);
+        assertThat(result1.getContent())
+                .describedAs("참조자 WikiPage 의 제목이 모두 포함되어야하며, 오름차순으로 정렬되어 있어야함.")
+                .containsExactlyElementsOf(givenWikiPageTitles.subList(0, pageSize));
+
+        // 두번째 페이지 테스트
+        assertThat(result2.getNumber())
+                .describedAs("페이지 번호는 1")
+                .isEqualTo(1);
+        assertThat(result2.getContent())
+                .describedAs("2 페이지에 있어야할 제목이 모두 포함되어야하며, 오름차순으로 정렬되어 있어야함.")
+                .containsExactlyElementsOf(givenWikiPageTitles.subList(pageSize, givenWikiPages.size()));
+    }
+
 }

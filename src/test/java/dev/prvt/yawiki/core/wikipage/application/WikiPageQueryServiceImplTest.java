@@ -14,17 +14,17 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static dev.prvt.yawiki.Fixture.randString;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class WikiPageQueryServiceImplTest {
-
+    boolean repositoryBackRefCalled;
     WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
     WikiReferenceRepository wikiReferenceRepository = new WikiReferenceRepository() {
         @Override
@@ -39,7 +39,8 @@ class WikiPageQueryServiceImplTest {
 
         @Override
         public Page<String> findBackReferencesByWikiPageTitle(String wikiPageTitle, Pageable pageable) {
-            return null;
+            repositoryBackRefCalled = true;
+            return new PageImpl<>(givenWikiReferences, pageable, 100);
         }
 
         @Override
@@ -78,6 +79,7 @@ class WikiPageQueryServiceImplTest {
                 .mapToObj(i -> randString())
                 .toList();
 
+        repositoryBackRefCalled = false;
     }
 
     @Test
@@ -98,5 +100,18 @@ class WikiPageQueryServiceImplTest {
     void getWikiPageDataForRead_should_fail_if_wiki_page_does_not_exist() {
         assertThatThrownBy(() -> wikiPageQueryService.getWikiPage("title that does not exist " + randString()))
                 .isInstanceOf(NoSuchWikiPageException.class);
+    }
+
+    @Test
+    void getBackReferences_build_pageable_test() {
+        // given
+        Pageable pageable = Pageable.ofSize(10).withPage(20);
+        // when
+        Page<String> backReferences = wikiPageQueryService.getBackReferences(givenWikiPageTitle, pageable);
+        // then
+        // 쿼리에 대한 검증은 repository 에서 해야함.
+        assertThat(repositoryBackRefCalled)
+                .describedAs("리포지토리 호출 책임 검증")
+                .isTrue();
     }
 }

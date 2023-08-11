@@ -8,6 +8,9 @@ import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +64,40 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
                     .where(refererIdMatches(refererId))
                 .stream()
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * 페이징을 위한 추가 Count 쿼리
+     */
+    private long backReferencesCount(String referredTitle) {
+        Long count = queryFactory
+                .select(wikiPage.count())
+                .from(wikiPage)
+                    .join(wikiReference)
+                    .on(wikiReference.refererId.eq(wikiPage.id))
+                .where(wikiReference.referredTitle.eq(referredTitle))
+                .fetchOne();
+
+        return count == null ? 0L : count;
+    }
+
+    /**
+     * <p>지정된 페이지 크기보다 BackReference 의 숫자가 적다면, 페이징을 위한 추가 count 쿼리가 나가지 않아야함.</p>
+     */
+    @Override
+    public Page<String> findBackReferencesByWikiPageTitle(String wikiPageTitle, Pageable pageable) {
+        List<String> content = queryFactory
+                .select(wikiPage.title)
+                .from(wikiPage)
+                    .join(wikiReference)
+                    .on(wikiReference.refererId.eq(wikiPage.id))
+                .where(wikiReference.referredTitle.eq(wikiPageTitle))
+                .orderBy(wikiPage.title.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return PageableExecutionUtils.getPage(content, pageable, () -> backReferencesCount(wikiPageTitle));
     }
 
     @Override

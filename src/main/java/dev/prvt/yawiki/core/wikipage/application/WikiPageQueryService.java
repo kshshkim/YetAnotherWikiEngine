@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface WikiPageQueryService {
     /**
@@ -20,7 +21,7 @@ public interface WikiPageQueryService {
      * @param size 페이지 크기
      * @return WikiPage.title in Page
      */
-    Page<String> getBackReferences(String title, int page, int size);
+    Page<String> getBackReferences(String title, Pageable pageable);
 
     /**
      * 페이징이 적용된 수정 내역 조회용 메소드.
@@ -29,5 +30,5 @@ public interface WikiPageQueryService {
      * @param size 페이지 크기
      * @return RevisionData in Page
      */
-    Page<RevisionData> getRevisionHistory(String title, int page, int size);
+    Page<RevisionData> getRevisionHistory(String title, Pageable pageable);
 }

@@ -1,5 +1,8 @@
 package dev.prvt.yawiki.core.wikireference.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +20,13 @@ public interface WikiReferenceRepository {
      * @return referer 가 참조하고 있는 문서 제목 중에, 실제로 존재하는 문서만 추려서 반환함.
      */
     Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId);
+
+    /**
+     * @param wikiPageTitle 참조되고 있는 문서의 제목
+     * @param pageable pageable
+     * @return wikiPageTitle 을 참조하고 있는 문서들의 title
+     */
+    Page<String> findBackReferencesByWikiPageTitle(String wikiPageTitle, Pageable pageable);
 
     /**
      * @param refererId refererId 가 일치하는 InnerReference 중에서

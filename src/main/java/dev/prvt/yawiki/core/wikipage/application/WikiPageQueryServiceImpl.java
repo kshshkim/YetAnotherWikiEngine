@@ -31,12 +31,12 @@ public class WikiPageQueryServiceImpl implements WikiPageQueryService {
     }
 
     @Override
-    public Page<String> getBackReferences(String title, int page, int size) {
-        return null; // todo implement
+    public Page<String> getBackReferences(String title, Pageable pageable) {
+        return wikiReferenceRepository.findBackReferencesByWikiPageTitle(title, pageable);
     }
 
     @Override
-    public Page<RevisionData> getRevisionHistory(String title, int page, int size) {
+    public Page<RevisionData> getRevisionHistory(String title, Pageable pageable) {
         return null;  // todo implement
     }
 }
