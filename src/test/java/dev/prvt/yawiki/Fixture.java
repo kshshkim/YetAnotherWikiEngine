@@ -1,10 +1,16 @@
 package dev.prvt.yawiki;
 
+import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
+import dev.prvt.yawiki.core.contributor.domain.ContributorState;
+import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import lombok.SneakyThrows;
 import net.bytebuddy.utility.RandomString;
 
+import java.net.InetAddress;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class Fixture {
     public static String randString() {
         return RandomString.make();
+    }
+
+    @SneakyThrows
+    public static InetAddress aInetV4Address() {
+        Random random = new Random();
+        byte[] ip = new byte[4];
+        random.nextBytes(ip);
+        return InetAddress.getByAddress(ip);
     }
 
     public static RawContent aRawContent() {
@@ -28,6 +42,18 @@ public class Fixture {
                 .contributorId(UUID.randomUUID())
                 .rawContent(aRawContent())
                 .comment(randString());
+    }
+
+    public static MemberContributor.MemberContributorBuilder aMemberContributor() {
+        return MemberContributor.builder()
+                .id(UUID.randomUUID())
+                .memberName(UUID.randomUUID().toString());
+    }
+
+    public static AnonymousContributor.AnonymousContributorBuilder anAnonymousContributor() {
+        return AnonymousContributor.builder()
+                .id(UUID.randomUUID())
+                .ipAddress(aInetV4Address());
     }
 
     public static void updateWikiPageRandomly(WikiPage wikiPage) {
