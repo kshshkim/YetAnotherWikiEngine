@@ -70,15 +70,15 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
      * 페이징을 위한 추가 Count 쿼리
      */
     private long backReferencesCount(String referredTitle) {
-        Long count = queryFactory
+        //count 쿼리 특성상 null 값을 걱정하지 않아도 될듯함.
+        //noinspection DataFlowIssue
+        return queryFactory
                 .select(wikiPage.count())
                 .from(wikiPage)
                     .join(wikiReference)
                     .on(wikiReference.refererId.eq(wikiPage.id))
                 .where(wikiReference.referredTitle.eq(referredTitle))
                 .fetchOne();
-
-        return count == null ? 0L : count;
     }
 
     /**
