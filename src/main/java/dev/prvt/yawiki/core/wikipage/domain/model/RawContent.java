@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 
@@ -21,13 +22,17 @@ public class RawContent {
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
     @Column(name = "raw_id", columnDefinition = "BINARY(16)")
     private UUID id;
-    @Column(updatable = false)
-    private Integer size;
     @Column(updatable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    public RawContent(String content) {
+    public int getSize() {
+        return content.length();
+    }
+
+    public RawContent(@NotNull String content) {
+        if (content == null) {
+            throw new NullPointerException("content must not be null");
+        }
         this.content = content;
-        this.size = content.length();
     }
 }

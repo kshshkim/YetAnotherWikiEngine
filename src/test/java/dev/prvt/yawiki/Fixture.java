@@ -25,6 +25,7 @@ public class Fixture {
 
     public static Revision.RevisionBuilder aRevision() {
         return Revision.builder()
+                .contributorId(UUID.randomUUID())
                 .rawContent(aRawContent())
                 .comment(randString());
     }

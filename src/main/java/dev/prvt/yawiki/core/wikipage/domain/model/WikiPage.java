@@ -100,14 +100,13 @@ public class WikiPage {
      * @see Revision
      */
     private void replaceCurrentRevisionWith(Revision revision) {
-        revision.setRevVersionAfter(this.currentRevision);
         this.currentRevision = revision;
     }
 
     /**
      * @param newRevision 새로 조립되어 영속화되지 않은 Revision 객체
      */
-    public void update(Revision newRevision) {
+    private void update(Revision newRevision) {
         replaceCurrentRevisionWith(newRevision);
         this.isActive = true;
         updateVersionToken();
@@ -127,6 +126,7 @@ public class WikiPage {
     private Revision buildNewRevision(UUID contributorId, String comment, String content) {
         return Revision.builder()
                 .wikiPage(this)
+                .beforeRevision(this.currentRevision)
                 .contributorId(contributorId)
                 .comment(comment)
                 .rawContent(new RawContent(content))

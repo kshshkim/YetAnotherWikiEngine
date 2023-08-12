@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 
@@ -46,7 +47,7 @@ public class Revision {
     private UUID contributorId;
 
     @Column(name = "rev_version", nullable = false, updatable = false)
-    private long revVersion;  // JPA 낙관적 락의 버전이 아님.
+    private Integer revVersion;  // JPA 낙관적 락의 버전이 아님.
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id", nullable = false, updatable = false)
@@ -59,34 +60,49 @@ public class Revision {
     @Column(name = "comment", nullable = false, updatable = false)
     private String comment;
 
+    @Column(name = "diff", nullable = false, updatable = false)
+    private Integer diff;  // 이전 버전과의 크기 차이
+
+    @Column(name = "size", nullable = false, updatable = false)
+    private int size;
+
     public String getContent() {
-        return this.rawContent == null ? "" :
-                rawContent.getContent();
+        boolean hasContent = (this.rawContent != null) && (this.size > 0);
+        return hasContent ? this.rawContent.getContent() : "";
     }
 
-    public void setRevVersionAfter(Revision beforeRev) {
-        if (this.revVersion != 0L) {
+    /**
+     * <p>생성 시점에만 호출됨. 생성 시점에 beforeRevision 이 할당되지 않으면 첫 Revision 으로 간주.</p>
+     * @param beforeRev 이전 Revision
+     */
+    private void asAfter(Revision beforeRev) {
+        if (this.revVersion != null) {
             throw new IllegalStateException("cannot change finalized field: revVersion="+this.revVersion);
         }
         this.revVersion = getNewVersion(beforeRev);
+        this.diff = getDiff(beforeRev);
     }
 
-    public void setRawContent(RawContent rawContent) {
-        if (this.rawContent != null) {
-            throw new IllegalStateException("cannot change finalized field: rawContent");
-        }
-        this.rawContent = rawContent;
+    private Integer getDiff(Revision beforeRev) {
+        return beforeRev == null ? this.getSize() : this.getSize() - beforeRev.getSize();
     }
 
-    private long getNewVersion(Revision beforeRev) {
-        return beforeRev == null ? 1L : beforeRev.getRevVersion() + 1L;
+    private int getNewVersion(Revision beforeRev) {
+        return beforeRev == null ? 1 : beforeRev.getRevVersion() + 1;
     }
 
     @Builder
-    protected Revision(UUID contributorId, WikiPage wikiPage, RawContent rawContent, String comment) {
+    protected Revision(@NotNull UUID contributorId,  // 생성 시점에 반드시 필요함.
+                       @NotNull String comment,  // 생성 시점에 반드시 필요함.
+                       @NotNull WikiPage wikiPage,  // 생성 시점에 반드시 필요함.
+                       RawContent rawContent,  // rawContent 는 null 일 수 있음. (삭제된 문서 등)
+                       Revision beforeRevision  // 첫 Revision 일 경우 null 값이 들어올 수 있음.
+    ) {
         this.contributorId = contributorId;
-        this.wikiPage = wikiPage;
         this.rawContent = rawContent;
+        this.size = rawContent == null ? 0 : rawContent.getSize();
         this.comment = comment;
+        this.wikiPage = wikiPage;
+        this.asAfter(beforeRevision);
     }
 }
