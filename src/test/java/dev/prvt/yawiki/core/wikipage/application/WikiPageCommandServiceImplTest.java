@@ -156,7 +156,7 @@ class WikiPageCommandServiceImplTest {
     }
 
     @Test
-    void should_success() {
+    void commitUpdate_should_success() {
         assertThatCode(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
                 .describedAs("should success")
                 .doesNotThrowAnyException();
@@ -167,7 +167,7 @@ class WikiPageCommandServiceImplTest {
     }
 
     @Test
-    void should_fail_when_updater_fails() {
+    void commitUpdate_should_fail_when_updater_fails() {
         givenContributorId = updaterFailTrigger;
 
         assertThatThrownBy(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
@@ -180,7 +180,7 @@ class WikiPageCommandServiceImplTest {
     }
 
     @Test
-    void should_fail_when_extractor_fails() {
+    void commitUpdate_should_fail_when_extractor_fails() {
         givenContent = extractorFailTrigger;
 
         assertThatThrownBy(() -> wikiPageCommandServiceImpl.commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent))
@@ -193,7 +193,7 @@ class WikiPageCommandServiceImplTest {
     }
 
     @Test
-    void should_success_proclaim() {
+    void proclaimUpdate_should_success() {
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandServiceImpl.proclaimUpdate(givenContributorId, givenTitle);
 
         assertThat(proclaimingExecuted).isTrue();
