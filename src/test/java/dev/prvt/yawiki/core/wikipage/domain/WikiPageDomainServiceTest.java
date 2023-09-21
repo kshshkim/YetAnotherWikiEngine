@@ -28,6 +28,9 @@ class WikiPageDomainServiceTest {
     private final UUID UPDATE_PERMISSION_EXCEPTION_TRIGGER = randomUUID();
     private final String UPDATE_PERMISSION_MESSAGE = randomUUID().toString();
 
+    private final UUID DELETE_PERMISSION_EXCEPTION_TRIGGER = randomUUID();
+    private final String DELETE_PERMISSION_MESSAGE = randomUUID().toString();
+
     private final UUID PROCLAIM_PERMISSION_EXCEPTION_TRIGGER = randomUUID();
     private final String PROCLAIM_PERMISSION_EXCEPTION_MESSAGE = randomUUID().toString();
 
@@ -35,27 +38,43 @@ class WikiPageDomainServiceTest {
     private final String COLLISION_VALIDATION_FAIL_MESSAGE = randomUUID().toString();
 
 
-    private boolean wikiReferenceUpdaterCalled;
-    private boolean updatePermissionValidatorCalled;
-    private boolean updateProclaimPermissionValidatorCalled;
+    private boolean wikiReferenceUpdaterCalled_update;
+    private boolean permissionValidatorCalled_update;
+    private boolean permissionValidatorCalled_updateProclaim;
     private boolean versionCollisionValidatorCalled;
+
+    private boolean wikiReferenceUpdaterCalled_delete;
+    private boolean permissionValidatorCalled_delete;
 
     private final WikiReferenceUpdater dummyWikiReferenceUpdater = new WikiReferenceUpdater() {
         @Override
         public void updateReferences(UUID documentId, Set<String> referencedTitles) {
-            wikiReferenceUpdaterCalled = true;
+            wikiReferenceUpdaterCalled_update = true;
             if (referencedTitles.contains(UPDATE_REFERENCE_EXCEPTION_TRIGGER)) {
                 throw new RuntimeException(UPDATE_REFERENCE_EXCEPTION_TRIGGERED_MESSAGE);
             }
+        }
+
+        @Override
+        public void deleteReferences(UUID documentId) {
+            wikiReferenceUpdaterCalled_delete = true;
         }
     };
 
     private final WikiPagePermissionValidator dummyWikiPagePermissionValidator = new WikiPagePermissionValidator() {
         @Override
         public void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException {
-            updatePermissionValidatorCalled = true;
+            permissionValidatorCalled_update = true;
             if (actorId.equals(UPDATE_PERMISSION_EXCEPTION_TRIGGER)) {
                 throw new RuntimeException(UPDATE_PERMISSION_MESSAGE);
+            }
+        }
+
+        @Override
+        public void validateDelete(UUID actorId, WikiPage wikiPage) {
+            permissionValidatorCalled_delete = true;
+            if (actorId.equals(DELETE_PERMISSION_EXCEPTION_TRIGGER)) {
+                throw new RuntimeException(DELETE_PERMISSION_MESSAGE);
             }
         }
 
@@ -64,7 +83,7 @@ class WikiPageDomainServiceTest {
             if (actorId.equals(PROCLAIM_PERMISSION_EXCEPTION_TRIGGER)) {
                 throw new RuntimeException(PROCLAIM_PERMISSION_EXCEPTION_MESSAGE);
             }
-            updateProclaimPermissionValidatorCalled = true;
+            permissionValidatorCalled_updateProclaim = true;
         }
     };
 
@@ -95,10 +114,12 @@ class WikiPageDomainServiceTest {
 
     @BeforeEach
     void init() {
-        wikiReferenceUpdaterCalled = false;
+        wikiReferenceUpdaterCalled_update = false;
         versionCollisionValidatorCalled = false;
-        updatePermissionValidatorCalled = false;
-        updateProclaimPermissionValidatorCalled = false;
+        permissionValidatorCalled_update = false;
+        permissionValidatorCalled_updateProclaim = false;
+        wikiReferenceUpdaterCalled_delete = false;
+        permissionValidatorCalled_delete = false;
 
         givenTitle = randomUUID().toString();
         givenWikiPage = wikiPageRepository.save(WikiPage.create(givenTitle));
@@ -156,9 +177,9 @@ class WikiPageDomainServiceTest {
         // then
         assertThat(versionCollisionValidatorCalled)
                 .isTrue();
-        assertThat(updatePermissionValidatorCalled)
+        assertThat(permissionValidatorCalled_update)
                 .isTrue();
-        assertThat(wikiReferenceUpdaterCalled)
+        assertThat(wikiReferenceUpdaterCalled_update)
                 .isTrue();
     }
 
@@ -183,7 +204,7 @@ class WikiPageDomainServiceTest {
     @Test
     void proclaimUpdate_should_call_validator_when_proclaim() {
         wikiPageDomainService.proclaimUpdate(givenActorId, givenTitle);
-        assertThat(updateProclaimPermissionValidatorCalled).isTrue();
+        assertThat(permissionValidatorCalled_updateProclaim).isTrue();
     }
 
     @Test
@@ -227,6 +248,24 @@ class WikiPageDomainServiceTest {
         // then
         assertThat(when.getContent())
                 .isEqualTo(savedContent);
-
     }
+
+    @Test
+    void delete_should_fail_if_validate_fails() {
+        assertThatThrownBy(() -> wikiPageDomainService.delete(DELETE_PERMISSION_EXCEPTION_TRIGGER, givenTitle, givenComment))
+                .hasMessageContaining(DELETE_PERMISSION_MESSAGE);
+    }
+
+    @Test
+    void delete_should_success_test() {
+        // when
+        wikiPageDomainService.delete(givenActorId, givenTitle, givenComment);
+
+        // then
+        assertThat(permissionValidatorCalled_delete)
+                .isTrue();
+        assertThat(wikiReferenceUpdaterCalled_delete)
+                .isTrue();
+    }
+
 }

@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * db 에 저장된 권한을 쿼리해서 편집 권한이 있는지 여부를 판별함.
+ * 스프링 시큐리티의 시큐리티 컨텍스트에 접근해서 권한을 가져올 수도 있을 것으로 보임.
+ *
+ */
 @Component
 @RequiredArgsConstructor
 public class WikiPagePermissionValidatorImpl implements WikiPagePermissionValidator {
@@ -15,6 +20,11 @@ public class WikiPagePermissionValidatorImpl implements WikiPagePermissionValida
 
     @Override
     public void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException {
+
+    }
+
+    @Override
+    public void validateDelete(UUID actorId, WikiPage wikiPage) {
 
     }
 

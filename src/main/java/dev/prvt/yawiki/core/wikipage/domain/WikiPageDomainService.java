@@ -55,6 +55,14 @@ public class WikiPageDomainService {
         updateReferences(wikiPage.getId(), references);
     }
 
+    public void delete(UUID contributorId, String title, String comment) {
+        WikiPage wikiPage = getWikiPage(title);
+        validateDelete(contributorId, wikiPage);
+        wikiPage.delete(contributorId, comment);
+        deleteReferences(wikiPage);
+    }
+
+
     private WikiPage getWikiPage(String title) {
         return wikiPageRepository.findByTitle(title)
                 .orElseThrow(NoSuchWikiPageException::new);
@@ -77,6 +85,14 @@ public class WikiPageDomainService {
         }
     }
 
+    private void deleteReferences(WikiPage wikiPage) {
+        wikiReferenceUpdater.deleteReferences(wikiPage.getId());
+    }
+
+    private void validateDelete(UUID contributorId, WikiPage wikiPage) {
+        wikiPagePermissionValidator.validateDelete(contributorId, wikiPage);
+    }
+
     private void validateProclaim(UUID contributorId, WikiPage wikiPage) {
         wikiPagePermissionValidator.validateUpdateProclaim(contributorId, wikiPage);
     }
@@ -85,5 +101,4 @@ public class WikiPageDomainService {
         versionCollisionValidator.validate(wikiPage, versionToken);
         wikiPagePermissionValidator.validateUpdate(contributorId, wikiPage);
     }
-
 }
