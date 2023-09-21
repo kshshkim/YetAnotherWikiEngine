@@ -63,9 +63,11 @@ class WikiPageCommandServiceImplTest {
     private Set<String> givenReferences;
     private String givenVersionToken;
 
-    private boolean extractingExecuted;
-    private boolean updatingExecuted;
-    private boolean proclaimingExecuted;
+    private boolean called_ReferencedTitleExtractor_extractReferencedTitles;
+    private boolean called_WikiPageDomainService_commitUpdate;
+    private boolean called_WikiPageDomainService_updateProclaim;
+    private boolean called_WikiPageDomainService_delete;
+
     class TestWikiPageDomainService extends WikiPageDomainService {
         public TestWikiPageDomainService() {
             super(null, null, null, null);
@@ -73,7 +75,7 @@ class WikiPageCommandServiceImplTest {
 
         @Override
         public void commitUpdate(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
-            updatingExecuted = true;
+            called_WikiPageDomainService_commitUpdate = true;
             if (updaterFailTrigger.equals(contributorId)) {
                 throw new WikiPageReferenceUpdaterException(updaterFailMessage);
             }
@@ -95,15 +97,20 @@ class WikiPageCommandServiceImplTest {
 
         @Override
         public WikiPage proclaimUpdate(UUID contributorId, String wikiPageTitle) {
-            proclaimingExecuted = true;
+            called_WikiPageDomainService_updateProclaim = true;
             return WikiPage.create(wikiPageTitle);
+        }
+
+        @Override
+        public void delete(UUID contributorId, String title, String comment) {
+            called_WikiPageDomainService_delete = true;
         }
     }
 
     class DummyReferenceTitleExtractor implements ReferencedTitleExtractor {
         @Override
         public Set<String> extractReferencedTitles(String rawMarkDown) {
-            extractingExecuted = true;
+            called_ReferencedTitleExtractor_extractReferencedTitles = true;
 
             if (rawMarkDown.equals(extractorFailTrigger)) {
                 throw new RuntimeException(extractorFailMessage);
@@ -150,9 +157,10 @@ class WikiPageCommandServiceImplTest {
         wikiPageCommandServiceImpl = new WikiPageCommandServiceImpl(new DummyReferenceTitleExtractor(), new TestWikiPageDomainService(), platformTransactionManager, new WikiPageMapper());
 
         // 참조하고 있는 클래스들의 호출이 적절하게 일어났는지 여부
-        extractingExecuted = false;
-        updatingExecuted = false;
-        proclaimingExecuted = false;
+        called_ReferencedTitleExtractor_extractReferencedTitles = false;
+        called_WikiPageDomainService_commitUpdate = false;
+        called_WikiPageDomainService_updateProclaim = false;
+        called_WikiPageDomainService_delete = false;
     }
 
     @Test
@@ -161,7 +169,7 @@ class WikiPageCommandServiceImplTest {
                 .describedAs("should success")
                 .doesNotThrowAnyException();
 
-        assertThat(tuple(extractingExecuted, updatingExecuted))
+        assertThat(tuple(called_ReferencedTitleExtractor_extractReferencedTitles, called_WikiPageDomainService_commitUpdate))
                 .describedAs("모두 호출되었음.")
                 .isEqualTo(tuple(true, true));
     }
@@ -174,7 +182,7 @@ class WikiPageCommandServiceImplTest {
                 .describedAs("업데이터에서만 문제가 터져야함.")
                 .hasMessageContaining(updaterFailMessage);
 
-        assertThat(tuple(extractingExecuted, updatingExecuted))
+        assertThat(tuple(called_ReferencedTitleExtractor_extractReferencedTitles, called_WikiPageDomainService_commitUpdate))
                 .describedAs("모두 호출되었음.")
                 .isEqualTo(tuple(true, true));
     }
@@ -187,7 +195,7 @@ class WikiPageCommandServiceImplTest {
                 .describedAs("extractor 에서만 문제가 터져야함.")
                 .hasMessageContaining(extractorFailMessage);
 
-        assertThat(tuple(extractingExecuted, updatingExecuted))
+        assertThat(tuple(called_ReferencedTitleExtractor_extractReferencedTitles, called_WikiPageDomainService_commitUpdate))
                 .describedAs("extracting 과정에 문제가 생겨서 업데이터는 호출되지 않았음.")
                 .isEqualTo(tuple(true, false));
     }
@@ -196,7 +204,13 @@ class WikiPageCommandServiceImplTest {
     void proclaimUpdate_should_success() {
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandServiceImpl.proclaimUpdate(givenContributorId, givenTitle);
 
-        assertThat(proclaimingExecuted).isTrue();
+        assertThat(called_WikiPageDomainService_updateProclaim).isTrue();
         assertThat(wikiPageDataForUpdate).isNotNull();
+    }
+
+    @Test
+    void delete_should_success() {
+        wikiPageCommandServiceImpl.delete(givenContributorId, givenTitle, givenComment);
+        assertThat(called_WikiPageDomainService_delete).isTrue();
     }
 }

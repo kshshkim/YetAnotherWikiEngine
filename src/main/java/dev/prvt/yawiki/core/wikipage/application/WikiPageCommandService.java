@@ -25,4 +25,6 @@ public interface WikiPageCommandService {
      * @see WikiPageDataForUpdate
      */
     WikiPageDataForUpdate proclaimUpdate(UUID contributorId, String title);
+
+    void delete(UUID contributorId, String title, String comment);
 }

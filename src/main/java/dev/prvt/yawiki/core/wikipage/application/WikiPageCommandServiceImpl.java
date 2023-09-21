@@ -57,6 +57,12 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
         return wikiPageMapper.mapFrom(wikiPage);
     }
 
+    @Override
+    @Transactional
+    public void delete(UUID contributorId, String title, String comment) {
+        wikiPageDomainService.delete(contributorId, title, comment);
+    }
+
 
     private Set<String> extractReferences(String content) {
         return referencedTitleExtractor.extractReferencedTitles(content);
