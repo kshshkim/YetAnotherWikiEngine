@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -171,6 +172,36 @@ class WikiPageTest {
         // then
         assertThat(givenDoc.isActive())
                 .isTrue();
+    }
+
+    @Test
+    void delete_test() {
+        // given
+        givenDoc.update(givenContributorId, givenComment, givenContent);
+        givenComment = randString();
+        Revision givenRevision = givenDoc.getCurrentRevision();
+
+        // when
+        givenDoc.delete(givenContributorId, givenComment);
+
+        // then
+        assertThat(givenDoc.isActive())
+                .describedAs("isActive status should be changed")
+                .isFalse();
+
+        assertThat(givenDoc.getContent())
+                .describedAs("content should be blank")
+                .isBlank();
+
+        Revision currentRevision = givenDoc.getCurrentRevision();
+
+        assertThat(currentRevision)
+                .isNotNull();
+
+        assertThat(currentRevision.getRevVersion())
+                .isNotEqualTo(givenRevision.getRevVersion());
+
+
     }
 
     @Test

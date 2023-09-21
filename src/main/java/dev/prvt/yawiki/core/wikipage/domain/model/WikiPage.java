@@ -112,6 +112,7 @@ public class WikiPage {
         updateVersionToken();
     }
 
+
     /**
      * Root Aggregate 로써 Revision 엔티티의 생성과 영속화에 대한 책임이 포함된 update
      * @param contributorId 수정자 ID
@@ -122,6 +123,16 @@ public class WikiPage {
         Revision newRev = buildNewRevision(contributorId, comment, content);
         update(newRev);
     }
+
+
+    /**
+     * <p>빈 리비전을 생성하고, 문서의 상태를 삭제됨으로 변경.</p>
+     */
+    public void delete(UUID contributorId, String comment) {
+        update(contributorId, comment, "");
+        this.isActive = false;
+    }
+
 
     private Revision buildNewRevision(UUID contributorId, String comment, String content) {
         return Revision.builder()
