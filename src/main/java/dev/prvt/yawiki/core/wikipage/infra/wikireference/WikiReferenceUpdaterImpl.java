@@ -74,4 +74,9 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
         deleteRefs(documentId, existingRefTitles, updatedRefTitles);
         createRefs(documentId, existingRefTitles, updatedRefTitles);
     }
+
+    @Override
+    public void deleteReferences(UUID documentId) {
+        wikiReferenceRepository.deleteExcept(documentId, List.of());
+    }
 }

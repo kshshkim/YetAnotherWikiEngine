@@ -9,4 +9,5 @@ import java.util.UUID;
  */
 public interface WikiReferenceUpdater {
     void updateReferences(UUID documentId, Set<String> referencedTitles);
+    void deleteReferences(UUID documentId);
 }
