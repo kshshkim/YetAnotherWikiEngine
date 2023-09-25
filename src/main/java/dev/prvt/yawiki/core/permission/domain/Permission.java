@@ -66,7 +66,8 @@ public class Permission {
     }
 
     @Builder
-    protected Permission(Integer create, Integer read, Integer update, Integer delete, Integer manage) {
+    protected Permission(UUID id, Integer create, Integer read, Integer update, Integer delete, Integer manage) {
+        this.id = id;
         this.create = create;
         this.read = read;
         this.update = update;
