@@ -34,6 +34,10 @@ public class ResourcePermission {
                 specificPermission;
     }
 
+    public int getRequiredAuthorityLevel(ActionType actionType) {
+        return getRequiredPermission().getRequiredLevel(actionType);
+    }
+
     public void updatePermission(Permission updatedPermission) {
         this.specificPermission = updatedPermission;
     }

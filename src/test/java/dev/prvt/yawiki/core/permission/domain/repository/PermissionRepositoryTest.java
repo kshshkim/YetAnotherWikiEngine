@@ -1,5 +1,7 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.repository;
 
+import dev.prvt.yawiki.core.permission.domain.Permission;
+import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

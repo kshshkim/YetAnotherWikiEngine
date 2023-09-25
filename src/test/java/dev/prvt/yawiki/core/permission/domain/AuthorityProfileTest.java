@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class AuthorityProfileTest {
     Permission givenPermission;
@@ -39,5 +39,28 @@ class AuthorityProfileTest {
 
         assertThat(ga.getAuthorityLevel())
                 .isEqualTo(3);
+    }
+
+    @Test
+    void validateAuthority_always_success_with_0_level_requirement() {
+        // given
+        AuthorityProfile given = AuthorityProfile.createWithGroup(UUID.randomUUID(), givenPermissionGroup, 3);
+
+        // when
+        assertThatCode(() -> given.validateAuthority(givenPermissionGroup.getId(), 0))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateAuthority_should_throw_exception_if_authority_level_is_not_enough() {
+        // given
+        AuthorityProfile given = AuthorityProfile.createWithGroup(UUID.randomUUID(), givenPermissionGroup, 3);
+
+        // when
+        assertThatThrownBy(() -> given.validateAuthority(givenPermissionGroup.getId(), 4))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("not enough")
+        ;
+
     }
 }

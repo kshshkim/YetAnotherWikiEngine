@@ -32,6 +32,19 @@ public class AuthorityProfile {
         groupAuthorities.add(groupAuthority);
     }
 
+    public void validateAuthority(UUID permissionGroupId, int requiredAuthorityLevel) {
+        if (requiredAuthorityLevel == 0) {
+            return;
+        }
+        List<GrantedGroupAuthority> grantedGroupAuthorities = groupAuthorities.stream()
+                .filter(ga -> ga.getGroup().getId().equals(permissionGroupId))
+                .filter(ga -> ga.getAuthorityLevel() >= requiredAuthorityLevel)
+                .toList();
+        if (grantedGroupAuthorities.isEmpty()) {
+            throw new RuntimeException("not enough authority. permissionGroupId: " + permissionGroupId + " requiredAuthorityLevel: " + requiredAuthorityLevel);
+        }
+    }
+
     protected AuthorityProfile(UUID id) {
         this.id = id;
     }
