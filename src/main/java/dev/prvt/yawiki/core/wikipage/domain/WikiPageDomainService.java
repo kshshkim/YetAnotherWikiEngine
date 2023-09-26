@@ -4,7 +4,7 @@ import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
-import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPagePermissionValidator;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class WikiPageDomainService {
      */
     private final WikiReferenceUpdater wikiReferenceUpdater;
     private final VersionCollisionValidator versionCollisionValidator;
-    private final WikiPagePermissionValidator wikiPagePermissionValidator;
+    private final WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator;
 
     /**
      * 문서 수정 이전에 문서 수정을 시작하기 위해 사용하는 메소드.
@@ -90,15 +90,15 @@ public class WikiPageDomainService {
     }
 
     private void validateDelete(UUID contributorId, WikiPage wikiPage) {
-        wikiPagePermissionValidator.validateDelete(contributorId, wikiPage);
+        wikiPageCommandPermissionValidator.validateDelete(contributorId, wikiPage);
     }
 
     private void validateProclaim(UUID contributorId, WikiPage wikiPage) {
-        wikiPagePermissionValidator.validateUpdateProclaim(contributorId, wikiPage);
+        wikiPageCommandPermissionValidator.validateUpdateProclaim(contributorId, wikiPage);
     }
 
     private void validateUpdate(UUID contributorId, String versionToken, WikiPage wikiPage) {
         versionCollisionValidator.validate(wikiPage, versionToken);
-        wikiPagePermissionValidator.validateUpdate(contributorId, wikiPage);
+        wikiPageCommandPermissionValidator.validateUpdate(contributorId, wikiPage);
     }
 }

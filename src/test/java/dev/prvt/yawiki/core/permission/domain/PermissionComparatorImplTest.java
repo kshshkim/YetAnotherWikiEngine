@@ -5,7 +5,6 @@ import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileMemoryR
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionMemoryRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +12,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
-class PermissionComparatorTest {
+class PermissionComparatorImplTest {
     AuthorityProfileRepository authorityProfileRepository;
     ResourcePermissionRepository resourcePermissionRepository;
-    PermissionComparator permissionComparator;
+    PermissionComparatorImpl permissionComparator;
 
 
     AuthorityProfile givenAuthorityProfile;
@@ -30,7 +28,7 @@ class PermissionComparatorTest {
     void init() {
         authorityProfileRepository = new AuthorityProfileMemoryRepository();
         resourcePermissionRepository = new ResourcePermissionMemoryRepository();
-        permissionComparator = new PermissionComparator(authorityProfileRepository, resourcePermissionRepository);
+        permissionComparator = new PermissionComparatorImpl(authorityProfileRepository, resourcePermissionRepository);
 
 
         givenPermission = PermissionFixture.aPermission()

@@ -8,7 +8,7 @@ import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
-import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPagePermissionValidator;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import dev.prvt.yawiki.core.wikipage.infra.repository.WikiPageMemoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +61,7 @@ class WikiPageDomainServiceTest {
         }
     };
 
-    private final WikiPagePermissionValidator dummyWikiPagePermissionValidator = new WikiPagePermissionValidator() {
+    private final WikiPageCommandPermissionValidator dummyWikiPageCommandPermissionValidator = new WikiPageCommandPermissionValidator() {
         @Override
         public void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException {
             permissionValidatorCalled_update = true;
@@ -100,7 +100,7 @@ class WikiPageDomainServiceTest {
 
     private final WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
 
-    private final WikiPageDomainService wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, dummyWikiReferenceUpdater, dummyVersionCollisionValidator, dummyWikiPagePermissionValidator);
+    private final WikiPageDomainService wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, dummyWikiReferenceUpdater, dummyVersionCollisionValidator, dummyWikiPageCommandPermissionValidator);
 
     private WikiPage givenWikiPage;
     private UUID givenActorId;

@@ -5,7 +5,7 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 
 import java.util.UUID;
 
-public interface WikiPagePermissionValidator {
+public interface WikiPageCommandPermissionValidator {
     void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException;
 
     void validateDelete(UUID actorId, WikiPage wikiPage);
