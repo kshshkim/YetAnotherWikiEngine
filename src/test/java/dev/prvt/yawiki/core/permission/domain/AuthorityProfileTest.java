@@ -42,6 +42,23 @@ class AuthorityProfileTest {
     }
 
     @Test
+    void createWithGroup_granted_group_authority_field_should_not_null() {
+        // when
+        AuthorityProfile authorityProfile = AuthorityProfile.createWithGroup(UUID.randomUUID(), givenPermissionGroup, 3);
+        GrantedGroupAuthority grantedGroupAuthority = authorityProfile.getGroupAuthorities().get(0);
+
+        // then
+        assertThat(grantedGroupAuthority.getGroup())
+                .isNotNull();
+        assertThat(grantedGroupAuthority.getGroup().getId())
+                .isNotNull();
+        assertThat(grantedGroupAuthority.getProfile())
+                .isNotNull();
+        assertThat(grantedGroupAuthority.getProfile().getId())
+                .isNotNull();
+    }
+
+    @Test
     void validateAuthority_always_success_with_0_level_requirement() {
         // given
         AuthorityProfile given = AuthorityProfile.createWithGroup(UUID.randomUUID(), givenPermissionGroup, 3);
