@@ -37,4 +37,8 @@ public class PermissionGroup {
         this.name = name;
         this.defaultResourcePermission = defaultResourcePermission;
     }
+
+    public PermissionGroup(UUID id) {
+        this.id = id;
+    }
 }

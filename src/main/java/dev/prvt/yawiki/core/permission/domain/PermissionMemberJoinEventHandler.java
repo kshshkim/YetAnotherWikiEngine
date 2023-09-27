@@ -3,7 +3,6 @@ package dev.prvt.yawiki.core.permission.domain;
 import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
 import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
-import dev.prvt.yawiki.core.permission.domain.repository.PermissionGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +13,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PermissionMemberJoinEventHandler {
     private final AuthorityProfileRepository authorityProfileRepository;
-    private final PermissionGroupRepository permissionGroupRepository;
     private final DefaultPermissionProperties defaultPermissionProperties;
 
     public void handle(MemberJoinEvent memberJoinEvent) {
-        AuthorityProfile authorityProfile = AuthorityProfile.createWithGroup(memberJoinEvent.memberId(), permissionGroupRepository.getReferenceById(defaultPermissionProperties.getDefaultPermissionGroupId()), 1);
+        AuthorityProfile authorityProfile = AuthorityProfile.createWithGroup(memberJoinEvent.memberId(), new PermissionGroup(defaultPermissionProperties.getDefaultPermissionGroupId()), 1);
         authorityProfileRepository.save(authorityProfile);
     }
 }
