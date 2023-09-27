@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PermissionMemberJoinEventHandlerTest {
     UUID givenDefaultGroupId = UUID.randomUUID();
     DefaultPermissionProperties defaultPermissionProperties = new DefaultPermissionProperties(
-            0, 0, 0, 0, 3, givenDefaultGroupId
+            true, 0, 0, 0, 0, 3, givenDefaultGroupId
     );
     AuthorityProfileRepository memoryAuthorityProfileRepository = new AuthorityProfileMemoryRepository();
     PermissionMemberJoinEventHandler permissionMemberJoinEventHandler = new PermissionMemberJoinEventHandler(memoryAuthorityProfileRepository, defaultPermissionProperties);

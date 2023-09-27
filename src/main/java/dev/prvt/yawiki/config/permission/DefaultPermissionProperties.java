@@ -12,6 +12,7 @@ import java.util.UUID;
 @ConstructorBinding
 @ConfigurationProperties(prefix = "yawiki.default-permission")
 public class DefaultPermissionProperties {
+    private final boolean doInitialize;
     private final int create;
     private final int read;
     private final int update;
@@ -20,6 +21,7 @@ public class DefaultPermissionProperties {
     private final UUID defaultPermissionGroupId;
 
     public DefaultPermissionProperties(
+            @DefaultValue("true") boolean doInitialize,
             @DefaultValue("0") int create,
             @DefaultValue("0") int read,
             @DefaultValue("0") int update,
@@ -27,6 +29,7 @@ public class DefaultPermissionProperties {
             @DefaultValue("4") int manage,
             @DefaultValue("00000000-0000-0000-0000-000000000001") UUID defaultPermissionGroupId
             ) {
+        this.doInitialize = doInitialize;
         this.create = create;
         this.read = read;
         this.update = update;
