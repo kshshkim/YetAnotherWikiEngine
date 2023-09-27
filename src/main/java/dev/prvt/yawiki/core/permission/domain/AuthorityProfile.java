@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.permission.domain;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Table(name = "authority_profile")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuthorityProfile {
+public class AuthorityProfile implements Persistable<UUID> {
     @Id
     @Column(name = "profile_id", columnDefinition = "BINARY(16)")
     private UUID id;  // should match with actor's id
@@ -28,6 +29,8 @@ public class AuthorityProfile {
     @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<GrantedGroupAuthority> groupAuthorities = new ArrayList<>();
 
+    @Transient
+    private boolean isNew = false;
     void addGroupAuthority(GrantedGroupAuthority groupAuthority) {
         groupAuthorities.add(groupAuthority);
     }
@@ -56,6 +59,17 @@ public class AuthorityProfile {
                 .authorityLevel(authorityLevel)
                 .profile(created)
                 .build();
+        created.isNew = true;
         return created;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    private void flagNotNew() {
+        isNew = false;
     }
 }
