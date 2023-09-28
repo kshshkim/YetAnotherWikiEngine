@@ -6,9 +6,11 @@ import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 
+@Component
 @RequiredArgsConstructor
 public class ContributorMemberJoinEventHandler {
     private final ContributorRepository contributorRepository;
