@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluator;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ class WikiPageCommandPermissionValidatorImplTest {
     UUID calledActorId;
     UUID calledResourceId;
 
-    PermissionComparator permissionComparator = new PermissionComparator() {
+    PermissionEvaluator permissionComparator = new PermissionEvaluator() {
         @Override
         public void validatePermission(UUID actorId, UUID resourceId, ActionType actionType) {
             calledActionType = actionType;
@@ -29,7 +30,7 @@ class WikiPageCommandPermissionValidatorImplTest {
         }
     };
 
-    WikiPageCommandCommandPermissionValidatorImpl wikiPageCommandPermissionValidator = new WikiPageCommandCommandPermissionValidatorImpl(permissionComparator);
+    WikiPageCommandPermissionValidatorImpl wikiPageCommandPermissionValidator = new WikiPageCommandPermissionValidatorImpl(permissionComparator);
 
     @BeforeEach
     @SneakyThrows

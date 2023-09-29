@@ -1,5 +1,8 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.evaluator;
 
+import dev.prvt.yawiki.core.permission.domain.ActionType;
+import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.ResourcePermission;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +12,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class PermissionComparatorImpl implements PermissionComparator {
+public class PermissionEvaluatorImpl implements PermissionEvaluator {
     private final AuthorityProfileRepository authorityProfileRepository;
     private final ResourcePermissionRepository resourcePermissionRepository;
 

@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluator;
 import dev.prvt.yawiki.core.wikipage.domain.exception.UpdatePermissionException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
@@ -14,8 +15,8 @@ import java.util.UUID;
  */
 @Component
 @RequiredArgsConstructor
-public class WikiPageCommandCommandPermissionValidatorImpl implements WikiPageCommandPermissionValidator {
-    private final PermissionComparator permissionComparator;
+public class WikiPageCommandPermissionValidatorImpl implements WikiPageCommandPermissionValidator {
+    private final PermissionEvaluator permissionComparator;
     @Override
     public void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException {
         permissionComparator.validatePermission(actorId, wikiPage.getId(), ActionType.UPDATE);

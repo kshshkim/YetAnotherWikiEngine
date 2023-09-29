@@ -27,26 +27,13 @@ public class DefaultPermissionConfigInitializerImpl implements DefaultPermission
     private final PermissionRepository permissionRepository;
     private final DefaultPermissionProperties defaultPermissionProperties;
 
-    private Permission createNewPermission() {
-        Permission built = Permission.builder()
-                .create(defaultPermissionProperties.getCreate())
-                .read(defaultPermissionProperties.getRead())
-                .update(defaultPermissionProperties.getUpdate())
-                .delete(defaultPermissionProperties.getDelete())
-                .manage(defaultPermissionProperties.getManage())
-                .build();
-        em.persist(built);
-        return built;
-    }
-
     public void initializePermissionConfig() {
-        Permission defaultPermission = permissionRepository.findByAllAttributes(
+        Permission defaultPermission = permissionRepository.getOrCreateByAllAttributes(
                         defaultPermissionProperties.getCreate(),
                         defaultPermissionProperties.getRead(),
                         defaultPermissionProperties.getUpdate(),
                         defaultPermissionProperties.getDelete(),
-                        defaultPermissionProperties.getManage())
-                .orElseGet(this::createNewPermission);
+                        defaultPermissionProperties.getManage());
         PermissionGroup defaultPermissionGroup = new PermissionGroup(defaultPermissionProperties.getDefaultPermissionGroupId(), "default", defaultPermission);
         em.persist(defaultPermissionGroup);
     }

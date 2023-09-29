@@ -1,6 +1,8 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.evaluator;
 
 import dev.prvt.yawiki.core.permission.PermissionFixture;
+import dev.prvt.yawiki.core.permission.domain.*;
+import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluatorImpl;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileMemoryRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionMemoryRepository;
@@ -13,10 +15,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class PermissionComparatorImplTest {
+class PermissionEvaluatorImplTest {
     AuthorityProfileRepository authorityProfileRepository;
     ResourcePermissionRepository resourcePermissionRepository;
-    PermissionComparatorImpl permissionComparator;
+    PermissionEvaluatorImpl permissionComparator;
 
 
     AuthorityProfile givenAuthorityProfile;
@@ -28,7 +30,7 @@ class PermissionComparatorImplTest {
     void init() {
         authorityProfileRepository = new AuthorityProfileMemoryRepository();
         resourcePermissionRepository = new ResourcePermissionMemoryRepository();
-        permissionComparator = new PermissionComparatorImpl(authorityProfileRepository, resourcePermissionRepository);
+        permissionComparator = new PermissionEvaluatorImpl(authorityProfileRepository, resourcePermissionRepository);
 
 
         givenPermission = PermissionFixture.aPermission()
@@ -37,7 +39,11 @@ class PermissionComparatorImplTest {
                 .manage(4)
                 .build();
         givenPermissionGroup = new PermissionGroup(UUID.randomUUID(), UUID.randomUUID().toString(), givenPermission);
-        givenResourcePermission = new ResourcePermission(UUID.randomUUID(), givenPermissionGroup, null);
+        givenResourcePermission = ResourcePermission.builder()
+                .id(UUID.randomUUID())
+                .ownerGroup(givenPermissionGroup)
+                .specificPermission(null)
+                .build();
         givenAuthorityProfile = AuthorityProfile.createWithGroup(UUID.randomUUID(), givenPermissionGroup, 1);
 
         authorityProfileRepository.save(givenAuthorityProfile);

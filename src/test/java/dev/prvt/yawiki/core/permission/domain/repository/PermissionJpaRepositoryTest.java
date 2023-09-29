@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core.permission.domain.repository;
 
 import dev.prvt.yawiki.core.permission.domain.Permission;
-import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
+import dev.prvt.yawiki.core.permission.infra.repository.PermissionJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,10 @@ import javax.persistence.EntityManager;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-class PermissionRepositoryTest {
+class PermissionJpaRepositoryTest {
 
     @Autowired
-    PermissionRepository permissionRepository;
+    PermissionJpaRepository permissionJpaRepository;
 
     @Autowired
     EntityManager em;
@@ -31,7 +31,7 @@ class PermissionRepositoryTest {
                 .manage(4)
                 .build();
 
-        permissionRepository.save(build);
+        permissionJpaRepository.save(build);
     }
 
     @Test
@@ -40,7 +40,7 @@ class PermissionRepositoryTest {
         em.flush();
         em.clear();
 
-        Permission found = permissionRepository.findByAllAttributes(1, 0, 1, 1, 4).orElseThrow();
+        Permission found = permissionJpaRepository.findByAllAttributes(1, 0, 1, 1, 4).orElseThrow();
 
         assertThat(found)
                 .isNotNull();

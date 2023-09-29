@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.permission.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,8 @@ public class ResourcePermission {
         this.specificPermission = updatedPermission;
     }
 
-    public ResourcePermission(UUID id, PermissionGroup ownerGroup, Permission specificPermission) {
+    @Builder
+    protected ResourcePermission(UUID id, PermissionGroup ownerGroup, Permission specificPermission) {
         this.id = id;
         this.ownerGroup = ownerGroup;
         this.specificPermission = specificPermission;
