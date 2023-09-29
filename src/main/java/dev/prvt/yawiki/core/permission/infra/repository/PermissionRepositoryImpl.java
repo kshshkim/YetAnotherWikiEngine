@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.permission.infra.repository;
 
 import dev.prvt.yawiki.core.permission.domain.Permission;
+import dev.prvt.yawiki.core.permission.domain.PermissionData;
 import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -39,5 +40,10 @@ public class PermissionRepositoryImpl implements PermissionRepository {
     public Permission getOrCreateByAllAttributes(int c, int r, int u, int d, int m) {
         Optional<Permission> found = permissionJpaRepository.findByAllAttributes(c, r, u, d, m);
         return found.orElseGet(() -> create(c, r, u, d, m));
+    }
+
+    @Override
+    public Permission getOrCreateByAllAttributes(PermissionData permissionData) {
+        return getOrCreateByAllAttributes(permissionData.getC(), permissionData.getR(), permissionData.getU(), permissionData.getD(), permissionData.getM());
     }
 }

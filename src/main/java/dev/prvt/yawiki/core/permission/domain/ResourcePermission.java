@@ -27,7 +27,7 @@ public class ResourcePermission {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "acl_id")
-    private Permission specificPermission;  // can be null. if null, check the ownerGroup.defaultResourcePermission
+    private Permission specificPermission;  // can be null. if null, check ownerGroup.defaultResourcePermission
 
     @NotNull
     public Permission getRequiredPermission() {
@@ -41,6 +41,10 @@ public class ResourcePermission {
 
     public void updatePermission(Permission updatedPermission) {
         this.specificPermission = updatedPermission;
+    }
+
+    public void updateOwnerGroup(PermissionGroup permissionGroup) {
+        this.ownerGroup = permissionGroup;
     }
 
     @Builder
