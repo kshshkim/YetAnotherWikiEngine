@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,5 +80,47 @@ class ContributorRepositoryImplTest {
 
         assertThat(found).isPresent();
         assertThat(found.orElseThrow().getName()).isEqualTo(given.getName());
+    }
+
+    @Test
+    void getByInetAddress_when_not_exist() {
+        // given
+        InetAddress addr = aInetV4Address();
+        // when
+        Contributor created = contributorRepository.getByInetAddress(addr);
+        em.flush();
+        em.clear();
+        // then
+        Optional<Contributor> byId = contributorRepository.findById(created.getId());
+        assertThat(byId).isPresent();
+        AnonymousContributor contributor = (AnonymousContributor) byId.get();
+        assertThat(contributor.getIpAddress())
+                .isEqualTo(addr);
+    }
+
+    @Test
+    void getByInetAddress_when_exist() {
+        // given
+        InetAddress addr = aInetV4Address();
+        AnonymousContributor built = AnonymousContributor.builder()
+                .id(UUID.randomUUID())
+                .ipAddress(addr)
+                .build();
+        em.persist(built);
+        em.flush();
+        em.clear();
+
+        // when
+        Contributor byInetAddress = contributorRepository.getByInetAddress(addr);
+
+        assertThat(byInetAddress)
+                .isNotNull()
+                .isInstanceOf(AnonymousContributor.class);
+
+        assertThat(byInetAddress.getId())
+                .isEqualTo(built.getId());
+
+
+
     }
 }

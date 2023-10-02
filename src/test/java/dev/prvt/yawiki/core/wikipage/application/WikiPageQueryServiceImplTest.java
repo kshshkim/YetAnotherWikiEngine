@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -94,6 +95,11 @@ class WikiPageQueryServiceImplTest {
 
         @Override
         public <S extends Contributor> S save(S entity) {
+            return null;
+        }
+
+        @Override
+        public Contributor getByInetAddress(InetAddress inetAddress) {
             return null;
         }
     };

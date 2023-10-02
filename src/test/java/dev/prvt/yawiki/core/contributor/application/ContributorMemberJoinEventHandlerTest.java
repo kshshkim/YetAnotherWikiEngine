@@ -7,6 +7,7 @@ import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +34,11 @@ class ContributorMemberJoinEventHandlerTest {
         public <S extends Contributor> S save(S entity) {
             createdContributor = entity;
             return entity;
+        }
+
+        @Override
+        public Contributor getByInetAddress(InetAddress inetAddress) {
+            return null;
         }
     };
     ContributorMemberJoinEventHandler contributorMemberJoinEventHandler = new ContributorMemberJoinEventHandler(contributorDummyRepository);
