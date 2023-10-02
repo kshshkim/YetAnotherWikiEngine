@@ -1,8 +1,6 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.core.wikireference.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

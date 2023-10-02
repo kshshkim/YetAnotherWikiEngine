@@ -1,10 +1,8 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.core.wikireference.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 
-@Service
-@Transactional
+@Component
 @RequiredArgsConstructor
 public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
     private final WikiReferenceRepository wikiReferenceRepository;

@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikipage.infra.repository;
+package dev.prvt.yawiki.core.wikireference.infra;
 
 import com.fasterxml.uuid.impl.UUIDUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
-import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

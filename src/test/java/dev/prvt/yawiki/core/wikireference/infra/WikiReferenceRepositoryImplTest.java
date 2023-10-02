@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikipage.infra.repository;
+package dev.prvt.yawiki.core.wikireference.infra;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
