@@ -1,12 +1,14 @@
-package dev.prvt.yawiki.core.member.infra;
+package dev.prvt.yawiki.auth.member.infra;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import dev.prvt.yawiki.auth.member.infra.AuthenticationTokenGeneratorImpl;
+import dev.prvt.yawiki.auth.member.infra.PasswordHasherImpl;
 import dev.prvt.yawiki.config.springsecurity.JwtProperties;
-import dev.prvt.yawiki.core.member.domain.BaseMember;
-import dev.prvt.yawiki.core.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.BaseMember;
+import dev.prvt.yawiki.auth.member.domain.Member;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

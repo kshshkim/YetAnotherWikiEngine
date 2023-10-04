@@ -1,5 +1,8 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
+import dev.prvt.yawiki.auth.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.MemberRepository;
+import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

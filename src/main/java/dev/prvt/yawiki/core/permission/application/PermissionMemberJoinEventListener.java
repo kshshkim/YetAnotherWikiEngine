@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import dev.prvt.yawiki.core.permission.domain.PermissionMemberJoinEventHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;

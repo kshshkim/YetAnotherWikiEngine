@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
 import lombok.Getter;

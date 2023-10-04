@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

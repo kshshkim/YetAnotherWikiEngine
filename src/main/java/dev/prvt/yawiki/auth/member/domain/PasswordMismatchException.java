@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 public class PasswordMismatchException extends MemberException {
     public PasswordMismatchException() {

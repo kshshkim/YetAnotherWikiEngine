@@ -1,5 +1,6 @@
-package dev.prvt.yawiki.core.member.infra;
+package dev.prvt.yawiki.auth.member.infra;
 
+import dev.prvt.yawiki.auth.member.infra.PasswordHasherImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

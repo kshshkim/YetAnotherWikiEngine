@@ -1,7 +1,8 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.auth.member.application;
 
+import dev.prvt.yawiki.auth.member.domain.*;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
-import dev.prvt.yawiki.core.member.domain.*;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

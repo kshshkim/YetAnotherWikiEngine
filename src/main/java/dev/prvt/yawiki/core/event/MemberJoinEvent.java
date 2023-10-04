@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.core.event;
 
 import java.util.UUID;
 

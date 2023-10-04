@@ -1,6 +1,6 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.auth.member.application;
 
-import dev.prvt.yawiki.core.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.Member;
 
 public interface MemberService {
     Member join(MemberJoinDto memberJoinDto);

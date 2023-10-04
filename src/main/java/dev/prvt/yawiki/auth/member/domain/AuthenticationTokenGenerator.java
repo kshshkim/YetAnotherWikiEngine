@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 public interface AuthenticationTokenGenerator {
     String create(BaseMember member);

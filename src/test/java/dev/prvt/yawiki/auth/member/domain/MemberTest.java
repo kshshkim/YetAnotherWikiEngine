@@ -1,6 +1,8 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
-import org.assertj.core.api.Assertions;
+import dev.prvt.yawiki.auth.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
+import dev.prvt.yawiki.auth.member.domain.PasswordMismatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

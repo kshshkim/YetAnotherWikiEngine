@@ -3,7 +3,7 @@ package dev.prvt.yawiki.core.contributor.application;
 
 import dev.prvt.yawiki.core.contributor.domain.ContributorRepository;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
-import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

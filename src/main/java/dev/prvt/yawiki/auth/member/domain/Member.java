@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 import lombok.AccessLevel;
 import lombok.Getter;

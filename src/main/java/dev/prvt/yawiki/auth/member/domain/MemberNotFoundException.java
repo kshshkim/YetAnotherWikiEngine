@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.domain;
+package dev.prvt.yawiki.auth.member.domain;
 
 public class MemberNotFoundException extends MemberException {
     public MemberNotFoundException() {

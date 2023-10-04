@@ -1,10 +1,11 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.auth.member.application;
 
 import com.fasterxml.uuid.Generators;
+import dev.prvt.yawiki.auth.member.domain.*;
 import dev.prvt.yawiki.common.uuid.FasterXmlNoArgGeneratorAdapter;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
-import dev.prvt.yawiki.core.member.domain.*;
-import dev.prvt.yawiki.core.member.infra.PasswordHasherImpl;
+import dev.prvt.yawiki.auth.member.infra.PasswordHasherImpl;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;

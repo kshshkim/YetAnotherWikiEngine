@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core.permission.domain;
 
 import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
-import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileMemoryRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import org.junit.jupiter.api.Test;

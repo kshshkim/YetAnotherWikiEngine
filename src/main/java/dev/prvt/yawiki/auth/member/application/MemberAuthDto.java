@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.auth.member.application;
 
 public record MemberAuthDto(
         String username,

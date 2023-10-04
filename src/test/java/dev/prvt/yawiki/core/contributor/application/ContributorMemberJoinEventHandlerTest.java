@@ -3,7 +3,7 @@ package dev.prvt.yawiki.core.contributor.application;
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
 import dev.prvt.yawiki.core.contributor.domain.ContributorRepository;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
-import dev.prvt.yawiki.core.member.application.MemberJoinEvent;
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

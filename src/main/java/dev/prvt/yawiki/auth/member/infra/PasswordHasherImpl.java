@@ -1,6 +1,6 @@
-package dev.prvt.yawiki.core.member.infra;
+package dev.prvt.yawiki.auth.member.infra;
 
-import dev.prvt.yawiki.core.member.domain.PasswordHasher;
+import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;

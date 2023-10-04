@@ -1,5 +1,6 @@
-package dev.prvt.yawiki.core.member.application;
+package dev.prvt.yawiki.auth.member.application;
 
+import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
 import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
