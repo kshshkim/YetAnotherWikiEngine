@@ -21,8 +21,7 @@ public class Member extends BaseMember {
     }
 
     public void validatePassword(String raw, PasswordHasher hasher) {
-        String hashed = hasher.hash(raw);
-        if (!hashed.equals(password)) {
+        if (!hasher.matches(raw, password)) {
             throw new PasswordMismatchException();
         }
     }

@@ -16,4 +16,9 @@ public class PasswordHasherImpl implements PasswordHasher {
     public String hash(String toHash) {  // todo hash password
         return bCryptPasswordEncoder.encode(toHash);
     }
+
+    @Override
+    public boolean matches(String raw, String hashed) {
+        return bCryptPasswordEncoder.matches(raw, hashed);
+    }
 }

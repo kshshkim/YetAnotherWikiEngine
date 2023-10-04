@@ -22,6 +22,11 @@ class MemberTest {
         public String hash(String toHash) {
             return String.valueOf(toHash.hashCode());
         }
+
+        @Override
+        public boolean matches(String raw, String hashed) {
+            return String.valueOf(raw.hashCode()).equals(hashed);
+        }
     };
 
     @BeforeEach
