@@ -1,10 +1,7 @@
 package dev.prvt.yawiki.core.member.application;
 
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
-import dev.prvt.yawiki.core.member.domain.Member;
-import dev.prvt.yawiki.core.member.domain.MemberException;
-import dev.prvt.yawiki.core.member.domain.MemberRepository;
-import dev.prvt.yawiki.core.member.domain.PasswordHasher;
+import dev.prvt.yawiki.core.member.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -19,6 +16,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordHasher passwordHasher;
     private final UuidGenerator uuidGenerator;
     private final ApplicationEventPublisher publisher;
+    private final AuthenticationTokenGenerator authenticationTokenGenerator;
 
     @Override
     public Member join(MemberJoinDto memberJoinDto) {
@@ -30,5 +28,13 @@ public class MemberServiceImpl implements MemberService {
         );
         publisher.publishEvent(new MemberJoinEvent(joined.getId(), joined.getDisplayedName()));
         return joined;
+    }
+
+    @Override
+    public String authenticate(MemberAuthDto memberAuthDto) {
+        Member member = memberRepository.findByUsername(memberAuthDto.username())
+                .orElseThrow(MemberNotFoundException::new);
+        member.validatePassword(memberAuthDto.password(), passwordHasher);
+        return authenticationTokenGenerator.create(member);
     }
 }
