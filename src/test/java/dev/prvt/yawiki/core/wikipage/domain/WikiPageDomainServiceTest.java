@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.UpdatePermissionException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
@@ -13,7 +14,10 @@ import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import dev.prvt.yawiki.core.wikipage.infra.repository.WikiPageMemoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -97,10 +101,16 @@ class WikiPageDomainServiceTest {
         }
     };
 
+    private final ApplicationEventPublisher dummyEventPublisher = new ApplicationEventPublisher() {
+        @Override
+        public void publishEvent(Object event) {
+            publishedEvents.add(event);
+        }
+    };
 
     private final WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
 
-    private final WikiPageDomainService wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, dummyWikiReferenceUpdater, dummyVersionCollisionValidator, dummyWikiPageCommandPermissionValidator);
+    private final WikiPageDomainService wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, dummyWikiReferenceUpdater, dummyVersionCollisionValidator, dummyWikiPageCommandPermissionValidator, dummyEventPublisher);
 
     private WikiPage givenWikiPage;
     private UUID givenActorId;
@@ -111,6 +121,7 @@ class WikiPageDomainServiceTest {
     private String givenReference;
     private Set<String> givenReferences;
 
+    private List<Object> publishedEvents;
 
     @BeforeEach
     void init() {
@@ -129,6 +140,7 @@ class WikiPageDomainServiceTest {
         givenVersionToken = givenWikiPage.getVersionToken();
         givenReference = randomUUID().toString();
         givenReferences = Set.of(givenReference);
+        publishedEvents = new ArrayList<>();
     }
 
     void commitUpdate() {
@@ -266,6 +278,24 @@ class WikiPageDomainServiceTest {
                 .isTrue();
         assertThat(wikiReferenceUpdaterCalled_delete)
                 .isTrue();
+    }
+
+    @Test
+    void create_should_publish_event() {
+        // when
+        WikiPage wikiPage = wikiPageDomainService.create(randString());
+        // then
+        List<WikiPageCreatedEvent> events = publishedEvents.stream().filter(ev -> ev instanceof WikiPageCreatedEvent)
+                .map(ev -> (WikiPageCreatedEvent) ev)
+                .toList();
+
+        assertThat(events)
+                .isNotEmpty()
+                .hasSize(1);
+        WikiPageCreatedEvent wikiPageCreatedEvent = events.get(0);
+        assertThat(tuple(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.title()))
+                .isEqualTo(tuple(wikiPage.getId(), wikiPage.getTitle()));
+
     }
 
 }

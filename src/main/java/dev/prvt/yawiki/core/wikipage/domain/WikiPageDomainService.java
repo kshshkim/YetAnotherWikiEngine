@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
@@ -8,6 +9,7 @@ import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionV
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -26,6 +28,7 @@ public class WikiPageDomainService {
     private final WikiReferenceUpdater wikiReferenceUpdater;
     private final VersionCollisionValidator versionCollisionValidator;
     private final WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * 문서 수정 이전에 문서 수정을 시작하기 위해 사용하는 메소드.
@@ -68,8 +71,16 @@ public class WikiPageDomainService {
                 .orElseThrow(NoSuchWikiPageException::new);
     }
 
-    private WikiPage create(String title) {
-        return wikiPageRepository.save(WikiPage.create(title));
+    /**
+     * <p>WikiPage 엔티티가 존재하지 않으면 생성, 존재하면 예외 반환.</p>
+     * <p>생성 성공시 {@link WikiPageCreatedEvent} 발행.</p>
+     * @param title 생성할 문서 제목
+     * @return 생성된 WikiPage
+     */
+    public WikiPage create(String title) {
+        WikiPage created = wikiPageRepository.save(WikiPage.create(title));
+        applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getTitle()));
+        return created;
     }
 
     private WikiPage getOrCreate(String title) {

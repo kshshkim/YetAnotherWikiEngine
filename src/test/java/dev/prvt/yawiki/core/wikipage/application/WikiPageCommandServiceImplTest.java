@@ -70,7 +70,7 @@ class WikiPageCommandServiceImplTest {
 
     class TestWikiPageDomainService extends WikiPageDomainService {
         public TestWikiPageDomainService() {
-            super(null, null, null, null);
+            super(null, null, null, null, null);
         }
 
         @Override
