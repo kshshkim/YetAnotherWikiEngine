@@ -54,12 +54,17 @@ class ResourcePermissionServiceImplTest {
     void updatePermission_default() {
         // when
         resourcePermissionService.updateResourcePermission(givenId);
+        em.flush();
+        em.clear();
+
         // then
         ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();
         assertThat(resourcePermission.getSpecificPermission())
                 .isNull();
         assertThat(resourcePermission.getOwnerGroup().getId())
                 .isEqualTo(defaultPermissionProperties.getDefaultPermissionGroupId());
+        assertThat(resourcePermission.getOwnerGroup().getDefaultResourcePermission())
+                .isNotNull();
     }
 
     @Test
@@ -68,9 +73,13 @@ class ResourcePermissionServiceImplTest {
         UUID givenPermissionGroupId = UUID.randomUUID();
         Permission givenPermission = permissionRepository.getOrCreateByAllAttributes(1, 2, 3, 4, 4);
         em.persist(new PermissionGroup(givenPermissionGroupId, randString(), givenPermission));
+        em.flush();
+        em.clear();
 
         // when
         resourcePermissionService.updateResourcePermission(givenId, givenPermissionGroupId);
+        em.flush();
+        em.clear();
 
         // then
         ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();
@@ -86,9 +95,12 @@ class ResourcePermissionServiceImplTest {
         UUID givenPermissionGroupId = UUID.randomUUID();
         Permission givenPermission = permissionRepository.getOrCreateByAllAttributes(1, 2, 3, 4, 4);
         em.persist(new PermissionGroup(givenPermissionGroupId, randString(), givenPermission));
-
+        em.flush();
+        em.clear();
         // when
         resourcePermissionService.updateResourcePermission(givenId, givenPermissionGroupId, PermissionData.from(givenPermission));
+        em.flush();
+        em.clear();
 
         // then
         ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();

@@ -52,5 +52,11 @@ public class ResourcePermission {
         this.id = id;
         this.ownerGroup = ownerGroup;
         this.specificPermission = specificPermission;
+        if (this.id == null) {
+            throw new NullPointerException("id must not be null");
+        }
+        if (this.ownerGroup == null) {
+            throw new NullPointerException("ownerGroup must not be null");
+        }
     }
 }

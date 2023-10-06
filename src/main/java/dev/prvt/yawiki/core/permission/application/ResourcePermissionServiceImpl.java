@@ -51,6 +51,7 @@ public class ResourcePermissionServiceImpl implements ResourcePermissionService 
                 () -> resourcePermissionRepository.save(
                         ResourcePermission.builder()
                                 .id(resourceId)
+                                .ownerGroup(new PermissionGroup(defaultPermissionProperties.getDefaultPermissionGroupId()))
                                 .build()));
     }
 }

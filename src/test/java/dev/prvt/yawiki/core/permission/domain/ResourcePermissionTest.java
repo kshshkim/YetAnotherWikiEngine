@@ -1,14 +1,14 @@
 package dev.prvt.yawiki.core.permission.domain;
 
-import dev.prvt.yawiki.core.permission.PermissionFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static dev.prvt.yawiki.Fixture.randString;
-import static dev.prvt.yawiki.core.permission.PermissionFixture.*;
+import static dev.prvt.yawiki.core.permission.PermissionFixture.aPermission;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ResourcePermissionTest {
     Permission givenPermission;
@@ -20,6 +20,19 @@ class ResourcePermissionTest {
         givenPermission = aPermission().build();
         givenPermissionGroup = new PermissionGroup(UUID.randomUUID(), randString(), givenPermission);
         givenResourcePermission = new ResourcePermission(UUID.randomUUID(), givenPermissionGroup, null);
+    }
+
+    @Test
+    void constructor_field_not_null_test() {
+        assertThatThrownBy(() -> ResourcePermission.builder().build())
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() ->
+                ResourcePermission.builder()
+                        .id(UUID.randomUUID())
+                        .build()
+        )
+                .describedAs("")
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
