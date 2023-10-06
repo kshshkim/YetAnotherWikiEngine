@@ -38,7 +38,7 @@ public class WikiPageDomainService {
      * @return 수정할 WikiPage 엔티티
      */
     public WikiPage proclaimUpdate(UUID contributorId, String wikiPageTitle) {
-        WikiPage wikiPage = getOrCreate(wikiPageTitle);
+        WikiPage wikiPage = getWikiPage(wikiPageTitle);
         validateProclaim(contributorId, wikiPage);
         return wikiPage;
     }
@@ -74,6 +74,7 @@ public class WikiPageDomainService {
     /**
      * <p>WikiPage 엔티티가 존재하지 않으면 생성, 존재하면 예외 반환.</p>
      * <p>생성 성공시 {@link WikiPageCreatedEvent} 발행.</p>
+     * todo 권한 체크
      * @param title 생성할 문서 제목
      * @return 생성된 WikiPage
      */
@@ -81,11 +82,6 @@ public class WikiPageDomainService {
         WikiPage created = wikiPageRepository.save(WikiPage.create(title));
         applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getTitle()));
         return created;
-    }
-
-    private WikiPage getOrCreate(String title) {
-        return wikiPageRepository.findByTitleWithRevisionAndRawContent(title)
-                .orElseGet(() -> this.create(title));
     }
 
     private void updateReferences(UUID pageId, Set<String> references) throws WikiPageReferenceUpdaterException {

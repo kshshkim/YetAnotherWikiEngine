@@ -226,29 +226,6 @@ class WikiPageDomainServiceTest {
     }
 
     @Test
-    void proclaimUpdate_should_create_when_does_not_exist() {
-        String notExists = randomUUID().toString();
-
-        WikiPage wikiPage = wikiPageDomainService.proclaimUpdate(givenActorId, notExists);
-
-        assertThat(wikiPage)
-                .describedAs("WikiPage 가 생성되어야함.")
-                .isNotNull();
-
-        assertThat(wikiPageRepository.findByTitle(notExists))
-                .describedAs("생성된 WikiPage 가 영속화 되어야함.")
-                .isPresent();
-
-        assertThat(wikiPage.getTitle())
-                .describedAs("생성된 WikiPage 의 문서 제목이 동일함.")
-                .isEqualTo(notExists);
-
-        assertThat(wikiPage.isActive())
-                .describedAs("새로 생성된 WikiPage 엔티티의 isActive 는 false 임")
-                .isFalse();
-    }
-
-    @Test
     void proclaimUpdate_should_get_when_exists() {
         WikiPage saved = wikiPageRepository.save(WikiPage.create(randString()));
         saved.update(randomUUID(), randString(), randString());
@@ -295,7 +272,33 @@ class WikiPageDomainServiceTest {
         WikiPageCreatedEvent wikiPageCreatedEvent = events.get(0);
         assertThat(tuple(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.title()))
                 .isEqualTo(tuple(wikiPage.getId(), wikiPage.getTitle()));
-
     }
 
+    @Test
+    void create_should_create_when_does_not_exist() {
+        String notExists = randomUUID().toString();
+
+        WikiPage wikiPage = wikiPageDomainService.create(notExists);
+
+        assertThat(wikiPage)
+                .describedAs("WikiPage 가 생성되어야함.")
+                .isNotNull();
+
+        assertThat(wikiPageRepository.findByTitle(notExists))
+                .describedAs("생성된 WikiPage 가 영속화 되어야함.")
+                .isPresent();
+
+        assertThat(wikiPage.getTitle())
+                .describedAs("생성된 WikiPage 의 문서 제목이 동일함.")
+                .isEqualTo(notExists);
+
+        assertThat(wikiPage.isActive())
+                .describedAs("새로 생성된 WikiPage 엔티티의 isActive 는 false 임")
+                .isFalse();
+    }
+
+    @Test
+    void create_should_fail_on_duplicate_title() {
+        assertThatThrownBy(() -> wikiPageDomainService.create(givenTitle));
+    }
 }

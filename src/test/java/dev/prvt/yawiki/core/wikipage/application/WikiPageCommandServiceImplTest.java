@@ -63,10 +63,13 @@ class WikiPageCommandServiceImplTest {
     private Set<String> givenReferences;
     private String givenVersionToken;
 
+    private String createdTitle;
+
     private boolean called_ReferencedTitleExtractor_extractReferencedTitles;
     private boolean called_WikiPageDomainService_commitUpdate;
     private boolean called_WikiPageDomainService_updateProclaim;
     private boolean called_WikiPageDomainService_delete;
+    private boolean called_WikiPageDomainService_create;
 
     class TestWikiPageDomainService extends WikiPageDomainService {
         public TestWikiPageDomainService() {
@@ -104,6 +107,13 @@ class WikiPageCommandServiceImplTest {
         @Override
         public void delete(UUID contributorId, String title, String comment) {
             called_WikiPageDomainService_delete = true;
+        }
+
+        @Override
+        public WikiPage create(String title) {
+            called_WikiPageDomainService_create = true;
+            createdTitle = title;
+            return WikiPage.create(title);
         }
     }
 
@@ -161,6 +171,10 @@ class WikiPageCommandServiceImplTest {
         called_WikiPageDomainService_commitUpdate = false;
         called_WikiPageDomainService_updateProclaim = false;
         called_WikiPageDomainService_delete = false;
+        called_WikiPageDomainService_create = false;
+
+        // domain service 에 적절히 인자가 넘어갔는지 여부 확인
+        createdTitle = null;
     }
 
     @Test
@@ -212,5 +226,15 @@ class WikiPageCommandServiceImplTest {
     void delete_should_success() {
         wikiPageCommandServiceImpl.delete(givenContributorId, givenTitle, givenComment);
         assertThat(called_WikiPageDomainService_delete).isTrue();
+    }
+
+    @Test
+    void create_call_and_title_check() {
+        wikiPageCommandServiceImpl.create(givenContributorId, givenTitle);
+
+        assertThat(called_WikiPageDomainService_create).isTrue();
+        assertThat(createdTitle)
+                .isNotNull()
+                .isEqualTo(givenTitle);
     }
 }
