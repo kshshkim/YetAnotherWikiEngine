@@ -20,7 +20,7 @@ import static dev.prvt.yawiki.fixture.Fixture.randString;
 public class SecurityFixture {
 
     static public WebAuthenticationDetails anWebAuthenticationDetails() {
-        return new WebAuthenticationDetails(Fixture.aInetV4Address().toString(), UUID.randomUUID().toString());
+        return new WebAuthenticationDetails(Fixture.aInetV4Address().getHostAddress(), UUID.randomUUID().toString());
     }
 
     static public AnonymousAuthenticationToken anAnonymousAuthenticationToken() {
@@ -42,7 +42,7 @@ public class SecurityFixture {
                 .subject("yawiki")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(60*30))
-                .claim("contributorId", contributorId)
+                .claim("contributorId", contributorId.toString())
                 .claim("name", name)
                 .build();
         JwtEncoder jwtEncoder = JwtFixture.getJwtEncoder();
