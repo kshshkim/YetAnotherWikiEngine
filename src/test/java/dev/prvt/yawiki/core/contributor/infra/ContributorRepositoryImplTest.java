@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.contributor.infra;
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
+import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.Fixture.*;
+import static dev.prvt.yawiki.fixture.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -36,7 +37,7 @@ class ContributorRepositoryImplTest {
     @BeforeEach
     void init() {
         givenContributors = IntStream.range(0, 10)
-                .mapToObj(i -> (Contributor) aMemberContributor().build())
+                .mapToObj(i -> (Contributor) WikiPageFixture.aMemberContributor().build())
                 .toList();
         givenContributors.forEach(em::persist);
         em.flush();
@@ -56,7 +57,7 @@ class ContributorRepositoryImplTest {
 
     @Test
     void save_MemberContributor() {
-        MemberContributor given = aMemberContributor().build();
+        MemberContributor given = WikiPageFixture.aMemberContributor().build();
         contributorRepository.save(given);
         em.flush();
         em.clear();
@@ -70,7 +71,7 @@ class ContributorRepositoryImplTest {
 
     @Test
     void save_AnonymousContributor() {
-        AnonymousContributor given = anAnonymousContributor().build();
+        AnonymousContributor given = WikiPageFixture.anAnonymousContributor().build();
         contributorRepository.save(given);
         em.flush();
         em.clear();

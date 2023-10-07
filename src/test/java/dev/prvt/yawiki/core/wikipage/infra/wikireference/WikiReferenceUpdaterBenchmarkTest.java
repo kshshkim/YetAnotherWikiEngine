@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 
 /**
  * <p>Bulk Insert 시, rewriteBatchedStatements 옵션이 사용되는 경우 Jdbc 쿼리가 10배 가량 빠름.</p>

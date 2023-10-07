@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 
-import dev.prvt.yawiki.Fixture;
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
 import dev.prvt.yawiki.core.contributor.domain.ContributorRepository;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
@@ -16,6 +15,7 @@ import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.infra.repository.WikiPageMemoryRepository;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
+import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -124,7 +124,7 @@ class WikiPageQueryServiceImplTest {
     void init() {
         givenWikiPageTitle = UUID.randomUUID().toString();
         givenWikiPage = wikiPageRepository.save(WikiPage.create(givenWikiPageTitle));
-        Fixture.updateWikiPageRandomly(givenWikiPage);
+        WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
         givenWikiReferences = IntStream.range(0, 10)
                 .mapToObj(i -> randString())
                 .toList();

@@ -1,11 +1,10 @@
 package dev.prvt.yawiki.auth.member.infra;
 
-import dev.prvt.yawiki.auth.member.infra.PasswordHasherImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PasswordHasherImplTest {

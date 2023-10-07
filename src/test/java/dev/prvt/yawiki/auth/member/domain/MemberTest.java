@@ -1,14 +1,11 @@
 package dev.prvt.yawiki.auth.member.domain;
 
-import dev.prvt.yawiki.auth.member.domain.Member;
-import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
-import dev.prvt.yawiki.auth.member.domain.PasswordMismatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.*;
 
 class MemberTest {

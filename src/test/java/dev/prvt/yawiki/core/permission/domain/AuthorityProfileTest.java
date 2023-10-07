@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core.permission.domain;
 
-import dev.prvt.yawiki.Fixture;
-import dev.prvt.yawiki.core.permission.PermissionFixture;
+import dev.prvt.yawiki.fixture.Fixture;
+import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

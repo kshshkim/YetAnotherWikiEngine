@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission;
+package dev.prvt.yawiki.fixture;
 
 import dev.prvt.yawiki.core.permission.domain.Permission;
 import dev.prvt.yawiki.core.permission.domain.ResourcePermission;

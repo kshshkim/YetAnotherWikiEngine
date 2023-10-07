@@ -1,13 +1,12 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.randString;
-import static dev.prvt.yawiki.Fixture.updateWikiPageRandomly;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WikiPageTest {

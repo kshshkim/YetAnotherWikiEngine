@@ -16,8 +16,8 @@ import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.prvt.yawiki.Fixture.randString;
-import static dev.prvt.yawiki.Fixture.updateWikiPageRandomly;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest

@@ -1,34 +1,17 @@
-package dev.prvt.yawiki;
+package dev.prvt.yawiki.fixture;
 
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
-import dev.prvt.yawiki.core.contributor.domain.ContributorState;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import lombok.SneakyThrows;
-import net.bytebuddy.utility.RandomString;
 
-import java.net.InetAddress;
-import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class Fixture {
-    public static String randString() {
-        return RandomString.make();
-    }
-
-    @SneakyThrows
-    public static InetAddress aInetV4Address() {
-        Random random = new Random();
-        byte[] ip = new byte[4];
-        random.nextBytes(ip);
-        return InetAddress.getByAddress(ip);
-    }
-
+public class WikiPageFixture {
     public static RawContent aRawContent() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 20; i++) {
@@ -41,7 +24,7 @@ public class Fixture {
         return Revision.builder()
                 .contributorId(UUID.randomUUID())
                 .rawContent(aRawContent())
-                .comment(randString());
+                .comment(Fixture.randString());
     }
 
     public static MemberContributor.MemberContributorBuilder aMemberContributor() {
@@ -53,15 +36,15 @@ public class Fixture {
     public static AnonymousContributor.AnonymousContributorBuilder anAnonymousContributor() {
         return AnonymousContributor.builder()
                 .id(UUID.randomUUID())
-                .ipAddress(aInetV4Address());
+                .ipAddress(Fixture.aInetV4Address());
     }
 
     public static void updateWikiPageRandomly(WikiPage wikiPage) {
-        wikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
+        wikiPage.update(UUID.randomUUID(), Fixture.randString(), Fixture.randString() + Fixture.randString() + Fixture.randString());
     }
 
     public static void updateWikiPageRandomlyWithContributorId(WikiPage wikiPage, UUID contributorId) {
-        wikiPage.update(contributorId, randString(), randString() + randString() + randString());
+        wikiPage.update(contributorId, Fixture.randString(), Fixture.randString() + Fixture.randString() + Fixture.randString());
     }
 
     public static void assertEqualRawContent(RawContent actual, RawContent expected) {

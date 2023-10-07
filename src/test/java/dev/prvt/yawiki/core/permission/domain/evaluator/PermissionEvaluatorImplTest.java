@@ -1,8 +1,7 @@
 package dev.prvt.yawiki.core.permission.domain.evaluator;
 
-import dev.prvt.yawiki.core.permission.PermissionFixture;
+import dev.prvt.yawiki.fixture.PermissionFixture;
 import dev.prvt.yawiki.core.permission.domain.*;
-import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluatorImpl;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileMemoryRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionMemoryRepository;

@@ -1,8 +1,5 @@
 package dev.prvt.yawiki.auth.member.domain;
 
-import dev.prvt.yawiki.auth.member.domain.Member;
-import dev.prvt.yawiki.auth.member.domain.MemberRepository;
-import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +10,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest

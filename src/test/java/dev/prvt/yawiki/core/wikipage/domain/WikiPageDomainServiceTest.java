@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 

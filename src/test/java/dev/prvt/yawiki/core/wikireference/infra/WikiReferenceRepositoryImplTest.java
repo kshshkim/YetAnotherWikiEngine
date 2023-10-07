@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static dev.prvt.yawiki.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j

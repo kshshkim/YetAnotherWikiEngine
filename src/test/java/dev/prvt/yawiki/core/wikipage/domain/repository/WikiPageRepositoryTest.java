@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikipage.domain.repository;
 import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import javax.persistence.PersistenceUnitUtil;
 import java.util.Optional;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.*;
+import static dev.prvt.yawiki.fixture.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -43,7 +44,7 @@ class WikiPageRepositoryTest {
         WikiPage foundWikiPage = wikiPageRepository.findById(testWikiPage.getId()).orElseThrow();
 
         // then
-        assertEqualWikiPage(foundWikiPage, testWikiPage);
+        WikiPageFixture.assertEqualWikiPage(foundWikiPage, testWikiPage);
     }
 
     @Test
@@ -54,7 +55,7 @@ class WikiPageRepositoryTest {
         WikiPage foundWikiPage = wikiPageRepository.findByTitle(testWikiPage.getTitle()).orElseThrow();
 
         // then
-        assertEqualWikiPage(foundWikiPage, testWikiPage);
+        WikiPageFixture.assertEqualWikiPage(foundWikiPage, testWikiPage);
     }
 
     @Test
@@ -64,7 +65,7 @@ class WikiPageRepositoryTest {
         givenWikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
 
         WikiPage testWikiPage1 = WikiPage.create(randString());
-        updateWikiPageRandomly(testWikiPage1);  // where 문이 누락되어있었는데, ID 내림차순 기준으로 1개만 불러오는 바람에 테스트에 성공했음. 걸러낼 수 있도록 추가함.
+        WikiPageFixture.updateWikiPageRandomly(testWikiPage1);  // where 문이 누락되어있었는데, ID 내림차순 기준으로 1개만 불러오는 바람에 테스트에 성공했음. 걸러낼 수 있도록 추가함.
 
         wikiPageRepository.save(givenWikiPage);
         wikiPageRepository.save(testWikiPage1);
@@ -87,9 +88,9 @@ class WikiPageRepositoryTest {
                 .satisfies(persistenceUnitUtil::isLoaded);
 
 
-        assertEqualWikiPage(foundGet, givenWikiPage);
-        assertEqualRevision(foundGet.getCurrentRevision(), givenWikiPage.getCurrentRevision());
-        assertEqualRawContent(foundGet.getCurrentRevision().getRawContent(), givenWikiPage.getCurrentRevision().getRawContent());
+        WikiPageFixture.assertEqualWikiPage(foundGet, givenWikiPage);
+        WikiPageFixture.assertEqualRevision(foundGet.getCurrentRevision(), givenWikiPage.getCurrentRevision());
+        WikiPageFixture.assertEqualRawContent(foundGet.getCurrentRevision().getRawContent(), givenWikiPage.getCurrentRevision().getRawContent());
     }
 
     @Test
@@ -97,7 +98,7 @@ class WikiPageRepositoryTest {
         // given
         WikiPage givenWikiPage = wikiPageRepository.findById(testWikiPage.getId())
                 .orElseThrow();
-        updateWikiPageRandomly(givenWikiPage);
+        WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
         Revision givenRevision = givenWikiPage.getCurrentRevision();
         RawContent givenRawContent = givenRevision.getRawContent();
 
@@ -118,7 +119,7 @@ class WikiPageRepositoryTest {
         // given
         WikiPage givenWikiPage = wikiPageRepository.findById(testWikiPage.getId())
                 .orElseThrow();
-        updateWikiPageRandomly(givenWikiPage);
+        WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
 
         // when
         em.flush();
@@ -149,12 +150,12 @@ class WikiPageRepositoryTest {
         em.clear();
 
         WikiPage found = em.find(WikiPage.class, created.getId());
-        assertEqualWikiPage(found, created);
+        WikiPageFixture.assertEqualWikiPage(found, created);
     }
 
     @Test
     void findOrCreate_should_get() {
         WikiPage found = wikiPageRepository.findOrCreate(testWikiPage.getTitle());
-        assertEqualWikiPage(found, testWikiPage);
+        WikiPageFixture.assertEqualWikiPage(found, testWikiPage);
     }
 }

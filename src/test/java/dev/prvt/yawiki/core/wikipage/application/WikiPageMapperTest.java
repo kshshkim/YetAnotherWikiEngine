@@ -1,22 +1,20 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
-import dev.prvt.yawiki.core.contributor.domain.ContributorState;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import lombok.SneakyThrows;
+import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.*;
+import static dev.prvt.yawiki.fixture.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -41,7 +39,7 @@ class WikiPageMapperTest {
     @Test
     void mapFrom_WikiPage_existing_WikiPage() {
         WikiPage wikiPage = WikiPage.create(randString());
-        updateWikiPageRandomly(wikiPage);
+        WikiPageFixture.updateWikiPageRandomly(wikiPage);
         WikiPageDataForUpdate mapped = wikiPageMapper.mapFrom(wikiPage);
 
         assertThat(tuple(mapped.title(), mapped.content(), mapped.versionToken()))
@@ -54,7 +52,7 @@ class WikiPageMapperTest {
 
     @Test
     void mapFrom_Revision_Map_Contributor_null() {
-        Revision givenRev = aRevision().build();
+        Revision givenRev = WikiPageFixture.aRevision().build();
         Map<UUID, Contributor> contributorMap = new HashMap<>();
 
         // when
@@ -67,8 +65,8 @@ class WikiPageMapperTest {
 
     @Test
     void mapFrom_Revision_Map_Contributor_redacted() {
-        Revision givenRev = aRevision().build();
-        MemberContributor givenContributor = aMemberContributor()
+        Revision givenRev = WikiPageFixture.aRevision().build();
+        MemberContributor givenContributor = WikiPageFixture.aMemberContributor()
                 .id(givenRev.getContributorId())
                 .build();
 

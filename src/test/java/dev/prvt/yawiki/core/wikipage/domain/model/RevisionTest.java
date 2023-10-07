@@ -1,12 +1,13 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.Fixture.*;
+import static dev.prvt.yawiki.fixture.Fixture.*;
 import static org.assertj.core.api.Assertions.*;
 
 class RevisionTest {
@@ -17,7 +18,7 @@ class RevisionTest {
     void beforeEach() {
         testWikiPage = WikiPage.create(randString());
         testContributorId = UUID.randomUUID();
-        testRev = aRevision()
+        testRev = WikiPageFixture.aRevision()
                 .contributorId(testContributorId)
                 .wikiPage(testWikiPage)
                 .build();
@@ -44,7 +45,7 @@ class RevisionTest {
         Method asAfter = revClass.getDeclaredMethod("asAfter", Revision.class);
         asAfter.setAccessible(true);
 
-        Revision ex = aRevision()
+        Revision ex = WikiPageFixture.aRevision()
                 .build();
 
         // then
@@ -59,7 +60,7 @@ class RevisionTest {
         assertThat(testRev.getRevVersion()).isEqualTo(1L);
 
         // when
-        Revision newerRev = aRevision()
+        Revision newerRev = WikiPageFixture.aRevision()
                 .contributorId(testContributorId)
                 .wikiPage(testWikiPage)
                 .beforeRevision(testRev)
@@ -136,8 +137,8 @@ class RevisionTest {
 
     @Test
     void getContent_return_correct_string() {
-        RawContent givenRaw = aRawContent();
-        Revision givenRev = aRevision()
+        RawContent givenRaw = WikiPageFixture.aRawContent();
+        Revision givenRev = WikiPageFixture.aRevision()
                 .rawContent(givenRaw).build();
 
         // when
@@ -150,7 +151,7 @@ class RevisionTest {
 
     @Test
     void getContent_must_not_return_null() {
-        Revision givenRev = aRevision()
+        Revision givenRev = WikiPageFixture.aRevision()
                 .rawContent(null)
                 .build();
 
@@ -165,7 +166,7 @@ class RevisionTest {
 
     @Test
     void getContent_when_givenRev_is_not_null_but_size_is_0() {
-        Revision givenRev = aRevision()
+        Revision givenRev = WikiPageFixture.aRevision()
                 .rawContent(new RawContent(""))
                 .build();
 

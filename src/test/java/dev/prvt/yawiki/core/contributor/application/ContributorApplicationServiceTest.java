@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.Fixture.aInetV4Address;
+import static dev.prvt.yawiki.fixture.Fixture.aInetV4Address;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ContributorApplicationServiceTest {
