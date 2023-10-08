@@ -33,21 +33,19 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     private final JPAQueryFactory queryFactory;
     private final WikiReferenceJpaRepository wikiReferenceJpaRepository;
     private final JdbcTemplate jdbcTemplate;
-    private final UuidGenerator uuidGenerator;
 
 
     public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate, UuidGenerator uuidGenerator) {
         this.queryFactory = new JPAQueryFactory(em);
         this.wikiReferenceJpaRepository = wikiReferenceJpaRepository;
         this.jdbcTemplate = jdbcTemplate;
-        this.uuidGenerator = uuidGenerator;
     }
 
 
     @Override
     public Set<String> findReferredTitlesByRefererId(UUID refererId) {
         return queryFactory
-                .select(wikiReference.referredTitle).from(wikiReference)
+                .select(wikiReference.tuple.referredTitle).from(wikiReference)
                     .where(refererIdMatches(refererId))
                 .stream()
                 .collect(Collectors.toSet());
@@ -56,7 +54,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     @Override
     public Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId) {
         return queryFactory
-                .select(wikiReference.referredTitle)
+                .select(wikiReference.tuple.referredTitle)
                     .from(wikiReference)
                         .innerJoin(wikiPage)
                             .on(titleMatches(), wikiPageIsActive())
@@ -75,8 +73,8 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
                 .select(wikiPage.count())
                 .from(wikiPage)
                     .join(wikiReference)
-                    .on(wikiReference.refererId.eq(wikiPage.id))
-                .where(wikiReference.referredTitle.eq(referredTitle))
+                    .on(wikiReference.tuple.refererId.eq(wikiPage.id))
+                .where(wikiReference.tuple.referredTitle.eq(referredTitle))
                 .fetchOne();
     }
 
@@ -89,8 +87,8 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
                 .select(wikiPage.title)
                 .from(wikiPage)
                     .join(wikiReference)
-                    .on(wikiReference.refererId.eq(wikiPage.id))
-                .where(wikiReference.referredTitle.eq(wikiPageTitle))
+                    .on(wikiReference.tuple.refererId.eq(wikiPage.id))
+                .where(wikiReference.tuple.referredTitle.eq(wikiPageTitle))
                 .orderBy(wikiPage.title.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -137,21 +135,20 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     @Override
     @Transactional
     public void bulkInsert(UUID refererId, List<String> titles) {
-        String sql = "INSERT INTO wiki_reference (ref_id, referer_id, referred_title) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO wiki_reference (referer_id, referred_title) VALUES (?, ?)";
         byte[] byteRefererId = UUIDUtil.asByteArray(refererId);
         jdbcTemplate.batchUpdate(sql,
                 titles,
                 titles.size(),
                 (PreparedStatement ps, String title) -> {
-                    ps.setBytes(1, UUIDUtil.asByteArray(uuidGenerator.generate()));
-                    ps.setBytes(2, byteRefererId);
-                    ps.setString(3, title);
+                    ps.setBytes(1, byteRefererId);
+                    ps.setString(2, title);
                 }
         );
     }
 
     private BooleanExpression titleMatches() {
-        return wikiReference.referredTitle.eq(wikiPage.title);
+        return wikiReference.tuple.referredTitle.eq(wikiPage.title);
     }
 
     private BooleanExpression wikiPageIsActive() {
@@ -159,14 +156,14 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     }
 
     private BooleanExpression refererIdMatches(UUID documentId) {
-        return wikiReference.refererId.eq(documentId);
+        return wikiReference.tuple.refererId.eq(documentId);
     }
 
     private BooleanExpression titleNotIn(Collection<String> titles) {
-        return wikiReference.referredTitle.notIn(titles);
+        return wikiReference.tuple.referredTitle.notIn(titles);
     }
 
     private BooleanExpression titleIn(Collection<String> titles) {
-        return wikiReference.referredTitle.in(titles);
+        return wikiReference.tuple.referredTitle.in(titles);
     }
 }

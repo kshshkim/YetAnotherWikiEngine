@@ -1,10 +1,9 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.core.wikireference.infra;
 
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
 import com.fasterxml.uuid.impl.UUIDUtil;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
-import dev.prvt.yawiki.core.wikireference.infra.WikiReferenceJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
@@ -29,7 +28,7 @@ import static dev.prvt.yawiki.fixture.Fixture.randString;
 @Slf4j
 @Disabled
 @SpringBootTest
-public class WikiReferenceUpdaterBenchmarkTest {
+public class WikiReferenceInsertBenchmarkTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -56,16 +55,16 @@ public class WikiReferenceUpdaterBenchmarkTest {
         UUID documentId = UUID.randomUUID();
         byte[] refererId = UUIDUtil.asByteArray(documentId);
 
-        String sql = "insert into wiki_reference (ref_id, referer_id, referred_title) values (?, ?, ?)";
+        String sql = "insert into wiki_reference (referer_id, referred_title) values (?, ?)";
 
         long startTime = System.currentTimeMillis();
         jdbcTemplate.batchUpdate(sql,
                 titles,
                 titles.size(),
                 (PreparedStatement ps, String title) -> {
-                    ps.setBytes(1, UUIDUtil.asByteArray(generator.generate()));
-                    ps.setBytes(2, refererId);
-                    ps.setString(3, title);
+//                    ps.setBytes(1, UUIDUtil.asByteArray(generator.generate()));
+                    ps.setBytes(1, refererId);
+                    ps.setString(2, title);
                 }
         );
         long endTime = System.currentTimeMillis();
