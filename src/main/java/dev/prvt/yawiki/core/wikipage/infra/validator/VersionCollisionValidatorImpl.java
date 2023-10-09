@@ -10,7 +10,7 @@ public class VersionCollisionValidatorImpl implements VersionCollisionValidator 
     @Override
     public void validate(WikiPage wikiPage, String editToken) {
         if (!wikiPage.getVersionToken().equals(editToken)) {
-            throw new VersionCollisionException();
+            throw new VersionCollisionException("submitted token: " + editToken);
         }
     }
 }

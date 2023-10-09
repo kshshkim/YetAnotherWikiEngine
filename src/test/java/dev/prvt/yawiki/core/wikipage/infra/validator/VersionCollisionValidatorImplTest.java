@@ -16,9 +16,12 @@ class VersionCollisionValidatorImplTest {
     @Test
     void validate_should_fail() {
         WikiPage givenWikiPage = WikiPage.create(randString());
-        assertThatThrownBy(() -> versionCollisionValidator.validate(givenWikiPage, UUID.randomUUID().toString()))
-                .describedAs("토큰 불일치시 실패하여야하고, 지정된 예외를 반환해야함.")
-                .isInstanceOf(VersionCollisionException.class);
+        String givenToken = UUID.randomUUID().toString();
+        assertThatThrownBy(() -> versionCollisionValidator.validate(givenWikiPage, givenToken))
+                .describedAs("토큰 불일치시 실패하여야하고, 지정된 예외를 전달받은 토큰과 함께 반환해야함.")
+                .isInstanceOf(VersionCollisionException.class)
+                .hasMessage("submitted token: " + givenToken)
+        ;
     }
 
     @Test
