@@ -75,7 +75,7 @@ class AuthorityProfileTest {
 
         // when
         assertThatThrownBy(() -> given.validateAuthority(givenPermissionGroup.getId(), 4))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(PermissionEvaluationException.class)
                 .hasMessageContaining("not enough")
         ;
 

@@ -44,7 +44,7 @@ public class AuthorityProfile implements Persistable<UUID> {
                 .filter(ga -> ga.getAuthorityLevel() >= requiredAuthorityLevel)
                 .toList();
         if (grantedGroupAuthorities.isEmpty()) {
-            throw new RuntimeException("not enough authority. permissionGroupId: " + permissionGroupId + " requiredAuthorityLevel: " + requiredAuthorityLevel);
+            throw new PermissionEvaluationException("not enough authority. permissionGroupId: " + permissionGroupId + " requiredAuthorityLevel: " + requiredAuthorityLevel);
         }
     }
 
