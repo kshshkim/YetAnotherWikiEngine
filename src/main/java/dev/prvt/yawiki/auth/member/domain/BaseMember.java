@@ -18,10 +18,6 @@ public abstract class BaseMember {
     @Column(name = "disp_name", unique = true)
     private String displayedName;
 
-    @PrimaryKeyJoinColumn
-    @OneToOne(fetch = FetchType.LAZY)
-    private AuthorityProfile authorityProfile;
-
     protected BaseMember() {
     }
 

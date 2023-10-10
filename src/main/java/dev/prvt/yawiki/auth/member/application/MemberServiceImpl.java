@@ -1,6 +1,14 @@
 package dev.prvt.yawiki.auth.member.application;
 
-import dev.prvt.yawiki.auth.member.domain.*;
+import dev.prvt.yawiki.auth.jwt.application.JwtIssuer;
+import dev.prvt.yawiki.auth.jwt.domain.AuthToken;
+import dev.prvt.yawiki.auth.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.MemberRepository;
+import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
+import dev.prvt.yawiki.auth.member.dto.MemberJoinDto;
+import dev.prvt.yawiki.auth.member.dto.MemberPasswordAuthDto;
+import dev.prvt.yawiki.auth.member.dto.MemberTokenAuthDto;
+import dev.prvt.yawiki.auth.member.exception.MemberNotFoundException;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.event.MemberJoinEvent;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordHasher passwordHasher;
     private final UuidGenerator uuidGenerator;
     private final ApplicationEventPublisher publisher;
-    private final AuthenticationTokenGenerator authenticationTokenGenerator;
+    private final JwtIssuer jwtIssuer;
 
     @Override
     public Member join(MemberJoinDto memberJoinDto) {
@@ -32,10 +40,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public String authenticate(MemberAuthDto memberAuthDto) {
-        Member member = memberRepository.findByUsername(memberAuthDto.username())
+    public AuthToken authenticate(MemberPasswordAuthDto memberPasswordAuthDto) {
+        Member member = memberRepository.findByUsername(memberPasswordAuthDto.username())
                 .orElseThrow(MemberNotFoundException::new);
-        member.validatePassword(memberAuthDto.password(), passwordHasher);
-        return authenticationTokenGenerator.create(member);
+        member.validatePassword(memberPasswordAuthDto.password(), passwordHasher);
+        return jwtIssuer.issue(member.getId(), member.getUsername());
+    }
+
+    @Override
+    public AuthToken authenticate(MemberTokenAuthDto memberTokenAuthDto) {
+        return jwtIssuer.renew(memberTokenAuthDto.refreshToken(), memberTokenAuthDto.username());
     }
 }

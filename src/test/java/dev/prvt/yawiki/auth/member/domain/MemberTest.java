@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.auth.member.domain;
 
+import dev.prvt.yawiki.auth.member.exception.PasswordMismatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

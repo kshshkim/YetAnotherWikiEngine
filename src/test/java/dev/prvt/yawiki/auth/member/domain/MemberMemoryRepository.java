@@ -1,7 +1,5 @@
 package dev.prvt.yawiki.auth.member.domain;
 
-import dev.prvt.yawiki.auth.member.domain.Member;
-import dev.prvt.yawiki.auth.member.domain.MemberRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

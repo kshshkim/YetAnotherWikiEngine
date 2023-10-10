@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.auth.member.domain;
 
+import dev.prvt.yawiki.auth.member.exception.PasswordMismatchException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
