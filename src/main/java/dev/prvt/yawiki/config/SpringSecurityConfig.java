@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.springsecurity;
+package dev.prvt.yawiki.config;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;

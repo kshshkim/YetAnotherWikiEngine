@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.fixture;
 
-import dev.prvt.yawiki.config.springsecurity.JwtProperties;
+import dev.prvt.yawiki.config.jwt.JwtProperties;
 import lombok.SneakyThrows;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;

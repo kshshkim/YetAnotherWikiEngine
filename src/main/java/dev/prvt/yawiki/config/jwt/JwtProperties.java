@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.springsecurity;
+package dev.prvt.yawiki.config.jwt;
 
 import lombok.Builder;
 import lombok.Getter;

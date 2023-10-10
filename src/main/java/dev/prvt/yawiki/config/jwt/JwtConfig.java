@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.springsecurity;
+package dev.prvt.yawiki.config.jwt;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -20,6 +20,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
+/**
+ *
+ */
 @Configuration
 @EnableConfigurationProperties(JwtProperties.class)
 @RequiredArgsConstructor

@@ -2,7 +2,7 @@ package dev.prvt.yawiki.auth.jwt.infra.jpaimpl;
 
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenManager;
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenRecord;
-import dev.prvt.yawiki.config.springsecurity.JwtProperties;
+import dev.prvt.yawiki.config.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

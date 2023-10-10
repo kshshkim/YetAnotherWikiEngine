@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.auth.jwt.infra;
 
-import dev.prvt.yawiki.auth.member.domain.BaseMember;
-import dev.prvt.yawiki.config.springsecurity.JwtProperties;
+import dev.prvt.yawiki.config.jwt.JwtProperties;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

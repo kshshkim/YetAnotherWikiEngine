@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.auth.jwt.infra;
 
 import dev.prvt.yawiki.auth.jwt.domain.AccessTokenGenerator;
-import dev.prvt.yawiki.config.springsecurity.JwtProperties;
+import dev.prvt.yawiki.config.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
