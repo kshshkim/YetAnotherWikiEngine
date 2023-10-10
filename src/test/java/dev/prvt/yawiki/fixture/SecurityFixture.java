@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.fixture;
 
+import dev.prvt.yawiki.config.springsecurity.JwtProperties;
 import lombok.SneakyThrows;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -61,5 +62,13 @@ public class SecurityFixture {
 
     static public JwtAuthenticationToken aJwtAuthenticationToken() {
         return aJwtAuthenticationToken(UUID.randomUUID(), randString());
+    }
+
+    static public JwtProperties.JwtPropertiesBuilder aJwtProperties() {
+        return JwtProperties.builder()
+                .lifespan(1800)
+                .refreshTokenLifespan(180000)
+                .issuer("self")
+                .subject("yawiki");
     }
 }
