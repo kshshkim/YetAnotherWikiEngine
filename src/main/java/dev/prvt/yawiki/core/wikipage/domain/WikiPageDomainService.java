@@ -58,9 +58,9 @@ public class WikiPageDomainService {
         updateReferences(wikiPage.getId(), references);
     }
 
-    public void delete(UUID contributorId, String title, String comment) {
+    public void delete(UUID contributorId, String title, String comment, String versionToken) {
         WikiPage wikiPage = getWikiPage(title);
-        validateDelete(contributorId, wikiPage);
+        validateDelete(contributorId, versionToken, wikiPage);
         wikiPage.delete(contributorId, comment);
         deleteReferences(wikiPage);
     }
@@ -96,7 +96,8 @@ public class WikiPageDomainService {
         wikiReferenceUpdater.deleteReferences(wikiPage.getId());
     }
 
-    private void validateDelete(UUID contributorId, WikiPage wikiPage) {
+    private void validateDelete(UUID contributorId, String versionToken, WikiPage wikiPage) {
+        versionCollisionValidator.validate(wikiPage, versionToken);
         wikiPageCommandPermissionValidator.validateDelete(contributorId, wikiPage);
     }
 

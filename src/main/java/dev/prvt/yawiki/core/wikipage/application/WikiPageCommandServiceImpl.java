@@ -65,8 +65,8 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
 
     @Override
     @Transactional
-    public void delete(UUID contributorId, String title, String comment) {
-        wikiPageDomainService.delete(contributorId, title, comment);
+    public void delete(UUID contributorId, String title, String comment, String versionToken) {
+        wikiPageDomainService.delete(contributorId, title, comment, versionToken);
     }
 
 

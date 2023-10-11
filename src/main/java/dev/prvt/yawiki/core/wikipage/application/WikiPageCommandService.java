@@ -11,10 +11,10 @@ public interface WikiPageCommandService {
      * @param contributorId 편집자 ID
      * @param title 문서 제목
      * @param comment 편집 코멘트
-     * @param editToken 편집 충돌 방지용 토큰
+     * @param versionToken 편집 충돌 방지용 토큰
      * @param content 본문
      */
-    void commitUpdate(UUID contributorId, String title, String comment, String editToken, String content);
+    void commitUpdate(UUID contributorId, String title, String comment, String versionToken, String content);
 
     /**
      * <p>편집을 시작하기 위해서 사용됨. DTO 형태로 반환하는 것을 고려할것.</p>
@@ -28,5 +28,5 @@ public interface WikiPageCommandService {
 
     void create(UUID contributorId, String title);
 
-    void delete(UUID contributorId, String title, String comment);
+    void delete(UUID contributorId, String title, String comment, String versionToken);
 }

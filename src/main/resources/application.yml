@@ -2,10 +2,10 @@ spring:
   datasource:
     # datasource configuration example.
     # It may also work with RDBMSs other than MySQL, but not tested.
-#    url: jdbc:mysql://localhost:3306/wiki_dev  #?rewriteBatchedStatements=true
-#    username: root
-#    password: test1234
-#    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wiki_dev  #?rewriteBatchedStatements=true
+    username: root
+    password: test1234
+    driverClassName: com.mysql.cj.jdbc.Driver
     hikari:
       data-source-properties:
         rewriteBatchedStatements: true  # highly recommended due to performance reasons
@@ -34,6 +34,12 @@ yawiki:
     update: 0
     delete: 0
     manage: 3
+  jwt:
+    lifespan: 1800
+#  cors:
+#    allowed-origins: *
+#    allowed-methods: *
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

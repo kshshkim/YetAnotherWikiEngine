@@ -240,15 +240,21 @@ class WikiPageDomainServiceTest {
     }
 
     @Test
-    void delete_should_fail_if_validate_fails() {
-        assertThatThrownBy(() -> wikiPageDomainService.delete(DELETE_PERMISSION_EXCEPTION_TRIGGER, givenTitle, givenComment))
+    void delete_should_fail_if_permission_validate_fails() {
+        assertThatThrownBy(() -> wikiPageDomainService.delete(DELETE_PERMISSION_EXCEPTION_TRIGGER, givenTitle, givenComment, givenVersionToken))
                 .hasMessageContaining(DELETE_PERMISSION_MESSAGE);
+    }
+
+    @Test
+    void delete_should_fail_if_version_validate_fails() {
+        assertThatThrownBy(() -> wikiPageDomainService.delete(givenActorId, givenTitle, givenComment, COLLISION_FAIL_TRIGGER))
+                .hasMessageContaining(COLLISION_VALIDATION_FAIL_MESSAGE);
     }
 
     @Test
     void delete_should_success_test() {
         // when
-        wikiPageDomainService.delete(givenActorId, givenTitle, givenComment);
+        wikiPageDomainService.delete(givenActorId, givenTitle, givenComment, givenVersionToken);
 
         // then
         assertThat(permissionValidatorCalled_delete)

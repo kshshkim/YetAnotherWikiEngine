@@ -105,7 +105,7 @@ class WikiPageCommandServiceImplTest {
         }
 
         @Override
-        public void delete(UUID contributorId, String title, String comment) {
+        public void delete(UUID contributorId, String title, String comment, String versionToken) {
             called_WikiPageDomainService_delete = true;
         }
 
@@ -224,7 +224,7 @@ class WikiPageCommandServiceImplTest {
 
     @Test
     void delete_should_success() {
-        wikiPageCommandServiceImpl.delete(givenContributorId, givenTitle, givenComment);
+        wikiPageCommandServiceImpl.delete(givenContributorId, givenTitle, givenComment, givenVersionToken);
         assertThat(called_WikiPageDomainService_delete).isTrue();
     }
 
