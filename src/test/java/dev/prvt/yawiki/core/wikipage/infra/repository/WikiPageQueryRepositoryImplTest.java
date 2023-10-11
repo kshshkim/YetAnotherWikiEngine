@@ -13,8 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnitUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
@@ -74,5 +77,25 @@ class WikiPageQueryRepositoryImplTest {
         assertThat(content.stream().map(Revision::getRevVersion))
                 .describedAs("내림차순으로 모두 찾아옴.")
                 .containsAll(givenRevisions.stream().map(Revision::getRevVersion).toList());
+    }
+
+    @Test
+    @Transactional
+    void findRevisionByTitleAndVersion() {
+        Random random = new Random();
+        int givenVersion = random.nextInt(1, TOTAL_REFS);
+        Optional<Revision> revisionByTitleAndVersion = wikiPageQueryRepository.findRevisionByTitleAndVersionWithRawContent(givenWikiPage.getTitle(), givenVersion);
+
+        assertThat(revisionByTitleAndVersion).isPresent();
+        Revision revision = revisionByTitleAndVersion.orElseThrow();
+        assertThat(revision.getRevVersion())
+                .isNotNull()
+                .isEqualTo(givenVersion);
+        assertThat(revision.getRawContent())
+                .isNotNull();
+        PersistenceUnitUtil persistenceUnitUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
+        assertThat(persistenceUnitUtil.isLoaded(revision.getRawContent()))
+                .describedAs("한 번의 쿼리로 raw content 까지 가져와야함.")
+                .isTrue();
     }
 }

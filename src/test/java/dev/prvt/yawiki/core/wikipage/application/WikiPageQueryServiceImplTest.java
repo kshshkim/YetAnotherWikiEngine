@@ -11,10 +11,9 @@ import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageQueryRepository;
+import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.infra.repository.WikiPageMemoryRepository;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,11 +34,7 @@ class WikiPageQueryServiceImplTest {
     boolean repositoryBackRefCalled;
     int REVISION_TOTAL_ELEMENTS = 100;
     WikiPageRepository wikiPageRepository = new WikiPageMemoryRepository();
-    WikiReferenceRepository wikiReferenceRepository = new WikiReferenceRepository() {
-        @Override
-        public Set<String> findReferredTitlesByRefererId(UUID refererId) {
-            return null;
-        }
+    WikiPageReferenceRepository wikiReferenceRepository = new WikiPageReferenceRepository() {
 
         @Override
         public Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId) {
@@ -51,31 +46,18 @@ class WikiPageQueryServiceImplTest {
             repositoryBackRefCalled = true;
             return new PageImpl<>(givenWikiReferences, pageable, 100);
         }
-
-        @Override
-        public long delete(UUID refererId, Collection<String> titlesToDelete) {
-            return 0;
-        }
-
-        @Override
-        public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
-            return 0;
-        }
-
-        @Override
-        public Iterable<WikiReference> saveAll(Iterable<WikiReference> entities) {
-            return null;
-        }
-
-        @Override
-        public void bulkInsert(UUID refererId, List<String> titles) {
-
-        }
     };
     WikiPageQueryRepository wikiPageQueryRepository = new WikiPageQueryRepository() {
         @Override
         public Page<Revision> findRevisionsByTitle(String title, Pageable pageable) {
             return new PageImpl<>(givenRevisions, pageable, REVISION_TOTAL_ELEMENTS);
+        }
+
+        @Override
+        public Optional<Revision> findRevisionByTitleAndVersionWithRawContent(String title, int version) {
+            return givenRevisions.stream()
+                    .filter(rv -> rv.getRevVersion().equals(version))
+                    .findFirst();
         }
     };
     ContributorRepository contributorRepository = new ContributorRepository() {
@@ -210,5 +192,31 @@ class WikiPageQueryServiceImplTest {
         assertThat(distinctCheckExecuted)
                 .describedAs("distinct 체크가 실행되었음.")
                 .isTrue();
+    }
+
+    @Test
+    void getRevisionTest() {
+        Random random = new Random();
+        int givenVersion = random.nextInt(1, TOTAL_REVS - 1);
+        Revision givenRevision = givenRevisions.stream()
+                .filter(rv -> rv.getRevVersion().equals(givenVersion))
+                .findFirst()
+                .orElseThrow();
+        WikiPageDataForRead revisionData = wikiPageQueryService.getWikiPage(givenWikiPageTitle, givenVersion);
+
+        assertThat(revisionData)
+                .isNotNull()
+                .isEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenRevision.getContent(), null))
+                .isNotEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenWikiPage.getContent(), null))
+        ;
+
+    }
+
+    @Test
+    void getRevision_not_found() {
+        assertThatThrownBy(() -> wikiPageQueryService.getWikiPage(givenWikiPageTitle, TOTAL_REVS + 1))
+                .isInstanceOf(NoSuchWikiPageException.class)
+        ;
+
     }
 }

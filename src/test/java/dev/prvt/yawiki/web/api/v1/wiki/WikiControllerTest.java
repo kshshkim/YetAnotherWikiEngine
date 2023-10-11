@@ -241,6 +241,26 @@ class WikiControllerTest {
                 .isEqualTo(tuple(givenTitle, givenContent));
     }
 
+    @Test
+    @SneakyThrows
+    void getWikiPage_with_revVersion() {
+        // given
+        int givenVersion = 22;
+        given(wikiPageQueryService.getWikiPage(givenTitle, 22))
+                .willReturn(new WikiPageDataForRead(givenTitle, givenContent, new ArrayList<>()));
+
+        // when then
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "?rev=" + givenVersion))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        WikiPageDataForRead response = objectMapper.readValue(contentAsString, WikiPageDataForRead.class);
+
+        assertThat(tuple(response.title(), response.content()))
+                .isEqualTo(tuple(givenTitle, givenContent));
+    }
+
     @SneakyThrows
     @Test
     void getWikiHistory_not_found() {

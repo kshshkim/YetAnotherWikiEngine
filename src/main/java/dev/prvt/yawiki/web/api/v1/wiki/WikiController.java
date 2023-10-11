@@ -23,8 +23,12 @@ public class WikiController {
     private final WikiPageQueryService wikiPageQueryService;
 
     @GetMapping("/{title}")
-    public WikiPageDataForRead getWikiPage(@PathVariable String title) {
-        return wikiPageQueryService.getWikiPage(title);
+    public WikiPageDataForRead getWikiPage(
+            @PathVariable String title,
+            @RequestParam(required = false) Integer rev
+    ) {
+        return rev == null ? wikiPageQueryService.getWikiPage(title):
+                wikiPageQueryService.getWikiPage(title, rev);
     }
 
     @GetMapping("/{title}/history")

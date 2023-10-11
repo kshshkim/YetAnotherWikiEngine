@@ -14,6 +14,8 @@ public interface WikiPageQueryService {
      */
     WikiPageDataForRead getWikiPage(String title);
 
+    WikiPageDataForRead getWikiPage(String title, int version);
+
     /**
      * title 을 참조하고 있는 문서들의 title 목록. title 기준으로 오름차순 정렬된 값을 반환함.
      * @param title 참조되고 있는 문서 제목

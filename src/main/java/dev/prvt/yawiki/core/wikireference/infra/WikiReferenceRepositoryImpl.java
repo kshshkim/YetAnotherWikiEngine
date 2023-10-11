@@ -4,6 +4,7 @@ import com.fasterxml.uuid.impl.UUIDUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ import static dev.prvt.yawiki.core.wikireference.domain.QWikiReference.wikiRefer
 @Repository
 @Slf4j
 @Transactional(readOnly = true)
-public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
+public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, WikiPageReferenceRepository {
     private final JPAQueryFactory queryFactory;
     private final WikiReferenceJpaRepository wikiReferenceJpaRepository;
     private final JdbcTemplate jdbcTemplate;

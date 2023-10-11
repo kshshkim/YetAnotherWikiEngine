@@ -8,8 +8,8 @@ import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageQueryRepository;
+import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
-import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +29,7 @@ public class WikiPageQueryServiceImpl implements WikiPageQueryService {
 
     private final WikiPageRepository wikiPageRepository;
     private final WikiPageQueryRepository wikiPageQueryRepository;
-    private final WikiReferenceRepository wikiReferenceRepository;
+    private final WikiPageReferenceRepository wikiReferenceRepository;
     private final ContributorRepository contributorRepository;
     private final WikiPageMapper wikiPageMapper;
 
@@ -39,6 +39,16 @@ public class WikiPageQueryServiceImpl implements WikiPageQueryService {
                 .orElseThrow(NoSuchWikiPageException::new);
         Set<String> validWikiReferences = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(found.getId());
         return new WikiPageDataForRead(title, found.getContent(), validWikiReferences);
+    }
+
+    /**
+     * 과거 버전에 대해서는 위키 레퍼런스 관련 정보를 제공하지 않음.
+     */
+    @Override
+    public WikiPageDataForRead getWikiPage(String title, int version) {
+        Revision found = wikiPageQueryRepository.findRevisionByTitleAndVersionWithRawContent(title, version)
+                .orElseThrow(NoSuchWikiPageException::new);
+        return new WikiPageDataForRead(title, found.getContent(), null);
     }
 
     @Override

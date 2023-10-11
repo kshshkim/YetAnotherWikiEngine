@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 import static dev.prvt.yawiki.core.wikipage.domain.model.QRevision.revision;
 import static dev.prvt.yawiki.core.wikipage.domain.model.QWikiPage.wikiPage;
@@ -59,5 +60,15 @@ public class WikiPageQueryRepositoryImpl implements WikiPageQueryRepository {
                 .fetch();
 
         return PageableExecutionUtils.getPage(content, pageable, () -> findRevisionsByTitleCount(title));
+    }
+
+    @Override
+    public Optional<Revision> findRevisionByTitleAndVersionWithRawContent(String title, int version) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(revision)
+                .join(wikiPage).on(revision.wikiPage.eq(wikiPage))
+                        .join(revision.rawContent).fetchJoin()
+                .where(wikiPage.title.eq(title), revision.revVersion.eq(version))
+                .fetchOne());
     }
 }
