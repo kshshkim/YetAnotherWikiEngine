@@ -141,6 +141,7 @@ class WikiControllerTest {
                 auth.anyRequest().permitAll();
             };
         }
+
         @Bean
         public KeyPair keyPair() throws NoSuchAlgorithmException {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -182,6 +183,7 @@ class WikiControllerTest {
     UUID givenContributorId;
     String givenVersionToken;
     String givenMessage;
+    String givenComment;
 
 
     @MockBean
@@ -195,6 +197,7 @@ class WikiControllerTest {
         givenContributorId = UUID.randomUUID();
         givenVersionToken = UUID.randomUUID().toString();
         givenMessage = randString();
+        givenComment = randString();
         given(contributorInfoArgumentResolver.supportsParameter(any())).willReturn(true);
         given(contributorInfoArgumentResolver.resolveArgument(any(), any(), any(), any())).willReturn(new ContributorInfoArg(givenContributorId));
     }
@@ -296,7 +299,6 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void proclaimEdit_permission_evaluation_exception() {
-        givenMessage = randString();
         given(wikiPageCommandService.proclaimUpdate(givenContributorId, givenTitle))
                 .willThrow(new PermissionEvaluationException(givenMessage));
 
@@ -315,16 +317,14 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void commitEdit_version_collision_exception() {
-        String givenComment = randString();
-        givenMessage = randString();
         doThrow(new VersionCollisionException(givenMessage)).when(wikiPageCommandService).commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent);
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when
         MvcResult mvcResult = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
-                            .content(body)
-                            .contentType(MediaType.APPLICATION_JSON)
+                        MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
+                                .content(body)
+                                .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -334,20 +334,19 @@ class WikiControllerTest {
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
                 .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
     }
+
     @SneakyThrows
     @Test
     @WithAnonymousUser
     void commitEdit_permission_exception() {
-        String givenComment = randString();
-        givenMessage = randString();
         doThrow(new PermissionEvaluationException(givenMessage)).when(wikiPageCommandService).commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent);
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when
         MvcResult mvcResult = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
-                            .content(body)
-                            .contentType(MediaType.APPLICATION_JSON)
+                        MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
+                                .content(body)
+                                .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -356,5 +355,49 @@ class WikiControllerTest {
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
                 .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithAnonymousUser
+    void delete_permission_exception() {
+        doThrow(new PermissionEvaluationException(givenMessage)).when(wikiPageCommandService).delete(givenContributorId, givenTitle, givenComment, givenVersionToken);
+        String body = objectMapper.writeValueAsString(new WikiController.DeleteRequest(givenComment, givenVersionToken));
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/wiki/" + givenTitle + "/edit")
+                                .content(body)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
+        assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
+                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithAnonymousUser
+    void delete_version_collision_exception() {
+        doThrow(new VersionCollisionException(givenMessage)).when(wikiPageCommandService).delete(givenContributorId, givenTitle, givenComment, givenVersionToken);
+        String body = objectMapper.writeValueAsString(new WikiController.DeleteRequest(givenComment, givenVersionToken));
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(
+                        MockMvcRequestBuilders.delete("/api/v1/wiki/" + givenTitle + "/edit")
+                                .content(body)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
+        assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
+                .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
     }
 }

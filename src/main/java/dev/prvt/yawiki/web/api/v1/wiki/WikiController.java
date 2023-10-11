@@ -66,4 +66,20 @@ public class WikiController {
         wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), title, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
         return wikiPageQueryService.getWikiPage(title);
     }
+
+    public record DeleteRequest(
+            String comment,
+            String versionToken
+    ) {
+    }
+
+
+    @DeleteMapping("/{title}/edit")
+    public void delete(
+            @PathVariable String title,
+            @ContributorInfo ContributorInfoArg contributorInfo,
+            @RequestBody DeleteRequest deleteRequest
+    ) {
+        wikiPageCommandService.delete(contributorInfo.contributorId(), title, deleteRequest.comment(), deleteRequest.versionToken());
+    }
 }
