@@ -33,7 +33,6 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
                         columnList = "contributor_id"
                 )
         }
-
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Revision {
@@ -48,9 +47,17 @@ public class Revision {
 
     @Column(name = "rev_version", nullable = false, updatable = false)
     private Integer revVersion;  // JPA 낙관적 락의 버전이 아님.
-
+    /**
+     * <p>참조무결성 제약조건이 설정되는 경우, MySQL 등 일부 DBMS에서 트랜잭션 시점 충돌 발생시 예상치 못한 데드락이 감지됨.</p>
+     * <ol>
+     *     <li>Revision 엔티티가 삽입될 때, 참조 무결성 제약조건으로 인해서 WikiPage에 복수의 공유 락이 걸림.</li>
+     *     <li>복수의 트랜잭션이 모두 WikiPage에 공유락을 건 상태로, WikiPage에 대한 배타락을 확보하기 위해 대기함.(update시 배타락 필요)</li>
+     *     <li>전형적인 순환대기 상황이 형성되어 데드락이 발생함. (공유락이 걸린 대상에는 배타락을 걸 수 없음)</li>
+     * </ol>
+     * <p>보통은 바로 데드락 상황이 감지되어 DBMS에서 이를 잘 처리하지만, 데드락이 발생하는 상황 자체가 이상적이지 않기 때문에 참조무결성 제약조건을 없애는 것을 권장함.</p>
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id", nullable = false, updatable = false)
+    @JoinColumn(name = "page_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private WikiPage wikiPage;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)  // 마찬가지로 수정될 일이 거의 없음.
