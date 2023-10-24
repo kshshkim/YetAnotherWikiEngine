@@ -1,38 +1,63 @@
 package dev.prvt.yawiki.core.permission.domain;
 
-
-import org.junit.jupiter.api.BeforeEach;
+import dev.prvt.yawiki.fixture.PermissionFixture;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 import static dev.prvt.yawiki.core.permission.domain.ActionType.*;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PermissionTest {
-    private Permission givenPermission;
+    static Random random = new Random();
+    static PermissionLevel[] permissionLevels = PermissionLevel.values();
 
-    @BeforeEach
-    void init() {
-        givenPermission = Permission.builder()
-                .create(0)
-                .read(1)
-                .update(2)
-                .delete(3)
-                .manage(4)
+
+    PermissionLevel randomPermissionLevel() {
+        return permissionLevels[random.nextInt(0, permissionLevels.length)];
+    }
+
+    /**
+     * 무작위 레벨 설정, 모든 ActionType 에 대해서 바른 값을 찾는지 확인
+     */
+    @RepeatedTest(value = 10)
+    void getPermissionLevel() {
+        Map<ActionType, PermissionLevel> givenPermissions = new HashMap<>();
+        for (ActionType value : values()) {
+            givenPermissions.put(value, randomPermissionLevel());
+        }
+
+        Permission givenPermission = Permission.builder()
+                .create(givenPermissions.get(CREATE))
+                .editRequest(givenPermissions.get(EDIT_REQUEST))
+                .editCommit(givenPermissions.get(EDIT_COMMIT))
+                .rename(givenPermissions.get(RENAME))
+                .delete(givenPermissions.get(DELETE))
+                .discussionParticipate(givenPermissions.get(DISCUSSION_PARTICIPATE))
+                .discussionCreate(givenPermissions.get(DISCUSSION_CREATE))
+                .description(randString())
                 .build();
+
+        for (ActionType actionType : values()) {
+            assertThat(givenPermission.getPermissionLevel(actionType))
+                    .describedAs("getPermissionLevel("+actionType+") failed.")
+                    .isEqualTo(givenPermissions.get(actionType));
+        }
     }
 
     @Test
-    void getRequiredLevel() {
-        assertThat(
-                tuple(
-                        givenPermission.getRequiredLevel(CREATE),
-                        givenPermission.getRequiredLevel(READ),
-                        givenPermission.getRequiredLevel(UPDATE),
-                        givenPermission.getRequiredLevel(DELETE),
-                        givenPermission.getRequiredLevel(MANAGE)))
-                .isEqualTo(
-                        tuple(0, 1, 2, 3, 4)
-                );
+    void creation_description_cannot_be_null() {
+        assertThatThrownBy(() -> PermissionFixture.aPermission()
+                .description(null)
+                .build())
+                .hasMessageContaining("description")
+                .describedAs("cannot be null")
+        ;
     }
 }

@@ -1,24 +1,34 @@
 package dev.prvt.yawiki.fixture;
 
+import dev.prvt.yawiki.core.permission.domain.GrantedPermission;
+import dev.prvt.yawiki.core.permission.domain.NamespacePermission;
 import dev.prvt.yawiki.core.permission.domain.Permission;
-import dev.prvt.yawiki.core.permission.domain.ResourcePermission;
 
-import java.util.UUID;
+import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 
 public class PermissionFixture {
-    public static Permission.PermissionBuilder aPermission() {
-        return Permission.builder()
-                .id(UUID.randomUUID())
-                .create(0)
-                .read(1)
-                .update(2)
-                .delete(3)
-                .manage(4);
+    static public GrantedPermission.GrantedPermissionBuilder aGrantedPermission() {
+        return GrantedPermission.builder()
+                .comment(randString());
     }
 
-    public static ResourcePermission.ResourcePermissionBuilder aResourcePermission() {
-        return ResourcePermission.builder()
-                .id(UUID.randomUUID());
+    static public Permission.PermissionBuilder aPermission() {
+        return Permission.builder()
+                .create(EVERYONE)
+                .editRequest(EVERYONE)
+                .editCommit(EVERYONE)
+                .rename(EVERYONE)
+                .delete(EVERYONE)
+                .discussionParticipate(EVERYONE)
+                .discussionCreate(EVERYONE)
+                .description(randString())
+                ;
+    }
 
+    static public NamespacePermission.NamespacePermissionBuilder aNamespacePermission() {
+        return NamespacePermission.builder()
+                .downwardOverridable(true)
+                .upwardOverridable(true);
     }
 }

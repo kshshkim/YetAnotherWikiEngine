@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionData;
+import dev.prvt.yawiki.core.permission.domain.Permission;
 
 import java.util.UUID;
 
@@ -23,5 +23,5 @@ public interface ResourcePermissionService {
      * @param resourceId
      * @param permissionData
      */
-    void updateResourcePermission(UUID resourceId, UUID permissionGroupId, PermissionData permissionData);
+    void updateResourcePermission(UUID resourceId, UUID permissionGroupId, Permission permissionData);
 }
