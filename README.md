@@ -334,7 +334,7 @@
 </details>
 
 <details>
-<summary>위키 문서 간의 참조 정보 저장시 성능 문제 - 펼치기</summary>
+<summary>위키 문서 간 참조 정보 저장시 성능 문제 - 펼치기</summary>
   
 - 배경
     - RDBMS를 활용하여 참조 정보를 저장함. (역링크 등에 활용)
