@@ -2,6 +2,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import lombok.Builder;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ public class WikiPageCommandServiceEditCollisionTest {
     @BeforeEach
     void init() {
         givenTitle = randString();
-        wikiPageCommandService.create(UUID.randomUUID(), givenTitle);
+        wikiPageCommandService.create(UUID.randomUUID(), givenTitle, Namespace.NORMAL);
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), givenTitle);
         wikiPageCommandService.commitUpdate(UUID.randomUUID(), givenTitle, randString(), wikiPageDataForUpdate.versionToken(), randString());
     }

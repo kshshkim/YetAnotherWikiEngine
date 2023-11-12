@@ -5,6 +5,7 @@ import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.UpdatePermissionException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
@@ -266,7 +267,7 @@ class WikiPageDomainServiceTest {
     @Test
     void create_should_publish_event() {
         // when
-        WikiPage wikiPage = wikiPageDomainService.create(randString());
+        WikiPage wikiPage = wikiPageDomainService.create(randString(), Namespace.NORMAL);
         // then
         List<WikiPageCreatedEvent> events = publishedEvents.stream().filter(ev -> ev instanceof WikiPageCreatedEvent)
                 .map(ev -> (WikiPageCreatedEvent) ev)
@@ -284,7 +285,7 @@ class WikiPageDomainServiceTest {
     void create_should_create_when_does_not_exist() {
         String notExists = randomUUID().toString();
 
-        WikiPage wikiPage = wikiPageDomainService.create(notExists);
+        WikiPage wikiPage = wikiPageDomainService.create(notExists, Namespace.NORMAL);
 
         assertThat(wikiPage)
                 .describedAs("WikiPage 가 생성되어야함.")
@@ -305,6 +306,6 @@ class WikiPageDomainServiceTest {
 
     @Test
     void create_should_fail_on_duplicate_title() {
-        assertThatThrownBy(() -> wikiPageDomainService.create(givenTitle));
+        assertThatThrownBy(() -> wikiPageDomainService.create(givenTitle, Namespace.NORMAL));
     }
 }

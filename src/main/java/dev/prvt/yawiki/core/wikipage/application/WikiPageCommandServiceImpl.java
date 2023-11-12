@@ -2,6 +2,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,8 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
 
     @Override
     @Transactional
-    public void create(UUID contributorId, String title) {
-        wikiPageDomainService.create(title);
+    public void create(UUID contributorId, String title, Namespace namespace) {
+        wikiPageDomainService.create(title, namespace);
     }
 
     @Override

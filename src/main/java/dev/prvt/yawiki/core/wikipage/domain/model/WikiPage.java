@@ -84,6 +84,12 @@ public class WikiPage {
     private String title;
 
     /**
+     * 네임스페이스
+     * @see Namespace
+     */
+    private Namespace namespace;
+
+    /**
      * 문서를 삭제하거나, 처음 생성되어 내용이 없는 경우 false
      */
     @Column(name = "is_active")
@@ -173,15 +179,30 @@ public class WikiPage {
                 .build();
     }
 
-    private WikiPage(String title, boolean isActive, Revision currentRevision) {
+    private WikiPage(String title, Namespace namespace) {
         this.title = title;
-        this.isActive = isActive;
-        this.currentRevision = currentRevision;
+        this.namespace = namespace;
+        this.isActive = false;
+        this.currentRevision = null;
     }
 
-    public static WikiPage create(String title) {
-        WikiPage created = new WikiPage(title, false, null);
+    /**
+     * @param title 네임스페이스 구분자가 포함되지 않은 문서 제목. (ex. '틀: 아무개' -> '아무개')
+     * @param namespace 네임스페이스 enum
+     * @return isActive가 false이고 currentRevision이 null인 새 문서.
+     */
+    public static WikiPage create(String title, Namespace namespace) {
+        WikiPage created = new WikiPage(title, namespace);
         created.updateVersionToken();
         return created;
+    }
+
+    /**
+     * @param title 네임스페이스 구분자가 포함되지 않은 제목.
+     * @return 네임스페이스가 Normal로 설정된 WikiPage 인스턴스.
+     * @deprecated 되도록 네임스페이스까지 파라미터로 받는 메서드를 사용할것.
+     */
+    public static WikiPage create(String title) {
+        return create(title, Namespace.NORMAL);
     }
 }

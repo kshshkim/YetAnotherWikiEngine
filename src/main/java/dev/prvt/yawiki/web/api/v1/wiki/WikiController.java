@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotBlank;
+
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/wiki/*")
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class WikiController {
     private final WikiPageCommandService wikiPageCommandService;
     private final WikiPageQueryService wikiPageQueryService;
+    private final NamespaceParser namespaceParser;
 
     @GetMapping("/{title}")
     public WikiPageDataForRead getWikiPage(
@@ -42,13 +45,17 @@ public class WikiController {
 
     @GetMapping("/{title}/edit")
     public WikiPageDataForUpdate proclaimEdit(
-            @PathVariable String title,
+            @PathVariable @NotBlank String title,
             @ContributorInfo ContributorInfoArg contributorInfo
     ) {
         try {
             return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
         } catch (NoSuchWikiPageException e) {
-            wikiPageCommandService.create(contributorInfo.contributorId(), title);
+            wikiPageCommandService.create(
+                    contributorInfo.contributorId(),
+                    title,
+                    namespaceParser.parseTitle(title)
+            );
             return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
         }
     }
@@ -63,7 +70,7 @@ public class WikiController {
 
     @PutMapping("/{title}/edit")
     public WikiPageDataForRead commitEdit(
-            @PathVariable String title,
+            @PathVariable @NotBlank String title,
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody CommitEditRequest commitEditRequest
     ) {
@@ -80,7 +87,7 @@ public class WikiController {
 
     @DeleteMapping("/{title}/edit")
     public void delete(
-            @PathVariable String title,
+            @PathVariable @NotBlank String title,
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody DeleteRequest deleteRequest
     ) {

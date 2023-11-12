@@ -94,6 +94,9 @@ class WikiControllerTest {
     @MockBean
     private JwtAuthenticationTokenContributorInfoConverter jwtAuthenticationTokenContributorInfoConverter;
 
+    @MockBean
+    private NamespaceParser namespaceParser;
+
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     // security

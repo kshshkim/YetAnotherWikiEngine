@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public interface WikiPageCommandService {
      */
     WikiPageDataForUpdate proclaimUpdate(UUID contributorId, String title);
 
-    void create(UUID contributorId, String title);
+    void create(UUID contributorId, String title, Namespace namespace);
 
     void delete(UUID contributorId, String title, String comment, String versionToken);
 }

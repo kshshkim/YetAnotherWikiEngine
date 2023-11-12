@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,10 +111,10 @@ class WikiPageCommandServiceImplTest {
         }
 
         @Override
-        public WikiPage create(String title) {
+        public WikiPage create(String title, Namespace namespace) {
             called_WikiPageDomainService_create = true;
             createdTitle = title;
-            return WikiPage.create(title);
+            return WikiPage.create(title, namespace);
         }
     }
 
@@ -164,7 +165,12 @@ class WikiPageCommandServiceImplTest {
         givenVersionToken = UUID.randomUUID().toString();
 
         // wikiPageCommandService 재생성
-        wikiPageCommandServiceImpl = new WikiPageCommandServiceImpl(new DummyReferenceTitleExtractor(), new TestWikiPageDomainService(), platformTransactionManager, new WikiPageMapper());
+        wikiPageCommandServiceImpl = new WikiPageCommandServiceImpl(
+                new DummyReferenceTitleExtractor(),
+                new TestWikiPageDomainService(),
+                platformTransactionManager,
+                new WikiPageMapper()
+        );
 
         // 참조하고 있는 클래스들의 호출이 적절하게 일어났는지 여부
         called_ReferencedTitleExtractor_extractReferencedTitles = false;
@@ -230,7 +236,7 @@ class WikiPageCommandServiceImplTest {
 
     @Test
     void create_call_and_title_check() {
-        wikiPageCommandServiceImpl.create(givenContributorId, givenTitle);
+        wikiPageCommandServiceImpl.create(givenContributorId, givenTitle, Namespace.MAIN);
 
         assertThat(called_WikiPageDomainService_create).isTrue();
         assertThat(createdTitle)

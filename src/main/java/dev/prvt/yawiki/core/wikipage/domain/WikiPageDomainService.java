@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikipage.domain;
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
@@ -78,8 +79,8 @@ public class WikiPageDomainService {
      * @param title 생성할 문서 제목
      * @return 생성된 WikiPage
      */
-    public WikiPage create(String title) {
-        WikiPage created = wikiPageRepository.save(WikiPage.create(title));
+    public WikiPage create(String title, Namespace namespace) {
+        WikiPage created = wikiPageRepository.save(WikiPage.create(title, namespace));
         applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getTitle()));
         return created;
     }
