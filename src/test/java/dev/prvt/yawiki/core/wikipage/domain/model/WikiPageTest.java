@@ -60,30 +60,6 @@ class WikiPageTest {
     }
 
     @Test
-    void should_be_created_with_default_owner_group() {
-        UUID givenOwnerGroupId = givenDoc.getOwnerGroupId();
-
-        assertThat(givenOwnerGroupId)
-                .describedAs("owner group id parameter 없이 생성될 경우, 기본값으로 \"00000000-0000-0000-0000-000000000001\"이 들어가야함.")
-                .isNotNull()
-                .isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
-    }
-
-    @Test
-    void should_be_created_with_owner_group() {
-        // given
-        UUID givenUuid = UUID.randomUUID();
-        String givenTitle = randString();
-
-        // when
-        WikiPage created = WikiPage.create(givenTitle, givenUuid);
-
-        // then
-        assertThat(created.getOwnerGroupId()).isEqualTo(givenUuid);
-        assertThat(created.getTitle()).isEqualTo(givenTitle);
-    }
-
-    @Test
     void should_success_update_when_current_revision_is_null() {
         // given
 

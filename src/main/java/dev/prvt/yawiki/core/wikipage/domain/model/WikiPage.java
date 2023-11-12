@@ -53,16 +53,11 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class WikiPage {
-    static private final UUID DEFAULT_GROUP_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-
     @Id
     @GeneratedValue(generator = "uuid-v7")
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
     @Column(name = "page_id", columnDefinition = "BINARY(16)")
     private UUID id;
-
-    @Column(name = "owner_group_id", columnDefinition = "BINARY(16)")
-    private UUID ownerGroupId;
 
     /**
      * <p>JPA 에서 관리하는 낙관락에 사용되는 필드</p>
@@ -178,19 +173,14 @@ public class WikiPage {
                 .build();
     }
 
-    private WikiPage(String title, UUID ownerGroupId, boolean isActive, Revision currentRevision) {
+    private WikiPage(String title, boolean isActive, Revision currentRevision) {
         this.title = title;
-        this.ownerGroupId = ownerGroupId;
         this.isActive = isActive;
         this.currentRevision = currentRevision;
     }
 
     public static WikiPage create(String title) {
-        return WikiPage.create(title, DEFAULT_GROUP_ID);
-    }
-
-    public static WikiPage create(String title, UUID ownerGroupId) {
-        WikiPage created = new WikiPage(title, ownerGroupId, false, null);
+        WikiPage created = new WikiPage(title, false, null);
         created.updateVersionToken();
         return created;
     }
