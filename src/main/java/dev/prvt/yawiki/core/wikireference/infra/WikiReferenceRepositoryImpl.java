@@ -4,6 +4,8 @@ import com.fasterxml.uuid.impl.UUIDUtil;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EnumPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
@@ -41,7 +43,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
     private final JdbcTemplate jdbcTemplate;
 
 
-    public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate, UuidGenerator uuidGenerator) {
+    public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate) {
         this.queryFactory = new JPAQueryFactory(em);
         this.wikiReferenceJpaRepository = wikiReferenceJpaRepository;
         this.jdbcTemplate = jdbcTemplate;
@@ -53,7 +55,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
         return queryFactory
                 .select(new QWikiPageTitle(wikiReference.tuple.referredTitle, wikiReference.tuple.namespace))
                     .from(wikiReference)
-                    .where(refererIdMatches(refererId))
+                    .where(wikiReferenceRefererIdMatches(refererId))
                 .stream()
                 .collect(Collectors.toSet());
     }
@@ -64,8 +66,10 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
                 .select(new QWikiPageTitle(wikiReference.tuple.referredTitle, wikiReference.tuple.namespace))
                     .from(wikiReference)
                         .innerJoin(wikiPage)
-                            .on(titleMatches(), wikiPageIsActive())
-                    .where(refererIdMatches(refererId))
+                            .on(wikiReferenceTitleAndNamespaceMatches(wikiPage.title, wikiPage.namespace))
+                    .where(
+                            wikiReferenceRefererIdMatches(refererId),
+                            wikiPage.isActive.isTrue())
                 .stream()
                 .collect(Collectors.toSet());
     }
@@ -80,13 +84,9 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
                 .select(wikiPage.count())
                 .from(wikiPage)
                     .join(wikiReference)
-                    .on(wikiReference.tuple.refererId.eq(wikiPage.id))
-                .where(titleAndNamespaceMatches(title, namespace))
+                    .on(wikiReferenceTitleAndNamespaceMatches(wikiPage.title, wikiPage.namespace))
+                .where(wikiReferenceTitleAndNamespaceMatches(title, namespace))
                 .fetchOne();
-    }
-
-    private static BooleanExpression titleAndNamespaceMatches(String title, Namespace namespace) {
-        return wikiReference.tuple.referredTitle.eq(title).and(wikiReference.tuple.namespace.eq(namespace));
     }
 
     /**
@@ -117,7 +117,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
         return queryFactory
                 .delete(wikiReference)
                     .where(
-                            refererIdMatches(refererId),
+                            wikiReferenceRefererIdMatches(refererId),
                             titleIn(titlesToDelete)
                     )
                 .execute();
@@ -129,7 +129,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
         return queryFactory
                 .delete(wikiReference)
                     .where(
-                            refererIdMatches(refererId),
+                            wikiReferenceRefererIdMatches(refererId),
                             titleNotIn(titlesNotToDelete)
                     )
                 .execute();
@@ -162,15 +162,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
         );
     }
 
-    private BooleanExpression titleMatches() {
-        return wikiReference.tuple.referredTitle.eq(wikiPage.title);
-    }
-
-    private BooleanExpression wikiPageIsActive() {
-        return wikiPage.isActive.isTrue();
-    }
-
-    private BooleanExpression refererIdMatches(UUID documentId) {
+    private BooleanExpression wikiReferenceRefererIdMatches(UUID documentId) {
         return wikiReference.tuple.refererId.eq(documentId);
     }
 
@@ -182,9 +174,20 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
         BooleanBuilder builder = new BooleanBuilder();
         for (WikiPageTitle title : titles) {
             builder.or(
-                    titleAndNamespaceMatches(title.title(), title.namespace())
+                    wikiReferenceTitleAndNamespaceMatches(title.title(), title.namespace())
             );
         }
         return builder;
+    }
+
+    private static BooleanExpression wikiReferenceTitleAndNamespaceMatches(String title, Namespace namespace) {
+        return wikiReference.tuple.referredTitle.eq(title)
+                .and(wikiReference.tuple.namespace.eq(namespace))
+                ;
+    }
+    private static BooleanExpression wikiReferenceTitleAndNamespaceMatches(StringPath title, EnumPath<Namespace> namespace) {
+        return wikiReference.tuple.referredTitle.eq(title)
+                .and(wikiReference.tuple.namespace.eq(namespace))
+                ;
     }
 }

@@ -6,6 +6,7 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,11 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,69 +26,97 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class WikiReferenceRepositoryImplTest {
-    // todo 네임스페이스 포함 쿼리 (조회, 삭제, join) 현재 동일한 네임스페이스, 다른 제목에 대해서는 테스트가 존재함. 그러나, 다른 네임스페이스와 다른 제목에 대해선 테스트 존재 x
-    // todo join 시 제목,네임스페이스 쌍으로 이루어지는지 확인해야함.
-    // todo 향로 블로그 between 인덱스
-    // sql or 인덱스 어떤식으로 적용되는지 확인
-    // todo title namespace 받는 부분 전부 wikipagetitle 받도록 수정
-    // 우선순위 하: todo wikipagetitle embed 하여 쿼리시에도 활용
-
     @Autowired
     EntityManager em;
 
     @Autowired
     WikiReferenceRepositoryImpl wikiReferenceRepository;
 
+    private final int REF_LIMIT_PER_NAMESPACE = 10;
     private WikiPage givenWikiPage;
 
-    private List<WikiPageTitle> givenRefTitles;
+    private List<String> givenRefTitles;
+    private Map<Namespace, List<WikiPageTitle>> namespaceWikiPageTitleMap;
 
     @BeforeEach
     void initData() {
         givenWikiPage = WikiPage.create(randString());
         em.persist(givenWikiPage);
-        log.info("persisted");
-        List<WikiReference> refs = IntStream.range(0, 10)
-                .mapToObj(i -> UUID.randomUUID().toString())
-                .map(title -> new WikiReference(givenWikiPage.getId(), title, Namespace.NORMAL))
-                .toList();
-        givenRefTitles = refs.stream()
-                .map(ref -> new WikiPageTitle(ref.getReferredTitle(), ref.getNamespace()))
+        log.info("wiki page persisted");
+
+        givenRefTitles = Stream.generate(() -> UUID.randomUUID().toString())
+                .limit(REF_LIMIT_PER_NAMESPACE)
                 .toList();
 
-        wikiReferenceRepository.saveAll(refs);
-
+        namespaceWikiPageTitleMap = new HashMap<>();
 
         em.flush();
         em.clear();
     }
 
+    /**
+     * (파라미터로 받은 namespace, givenRefTitles의 제목들, givenWikiPage의 id)로 WikiReference 엔티티를 생성하고 영속화함.
+     */
+    void initDataWithNamespace(Namespace namespace) {
+        List<WikiPageTitle> list = givenRefTitles
+                .stream()
+                .map(title -> new WikiPageTitle(title, namespace))
+                .limit(REF_LIMIT_PER_NAMESPACE)
+                .toList();
+        namespaceWikiPageTitleMap.put(namespace, list);
+        list.stream()
+                .map(wpt -> new WikiReference(givenWikiPage.getId(), wpt.title(), wpt.namespace()))
+                .forEach(em::persist);
+        em.flush();
+        em.clear();
+    }
+
     @Test
+    @DisplayName("참조 문서 ID로 참조중인 WikiPageTitle 목록 조회")
     void findReferredTitlesByRefererId() {
+
+        // given
+        // 두 가지 네임스페이스가 각각 동일한 제목을 가진 레퍼런스 데이터를 n개씩 가짐.
+        initDataWithNamespace(Namespace.NORMAL);
+        initDataWithNamespace(Namespace.MAIN);
+
+        List<WikiPageTitle> wholeWikiPageTitles = namespaceWikiPageTitleMap.keySet().stream()
+                .map(namespace -> namespaceWikiPageTitleMap.get(namespace))
+                .flatMap(Collection::stream)
+                .toList();
+
         // when
         Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isNotEmpty();
-        assertThat(found).containsAll(givenRefTitles);
-        assertThat(found).hasSize(givenRefTitles.size());
+        assertThat(found)
+                .describedAs("모든 WikiPageTitle 포함.")
+                .containsAll(wholeWikiPageTitles);
     }
 
     @Test
     void should_find_nothing_when_document_does_not_exists() {
         // when
-        Set<WikiPageTitle> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(UUID.randomUUID());
         // then
         assertThat(found).isEmpty();
     }
 
 
     @Test
-    void should_find_nothing_when_document_is_not_active() {
+    @DisplayName("위키 페이지의 isActive가 false인 경우, 레퍼런스가 존재해도 아무것도 찾아오지 않음.")
+    void findExistingWikiPageTitlesByRefererId_should_find_nothing_when_document_is_not_active() {
         // given
         givenRefTitles.stream()
                 .limit(3)
-                .map(wpt -> WikiPage.create(wpt.title(), wpt.namespace()))
+                .map(title ->
+                        {
+                            WikiPage created = WikiPage.create(title, Namespace.NORMAL);
+                            created.delete(UUID.randomUUID(), randString());
+                            return created;
+                        }
+                )
                 .forEach(em::persist);
 
         em.flush();
@@ -105,19 +132,22 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void should_find_only_active_wiki_pages() {
         // given
-        List<WikiPage> createdWikiPage = givenRefTitles.stream()
+        initDataWithNamespace(Namespace.NORMAL);  // NORMAL로 초기화 (givenWikiPage.id를 참조자ID로 가지는 WikiReference들이 생성됨.
+
+        List<WikiPage> createdWikiPage = namespaceWikiPageTitleMap.get(Namespace.NORMAL).stream()
                 .limit(3)
                 .map(wpt -> WikiPage.create(wpt.title(), wpt.namespace()))
                 .toList();
 
         for (WikiPage wikiPage : createdWikiPage) {
-            wikiPage.update(UUID.randomUUID(), randString(), randString());
+            wikiPage.update(UUID.randomUUID(), randString(), randString());  // 무작위 업데이트(isActive가 true로 설정됨.)
             em.persist(wikiPage);
         }
+
         em.flush();
         em.clear();
 
-        List<WikiPageTitle> activeWikiTitles = createdWikiPage.stream()
+        List<WikiPageTitle> activeWikiTitles = createdWikiPage.stream()  // isActive가 true인 WikiPageTitle 리스트
                 .map(WikiPage::getWikiPageTitle)
                 .toList();
 
@@ -126,6 +156,7 @@ class WikiReferenceRepositoryImplTest {
 
         // then
         assertThat(found)
+                .describedAs("유효한 WikiPageTitle이 모두 포함됨. 유효하지 않은 WikiPageTitle은 포함되지 않음.")
                 .hasSize(3)
                 .containsExactlyInAnyOrderElementsOf(activeWikiTitles);
     }
@@ -133,7 +164,10 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void delete() {
         // given
-        List<WikiPageTitle> toDelete = givenRefTitles.subList(0, 2);
+        initDataWithNamespace(Namespace.NORMAL);
+        initDataWithNamespace(Namespace.MAIN);
+
+        List<WikiPageTitle> toDelete = namespaceWikiPageTitleMap.get(Namespace.NORMAL).subList(0, 2);  // NORMAL 네임스페이스만 제거
 
         // when
         wikiReferenceRepository.delete(givenWikiPage.getId(), toDelete);
@@ -142,13 +176,22 @@ class WikiReferenceRepositoryImplTest {
         Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("toDelete 에 포함된 요소가 제거되어야함.")
-                .doesNotContainAnyElementsOf(toDelete);
+                .doesNotContainAnyElementsOf(toDelete)
+                .describedAs("NORMAL 네임스페이스에서 2개를 지웠음. 숫자가 맞아야함.")
+                .isNotEmpty()
+                .hasSize(REF_LIMIT_PER_NAMESPACE*2 - 2)  // (네임스페이스-타이틀 쌍 숫자)*2 - 2
+                .describedAs("title이 동일한 MAIN 네임스페이스는 지우지 않음.")
+                .containsAll(namespaceWikiPageTitleMap.get(Namespace.MAIN))  // MAIN은 지우지 않았기 때문에 모두 포함.
+        ;
     }
 
     @Test
     void deleteExcept() {
         // given
-        List<WikiPageTitle> notToDelete = givenRefTitles.subList(0, 2);
+        initDataWithNamespace(Namespace.NORMAL);
+        initDataWithNamespace(Namespace.MAIN);
+
+        List<WikiPageTitle> notToDelete = namespaceWikiPageTitleMap.get(Namespace.NORMAL).subList(0, 2);
 
         // when
         wikiReferenceRepository.deleteExcept(givenWikiPage.getId(), notToDelete);
@@ -161,20 +204,57 @@ class WikiReferenceRepositoryImplTest {
     }
 
     @Test
+    @DisplayName("새로운 Referer ID - WikiPageTitle 쌍으로 10개의 WikiReference를 insert")
     void bulkInsert() {
         // given
         UUID givenRefererId = UUID.randomUUID();
+        List<WikiPageTitle> wikiPageTitles = givenRefTitles.stream()
+                .map(title -> new WikiPageTitle(title, Namespace.NORMAL))
+                .toList();
 
         // when
-        wikiReferenceRepository.bulkInsert(givenRefererId, givenRefTitles);
+        wikiReferenceRepository.bulkInsert(givenRefererId, wikiPageTitles);
 
         // then
         Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenRefererId);
         assertThat(found)
-                .containsExactlyInAnyOrderElementsOf(givenRefTitles);
+                .describedAs("모두 저장되어야함.")
+                .containsExactlyInAnyOrderElementsOf(wikiPageTitles);
     }
 
     @Test
+    @DisplayName("중복되는 제목이 존재하지만 네임스페이스가 다른 경우 정상적으로 insert 되어야함.")
+    void bulkInsert_title_duplicate_but_namespace_is_not() {
+        // given
+        UUID givenRefererId = UUID.randomUUID();
+
+        List<WikiPageTitle> normalWikiPageTitles = givenRefTitles.stream()
+                .map(title -> new WikiPageTitle(title, Namespace.NORMAL))
+                .toList();
+
+        wikiReferenceRepository.bulkInsert(givenRefererId, normalWikiPageTitles);  // NORMAL 저장
+
+        List<WikiPageTitle> mainWikiPageTitles = givenRefTitles.stream()
+                .map(title -> new WikiPageTitle(title, Namespace.MAIN))
+                .toList();
+
+        List<WikiPageTitle> expecting = new ArrayList<>();
+        expecting.addAll(normalWikiPageTitles);
+        expecting.addAll(mainWikiPageTitles);
+
+        // when
+        wikiReferenceRepository.bulkInsert(givenRefererId, mainWikiPageTitles);
+
+        // then
+        Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenRefererId);
+
+        assertThat(found)
+                .describedAs("모두 저장되어야함.")
+                .containsExactlyInAnyOrderElementsOf(expecting);
+    }
+
+    @Test
+    @DisplayName("역레퍼런스 조회, 페이징 필요 없는 경우")
     void findBackReferencesByWikiPageTitle_paging_not_triggered() {
         // given
         List<WikiPage> givenWikiPages = IntStream.range(0, 10)
@@ -208,10 +288,6 @@ class WikiReferenceRepositoryImplTest {
         assertThat(result.getNumber())
                 .describedAs("페이지 번호")
                 .isEqualTo(0);
-        String expected = Arrays.toString(givenWikiPageTitles.toArray());
-        System.out.println("expected = " + expected);
-        String res = Arrays.toString(result.getContent().toArray());
-        System.out.println("string = " + res);
         assertThat(result.getContent())
                 .describedAs("참조자 WikiPage 의 제목이 모두 포함되어야하며, 오름차순으로 정렬되어 있어야함.")
                 .containsExactlyElementsOf(givenWikiPageTitles);
