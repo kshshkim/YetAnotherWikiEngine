@@ -60,7 +60,7 @@ class WikiPageQueryRepositoryImplTest {
     void findRevisionsByTitle() {
         // when
         Pageable pageable = Pageable.ofSize(TOTAL_REFS);
-        Page<Revision> revisionPage = wikiPageQueryRepository.findRevisionsByTitle(givenWikiPage.getTitle(), pageable);
+        Page<Revision> revisionPage = wikiPageQueryRepository.findRevisionsByWikiPageId(givenWikiPage.getId(), pageable);
 
         // then
         assertThat(revisionPage.getTotalPages())
@@ -84,7 +84,7 @@ class WikiPageQueryRepositoryImplTest {
     void findRevisionByTitleAndVersion() {
         Random random = new Random();
         int givenVersion = random.nextInt(1, TOTAL_REFS);
-        Optional<Revision> revisionByTitleAndVersion = wikiPageQueryRepository.findRevisionByTitleAndVersionWithRawContent(givenWikiPage.getTitle(), givenVersion);
+        Optional<Revision> revisionByTitleAndVersion = wikiPageQueryRepository.findRevisionByWikiPageTitleWithRawContent(givenWikiPage.getWikiPageTitle(), givenVersion);
 
         assertThat(revisionByTitleAndVersion).isPresent();
         Revision revision = revisionByTitleAndVersion.orElseThrow();

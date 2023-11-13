@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotBlank;
 
 @RestController
 @Slf4j
@@ -33,8 +32,9 @@ public class WikiController {
             @RequestParam(required = false) Integer rev
     ) {
         Namespace namespace = namespaceParser.parseTitle(title);
-        return rev == null ? wikiPageQueryService.getWikiPage(title, namespace):
-                wikiPageQueryService.getWikiPage(title, namespace, rev);
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        return rev == null ? wikiPageQueryService.getWikiPage(wikiPageTitle):
+                wikiPageQueryService.getWikiPage(wikiPageTitle, rev);
     }
 
     @GetMapping("/{title}/history")
@@ -43,9 +43,10 @@ public class WikiController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "30") int size
     ) {
+        Namespace namespace = namespaceParser.parseTitle(title);
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
         return wikiPageQueryService.getRevisionHistory(
-                title,
-                namespaceParser.parseTitle(title),
+                wikiPageTitle,
                 Pageable.ofSize(size).withPage(page)
         );
     }
@@ -83,8 +84,10 @@ public class WikiController {
             @RequestBody CommitEditRequest commitEditRequest
     ) {
         Namespace namespace = namespaceParser.parseTitle(title);
-        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), new WikiPageTitle(title, namespace), commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
-        return wikiPageQueryService.getWikiPage(title, namespace);
+
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), wikiPageTitle, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
+        return wikiPageQueryService.getWikiPage(wikiPageTitle);
     }
 
     public record DeleteRequest(

@@ -2,12 +2,14 @@ package dev.prvt.yawiki.core.wikipage.domain.repository;
 
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface WikiPageQueryRepository {
-    Page<Revision> findRevisionsByTitle(String title, Pageable pageable);
-    Optional<Revision> findRevisionByTitleAndVersionWithRawContent(String title, int version);
+    Page<Revision> findRevisionsByWikiPageId(UUID wikiPageId, Pageable pageable);
+    Optional<Revision> findRevisionByWikiPageTitleWithRawContent(WikiPageTitle wikiPageTitle, int version);
 }

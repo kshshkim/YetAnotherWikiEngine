@@ -214,7 +214,8 @@ class WikiControllerTest {
     void getWikiPage_not_found() {
         // given
         String nonExistTitle = UUID.randomUUID().toString() + "notexist";
-        given(wikiPageQueryService.getWikiPage(nonExistTitle, Namespace.NORMAL))
+        WikiPageTitle nonExistWikiPageTitle = new WikiPageTitle(nonExistTitle, Namespace.NORMAL);
+        given(wikiPageQueryService.getWikiPage(nonExistWikiPageTitle))
                 .willThrow(new NoSuchWikiPageException());
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + nonExistTitle))
@@ -233,7 +234,7 @@ class WikiControllerTest {
     @Test
     void getWikiPage_ok() {
         // given
-        given(wikiPageQueryService.getWikiPage(givenTitle.title(), givenTitle.namespace()))
+        given(wikiPageQueryService.getWikiPage(givenTitle))
                 .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
 
         // when then
@@ -253,7 +254,7 @@ class WikiControllerTest {
     void getWikiPage_with_revVersion() {
         // given
         int givenVersion = 22;
-        given(wikiPageQueryService.getWikiPage(givenTitle.title(), givenTitle.namespace(), givenVersion))
+        given(wikiPageQueryService.getWikiPage(givenTitle, givenVersion))
                 .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
 
         // when then
@@ -271,7 +272,7 @@ class WikiControllerTest {
     @SneakyThrows
     @Test
     void getWikiHistory_not_found() {
-        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle.title()), eq(givenTitle.namespace()), any()))
+        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle), any()))
                 .willThrow(new NoSuchWikiPageException());
 
         String requestedUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/history";
@@ -294,7 +295,7 @@ class WikiControllerTest {
                 .mapToObj(i -> new RevisionData(i, r.nextInt(10), randString(), randString()))
                 .toList();
         Pageable givenPageable = Pageable.ofSize(30).withPage(0);
-        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle.title()), eq(givenTitle.namespace()), any()))
+        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle), any()))
                 .willReturn(new PageImpl<>(revs, givenPageable, revs.size()));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "/history"))
