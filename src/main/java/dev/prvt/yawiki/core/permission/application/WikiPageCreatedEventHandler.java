@@ -13,6 +13,6 @@ public class WikiPageCreatedEventHandler {
 
     @EventListener
     public void handle(WikiPageCreatedEvent wikiPageCreatedEvent) {
-
+        resourcePermissionService.createPagePermission(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.wikiPageTitle().namespace().getIntValue());
     }
 }

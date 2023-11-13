@@ -81,7 +81,7 @@ public class WikiPageDomainService {
      */
     public WikiPage create(WikiPageTitle wikiPageTitle) {
         WikiPage created = wikiPageRepository.save(WikiPage.create(wikiPageTitle.title(), wikiPageTitle.namespace()));
-        applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getTitle()));
+        applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getWikiPageTitle()));
         return created;
     }
 

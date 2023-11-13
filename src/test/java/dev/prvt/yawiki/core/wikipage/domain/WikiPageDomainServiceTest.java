@@ -269,6 +269,7 @@ class WikiPageDomainServiceTest {
     void create_should_publish_event() {
         // when
         WikiPage wikiPage = wikiPageDomainService.create(new WikiPageTitle(randString(), Namespace.NORMAL));
+
         // then
         List<WikiPageCreatedEvent> events = publishedEvents.stream().filter(ev -> ev instanceof WikiPageCreatedEvent)
                 .map(ev -> (WikiPageCreatedEvent) ev)
@@ -277,9 +278,12 @@ class WikiPageDomainServiceTest {
         assertThat(events)
                 .isNotEmpty()
                 .hasSize(1);
+
         WikiPageCreatedEvent wikiPageCreatedEvent = events.get(0);
-        assertThat(tuple(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.title()))
-                .isEqualTo(tuple(wikiPage.getId(), wikiPage.getTitle()));
+
+        assertThat(tuple(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.wikiPageTitle()))
+                .describedAs("이벤트 객체의 내용이 적절히 설정됨.")
+                .isEqualTo(tuple(wikiPage.getId(), wikiPage.getWikiPageTitle()));
     }
 
     @Test
