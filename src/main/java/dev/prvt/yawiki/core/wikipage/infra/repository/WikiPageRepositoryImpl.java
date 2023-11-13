@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.infra.repository;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import org.springframework.stereotype.Repository;
@@ -18,13 +19,6 @@ public class WikiPageRepositoryImpl implements WikiPageRepository {
     }
 
     @Override
-    @Transactional
-    public WikiPage findOrCreate(String title) {
-        return wikiPageJpaRepository.findByTitle(title)
-                .orElseGet(() -> wikiPageJpaRepository.save(WikiPage.create(title)));
-    }
-
-    @Override
     public Optional<WikiPage> findById(UUID id) {
         return wikiPageJpaRepository.findById(id);
     }
@@ -36,12 +30,12 @@ public class WikiPageRepositoryImpl implements WikiPageRepository {
     }
 
     @Override
-    public Optional<WikiPage> findByTitle(String title) {
-        return wikiPageJpaRepository.findByTitle(title);
+    public Optional<WikiPage> findByTitleAndNamespace(String title, Namespace namespace) {
+        return wikiPageJpaRepository.findByTitleWithRevisionAndRawContent(title, namespace);
     }
 
     @Override
-    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title) {
-        return wikiPageJpaRepository.findByTitleWithRevisionAndRawContent(title);
+    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title, Namespace namespace) {
+        return wikiPageJpaRepository.findByTitleWithRevisionAndRawContent(title, namespace);
     }
 }

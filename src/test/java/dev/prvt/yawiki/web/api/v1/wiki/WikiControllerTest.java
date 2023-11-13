@@ -15,6 +15,8 @@ import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.web.api.v1.ErrorMessage;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArgumentResolver;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -94,7 +97,7 @@ class WikiControllerTest {
     @MockBean
     private JwtAuthenticationTokenContributorInfoConverter jwtAuthenticationTokenContributorInfoConverter;
 
-    @MockBean
+    @SpyBean
     private NamespaceParser namespaceParser;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -181,7 +184,7 @@ class WikiControllerTest {
     }
     // end security
 
-    String givenTitle;
+    WikiPageTitle givenTitle;
     String givenContent;
     UUID givenContributorId;
     String givenVersionToken;
@@ -195,7 +198,7 @@ class WikiControllerTest {
     @SneakyThrows
     @BeforeEach
     void init() {
-        givenTitle = randString();
+        givenTitle = new WikiPageTitle(randString(), Namespace.NORMAL);
         givenContent = randString() + randString() + randString();
         givenContributorId = UUID.randomUUID();
         givenVersionToken = UUID.randomUUID().toString();
@@ -210,10 +213,11 @@ class WikiControllerTest {
     @Test
     void getWikiPage_not_found() {
         // given
-        given(wikiPageQueryService.getWikiPage("notexist"))
+        String nonExistTitle = UUID.randomUUID().toString() + "notexist";
+        given(wikiPageQueryService.getWikiPage(nonExistTitle, Namespace.NORMAL))
                 .willThrow(new NoSuchWikiPageException());
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/notexist"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + nonExistTitle))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -221,7 +225,7 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.NOT_FOUND.value(), null, "/api/v1/wiki/notexist"));
+                .isEqualTo(tuple(HttpStatus.NOT_FOUND.value(), null, "/api/v1/wiki/" + nonExistTitle));
     }
 
     @SneakyThrows
@@ -229,19 +233,19 @@ class WikiControllerTest {
     @Test
     void getWikiPage_ok() {
         // given
-        given(wikiPageQueryService.getWikiPage(givenTitle))
-                .willReturn(new WikiPageDataForRead(givenTitle, givenContent, new ArrayList<>()));
+        given(wikiPageQueryService.getWikiPage(givenTitle.title(), givenTitle.namespace()))
+                .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
 
         // when then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
         WikiPageDataForRead response = objectMapper.readValue(contentAsString, WikiPageDataForRead.class);
 
-        assertThat(tuple(response.title(), response.content()))
-                .isEqualTo(tuple(givenTitle, givenContent));
+        assertThat(tuple(response.title(), response.namespace(), response.content()))
+                .isEqualTo(tuple(givenTitle.title(), response.namespace(), givenContent));
     }
 
     @Test
@@ -249,11 +253,11 @@ class WikiControllerTest {
     void getWikiPage_with_revVersion() {
         // given
         int givenVersion = 22;
-        given(wikiPageQueryService.getWikiPage(givenTitle, 22))
-                .willReturn(new WikiPageDataForRead(givenTitle, givenContent, new ArrayList<>()));
+        given(wikiPageQueryService.getWikiPage(givenTitle.title(), givenTitle.namespace(), givenVersion))
+                .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
 
         // when then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "?rev=" + givenVersion))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "?rev=" + givenVersion))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -261,16 +265,17 @@ class WikiControllerTest {
         WikiPageDataForRead response = objectMapper.readValue(contentAsString, WikiPageDataForRead.class);
 
         assertThat(tuple(response.title(), response.content()))
-                .isEqualTo(tuple(givenTitle, givenContent));
+                .isEqualTo(tuple(givenTitle.title(), givenContent));
     }
 
     @SneakyThrows
     @Test
     void getWikiHistory_not_found() {
-        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle), any()))
+        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle.title()), eq(givenTitle.namespace()), any()))
                 .willThrow(new NoSuchWikiPageException());
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "/history"))
+        String requestedUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/history";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(requestedUri))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -278,7 +283,7 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.NOT_FOUND.value(), null, "/api/v1/wiki/" + givenTitle + "/history"));
+                .isEqualTo(tuple(HttpStatus.NOT_FOUND.value(), null, requestedUri));
     }
 
     @SneakyThrows
@@ -289,10 +294,10 @@ class WikiControllerTest {
                 .mapToObj(i -> new RevisionData(i, r.nextInt(10), randString(), randString()))
                 .toList();
         Pageable givenPageable = Pageable.ofSize(30).withPage(0);
-        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle), any()))
+        given(wikiPageQueryService.getRevisionHistory(eq(givenTitle.title()), eq(givenTitle.namespace()), any()))
                 .willReturn(new PageImpl<>(revs, givenPageable, revs.size()));
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "/history"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "/history"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -304,18 +309,18 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void proclaimEdit() {
-        given(wikiPageCommandService.proclaimUpdate(givenContributorId, givenTitle))
-                .willReturn(new WikiPageDataForUpdate(givenTitle, givenContent, givenVersionToken));
+        given(wikiPageCommandService.proclaimUpdate(eq(givenContributorId), eq(givenTitle)))
+                .willReturn(new WikiPageDataForUpdate(givenTitle.title(), givenTitle.namespace(), givenContent, givenVersionToken));  // todo dto 리팩터
 
         // when then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "/edit"))
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
         WikiPageDataForUpdate wikiPageDataForUpdate = objectMapper.readValue(contentAsString, WikiPageDataForUpdate.class);
         assertThat(tuple(wikiPageDataForUpdate.title(), wikiPageDataForUpdate.content(), wikiPageDataForUpdate.versionToken()))
-                .isEqualTo(tuple(givenTitle, givenContent, givenVersionToken));
+                .isEqualTo(tuple(givenTitle.title(), givenContent, givenVersionToken));
     }
 
     @SneakyThrows
@@ -326,14 +331,15 @@ class WikiControllerTest {
                 .willThrow(new PermissionEvaluationException(givenMessage));
 
         // when then
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle + "/edit"))
+        String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(requestUri))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, requestUri));
     }
 
     @SneakyThrows
@@ -344,8 +350,9 @@ class WikiControllerTest {
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when
+        String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
+                        MockMvcRequestBuilders.put(requestUri)
                                 .content(body)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -355,7 +362,7 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+                .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, requestUri));
     }
 
     @SneakyThrows
@@ -366,8 +373,9 @@ class WikiControllerTest {
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when
+        String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.put("/api/v1/wiki/" + givenTitle + "/edit")
+                        MockMvcRequestBuilders.put(requestUri)
                                 .content(body)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -377,7 +385,7 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, requestUri));
     }
 
     @Test
@@ -388,8 +396,9 @@ class WikiControllerTest {
         String body = objectMapper.writeValueAsString(new WikiController.DeleteRequest(givenComment, givenVersionToken));
 
         // when
+        String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/wiki/" + givenTitle + "/edit")
+                        MockMvcRequestBuilders.delete(requestUri)
                                 .content(body)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -399,7 +408,7 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+                .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, requestUri));
     }
 
     @Test
@@ -410,8 +419,9 @@ class WikiControllerTest {
         String body = objectMapper.writeValueAsString(new WikiController.DeleteRequest(givenComment, givenVersionToken));
 
         // when
+        String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/v1/wiki/" + givenTitle + "/edit")
+                        MockMvcRequestBuilders.delete(requestUri)
                                 .content(body)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -421,6 +431,6 @@ class WikiControllerTest {
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
-                .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, "/api/v1/wiki/" + givenTitle + "/edit"));
+                .isEqualTo(tuple(HttpStatus.CONFLICT.value(), "versionToken mismatch: " + givenMessage, requestUri));
     }
 }

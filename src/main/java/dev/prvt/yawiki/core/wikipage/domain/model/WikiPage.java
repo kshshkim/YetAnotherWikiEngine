@@ -46,10 +46,11 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
         name = "wiki_page",
         indexes = {
                 @Index(
-                        name = "idx__page_title",
-                        columnList = "title",
+                        name = "idx__wiki_page__title__namespace",
+                        columnList = "title, namespace",
                         unique = true
-                )})
+                )
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class WikiPage {
@@ -87,6 +88,7 @@ public class WikiPage {
      * 네임스페이스
      * @see Namespace
      */
+    @Column(name = "namespace", columnDefinition = "INTEGER")
     private Namespace namespace;
 
     /**
@@ -120,6 +122,10 @@ public class WikiPage {
     public String getContent() {
         return this.currentRevision == null ? "" : this.currentRevision
                 .getContent();
+    }
+
+    public WikiPageTitle getWikiPageTitle() {  // todo test
+        return new WikiPageTitle(title, namespace);
     }
 
     /**

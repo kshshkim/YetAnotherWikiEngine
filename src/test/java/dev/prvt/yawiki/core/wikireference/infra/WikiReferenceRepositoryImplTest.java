@@ -1,6 +1,8 @@
 package dev.prvt.yawiki.core.wikireference.infra;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class WikiReferenceRepositoryImplTest {
+    // todo 네임스페이스 포함 쿼리 (조회, 삭제, join) 현재 동일한 네임스페이스, 다른 제목에 대해서는 테스트가 존재함. 그러나, 다른 네임스페이스와 다른 제목에 대해선 테스트 존재 x
+    // todo join 시 제목,네임스페이스 쌍으로 이루어지는지 확인해야함.
+    // todo 향로 블로그 between 인덱스
+    // sql or 인덱스 어떤식으로 적용되는지 확인
+    // todo title namespace 받는 부분 전부 wikipagetitle 받도록 수정
+    // 우선순위 하: todo wikipagetitle embed 하여 쿼리시에도 활용
 
     @Autowired
     EntityManager em;
@@ -34,7 +42,7 @@ class WikiReferenceRepositoryImplTest {
 
     private WikiPage givenWikiPage;
 
-    private List<String> givenRefTitles;
+    private List<WikiPageTitle> givenRefTitles;
 
     @BeforeEach
     void initData() {
@@ -43,10 +51,10 @@ class WikiReferenceRepositoryImplTest {
         log.info("persisted");
         List<WikiReference> refs = IntStream.range(0, 10)
                 .mapToObj(i -> UUID.randomUUID().toString())
-                .map(title -> new WikiReference(givenWikiPage.getId(), title))
+                .map(title -> new WikiReference(givenWikiPage.getId(), title, Namespace.NORMAL))
                 .toList();
         givenRefTitles = refs.stream()
-                .map(WikiReference::getReferredTitle)
+                .map(ref -> new WikiPageTitle(ref.getReferredTitle(), ref.getNamespace()))
                 .toList();
 
         wikiReferenceRepository.saveAll(refs);
@@ -59,7 +67,7 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void findReferredTitlesByRefererId() {
         // when
-        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isNotEmpty();
@@ -70,7 +78,7 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void should_find_nothing_when_document_does_not_exists() {
         // when
-        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
         // then
         assertThat(found).isEmpty();
     }
@@ -81,14 +89,14 @@ class WikiReferenceRepositoryImplTest {
         // given
         givenRefTitles.stream()
                 .limit(3)
-                .map(WikiPage::create)
+                .map(wpt -> WikiPage.create(wpt.title(), wpt.namespace()))
                 .forEach(em::persist);
 
         em.flush();
         em.clear();
 
         // when
-        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found).isEmpty();
@@ -99,7 +107,7 @@ class WikiReferenceRepositoryImplTest {
         // given
         List<WikiPage> createdWikiPage = givenRefTitles.stream()
                 .limit(3)
-                .map(WikiPage::create)
+                .map(wpt -> WikiPage.create(wpt.title(), wpt.namespace()))
                 .toList();
 
         for (WikiPage wikiPage : createdWikiPage) {
@@ -109,12 +117,12 @@ class WikiReferenceRepositoryImplTest {
         em.flush();
         em.clear();
 
-        List<String> activeWikiTitles = createdWikiPage.stream()
-                .map(WikiPage::getTitle)
+        List<WikiPageTitle> activeWikiTitles = createdWikiPage.stream()
+                .map(WikiPage::getWikiPageTitle)
                 .toList();
 
         // when
-        Set<String> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(givenWikiPage.getId());
 
         // then
         assertThat(found)
@@ -125,13 +133,13 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void delete() {
         // given
-        List<String> toDelete = givenRefTitles.subList(0, 1);
+        List<WikiPageTitle> toDelete = givenRefTitles.subList(0, 2);
 
         // when
         wikiReferenceRepository.delete(givenWikiPage.getId(), toDelete);
 
         // then
-        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("toDelete 에 포함된 요소가 제거되어야함.")
                 .doesNotContainAnyElementsOf(toDelete);
@@ -140,13 +148,13 @@ class WikiReferenceRepositoryImplTest {
     @Test
     void deleteExcept() {
         // given
-        List<String> notToDelete = givenRefTitles.subList(0, 1);
+        List<WikiPageTitle> notToDelete = givenRefTitles.subList(0, 2);
 
         // when
         wikiReferenceRepository.deleteExcept(givenWikiPage.getId(), notToDelete);
 
         // then
-        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
+        Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenWikiPage.getId());
         assertThat(found)
                 .describedAs("notToDelete 에 포함된 요소만 남아야함.")
                 .containsExactlyInAnyOrderElementsOf(notToDelete);
@@ -161,7 +169,7 @@ class WikiReferenceRepositoryImplTest {
         wikiReferenceRepository.bulkInsert(givenRefererId, givenRefTitles);
 
         // then
-        Set<String> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenRefererId);
+        Set<WikiPageTitle> found = wikiReferenceRepository.findReferredTitlesByRefererId(givenRefererId);
         assertThat(found)
                 .containsExactlyInAnyOrderElementsOf(givenRefTitles);
     }
@@ -173,16 +181,16 @@ class WikiReferenceRepositoryImplTest {
                 .mapToObj(i -> WikiPage.create(randString()))
                 .toList();
 
-        List<String> givenWikiPageTitles = givenWikiPages.stream()
-                .map(WikiPage::getTitle)
-                .sorted(String::compareToIgnoreCase)
+        List<WikiPageTitle> givenWikiPageTitles = givenWikiPages.stream()
+                .map(WikiPage::getWikiPageTitle)
+                .sorted((wpt1, wpt2) -> wpt1.title().compareToIgnoreCase(wpt2.title()))
                 .toList();
 
 
         givenWikiPages.forEach(em::persist);
 
         List<WikiReference> givenRefs = givenWikiPages.stream()
-                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle()))
+                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle(), givenWikiPage.getNamespace()))
                 .toList();
 
         wikiReferenceRepository.saveAll(givenRefs);
@@ -191,7 +199,7 @@ class WikiReferenceRepositoryImplTest {
 
         // when
         Pageable pageable = Pageable.ofSize(givenWikiPages.size() + 10);
-        Page<String> result = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable);
+        Page<WikiPageTitle> result = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable);
 
         // then
         assertThat(result.getTotalPages())
@@ -216,16 +224,16 @@ class WikiReferenceRepositoryImplTest {
                 .mapToObj(i -> WikiPage.create(randString()))
                 .toList();
 
-        List<String> givenWikiPageTitles = givenWikiPages.stream()
-                .map(WikiPage::getTitle)
-                .sorted(String::compareToIgnoreCase)
+        List<WikiPageTitle> givenWikiPageTitles = givenWikiPages.stream()
+                .map(WikiPage::getWikiPageTitle)
+                .sorted((wpt1, wpt2) -> wpt1.title().compareToIgnoreCase(wpt2.title()))
                 .toList();
 
 
         givenWikiPages.forEach(em::persist);
 
         List<WikiReference> givenRefs = givenWikiPages.stream()
-                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle()))
+                .map(wp -> new WikiReference(wp.getId(), givenWikiPage.getTitle(), givenWikiPage.getNamespace()))
                 .toList();
 
         wikiReferenceRepository.saveAll(givenRefs);
@@ -238,8 +246,8 @@ class WikiReferenceRepositoryImplTest {
         Pageable pageable1 = Pageable.ofSize(pageSize);  // 첫번째 페이지
         Pageable pageable2 = Pageable.ofSize(pageSize).withPage(1);  // 두번째 페이지
 
-        Page<String> result1 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable1);
-        Page<String> result2 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), pageable2);
+        Page<WikiPageTitle> result1 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable1);
+        Page<WikiPageTitle> result2 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable2);
 
         // then
         // 첫번째 페이지 테스트

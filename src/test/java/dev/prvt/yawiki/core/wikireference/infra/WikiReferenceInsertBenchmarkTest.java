@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikireference.infra;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
 import com.fasterxml.uuid.impl.UUIDUtil;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -55,7 +56,7 @@ public class WikiReferenceInsertBenchmarkTest {
         UUID documentId = UUID.randomUUID();
         byte[] refererId = UUIDUtil.asByteArray(documentId);
 
-        String sql = "insert into wiki_reference (referer_id, referred_title) values (?, ?)";
+        String sql = "insert into wiki_reference (referer_id, referred_title, referred_namespace) values (?, ?, ?)";
 
         long startTime = System.currentTimeMillis();
         jdbcTemplate.batchUpdate(sql,
@@ -65,6 +66,7 @@ public class WikiReferenceInsertBenchmarkTest {
 //                    ps.setBytes(1, UUIDUtil.asByteArray(generator.generate()));
                     ps.setBytes(1, refererId);
                     ps.setString(2, title);
+                    ps.setInt(3, 1);
                 }
         );
         long endTime = System.currentTimeMillis();
@@ -79,7 +81,7 @@ public class WikiReferenceInsertBenchmarkTest {
         UUID documentId = UUID.randomUUID();
 
         long mappingStartTime = System.currentTimeMillis();
-        List<WikiReference> list = titles.stream().map(title -> new WikiReference(documentId, title))
+        List<WikiReference> list = titles.stream().map(title -> new WikiReference(documentId, title, Namespace.NORMAL))
                 .toList();
 
         long queryStartTime = System.currentTimeMillis();

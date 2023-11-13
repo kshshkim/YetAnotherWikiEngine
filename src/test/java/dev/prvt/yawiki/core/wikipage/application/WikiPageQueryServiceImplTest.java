@@ -7,9 +7,7 @@ import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
-import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
-import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.*;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageQueryRepository;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
@@ -37,12 +35,12 @@ class WikiPageQueryServiceImplTest {
     WikiPageReferenceRepository wikiReferenceRepository = new WikiPageReferenceRepository() {
 
         @Override
-        public Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId) {
+        public Set<WikiPageTitle> findExistingWikiPageTitlesByRefererId(UUID refererId) {
             return new HashSet<>(givenWikiReferences);
         }
 
         @Override
-        public Page<String> findBackReferencesByWikiPageTitle(String wikiPageTitle, Pageable pageable) {
+        public Page<WikiPageTitle> findBackReferencesByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable) {
             repositoryBackRefCalled = true;
             return new PageImpl<>(givenWikiReferences, pageable, 100);
         }
@@ -92,7 +90,7 @@ class WikiPageQueryServiceImplTest {
 
     String givenWikiPageTitle;
     WikiPage givenWikiPage;
-    List<String> givenWikiReferences;
+    List<WikiPageTitle> givenWikiReferences;
     List<Contributor> givenContributors;
     List<Revision> givenRevisions;
     WikiPageQueryService wikiPageQueryService = new WikiPageQueryServiceImpl(wikiPageRepository, wikiPageQueryRepository, wikiReferenceRepository, contributorRepository, wikiPageMapper);
@@ -108,7 +106,7 @@ class WikiPageQueryServiceImplTest {
         givenWikiPage = wikiPageRepository.save(WikiPage.create(givenWikiPageTitle));
         WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
         givenWikiReferences = IntStream.range(0, 10)
-                .mapToObj(i -> randString())
+                .mapToObj(i -> new WikiPageTitle(randString(), Namespace.NORMAL))
                 .toList();
 
         repositoryBackRefCalled = false;
@@ -147,7 +145,7 @@ class WikiPageQueryServiceImplTest {
 
     @Test
     void getWikiPageDataForRead_should_success() {
-        WikiPageDataForRead wikiPage = wikiPageQueryService.getWikiPage(givenWikiPageTitle);
+        WikiPageDataForRead wikiPage = wikiPageQueryService.getWikiPage(givenWikiPageTitle, Namespace.NORMAL);
 
         assertThat(wikiPage.validWikiReferences())
                 .containsExactlyInAnyOrderElementsOf(givenWikiReferences);
@@ -161,7 +159,7 @@ class WikiPageQueryServiceImplTest {
 
     @Test
     void getWikiPageDataForRead_should_fail_if_wiki_page_does_not_exist() {
-        assertThatThrownBy(() -> wikiPageQueryService.getWikiPage("title that does not exist " + randString()))
+        assertThatThrownBy(() -> wikiPageQueryService.getWikiPage("title that does not exist " + randString(), Namespace.NORMAL))
                 .isInstanceOf(NoSuchWikiPageException.class);
     }
 
@@ -170,7 +168,7 @@ class WikiPageQueryServiceImplTest {
         // given
         Pageable pageable = Pageable.ofSize(10).withPage(20);
         // when
-        Page<String> backReferences = wikiPageQueryService.getBackReferences(givenWikiPageTitle, pageable);
+        Page<WikiPageTitle> backReferences = wikiPageQueryService.getBackReferences(givenWikiPageTitle, Namespace.NORMAL, pageable);
         // then
         // 쿼리에 대한 검증은 repository 에서 해야함.
         assertThat(repositoryBackRefCalled)
@@ -184,7 +182,7 @@ class WikiPageQueryServiceImplTest {
 
         int givenPageNumber = random.nextInt(10);
 
-        Page<RevisionData> revisionHistory = wikiPageQueryService.getRevisionHistory(givenWikiPageTitle, Pageable.ofSize(10).withPage(givenPageNumber));
+        Page<RevisionData> revisionHistory = wikiPageQueryService.getRevisionHistory(givenWikiPageTitle, Namespace.NORMAL, Pageable.ofSize(10).withPage(givenPageNumber));
         assertThat(revisionHistory.getPageable().getPageNumber())
                 .describedAs("인자가 잘 넘어갔는지 확인")
                 .isEqualTo(givenPageNumber);
@@ -202,21 +200,20 @@ class WikiPageQueryServiceImplTest {
                 .filter(rv -> rv.getRevVersion().equals(givenVersion))
                 .findFirst()
                 .orElseThrow();
-        WikiPageDataForRead revisionData = wikiPageQueryService.getWikiPage(givenWikiPageTitle, givenVersion);
+        WikiPageDataForRead revisionData = wikiPageQueryService.getWikiPage(givenWikiPageTitle, Namespace.NORMAL, givenVersion);
 
         assertThat(revisionData)
                 .isNotNull()
-                .isEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenRevision.getContent(), null))
-                .isNotEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenWikiPage.getContent(), null))
+                .isEqualTo(new WikiPageDataForRead(givenWikiPageTitle, Namespace.NORMAL, givenRevision.getContent(), null))
+                .isNotEqualTo(new WikiPageDataForRead(givenWikiPageTitle, Namespace.NORMAL, givenWikiPage.getContent(), null))
         ;
 
     }
 
     @Test
     void getRevision_not_found() {
-        assertThatThrownBy(() -> wikiPageQueryService.getWikiPage(givenWikiPageTitle, TOTAL_REVS + 1))
+        assertThatThrownBy(() -> wikiPageQueryService.getWikiPage(givenWikiPageTitle, Namespace.NORMAL, TOTAL_REVS + 1))
                 .isInstanceOf(NoSuchWikiPageException.class)
         ;
-
     }
 }

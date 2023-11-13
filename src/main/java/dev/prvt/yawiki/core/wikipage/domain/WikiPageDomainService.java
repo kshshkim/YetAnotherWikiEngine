@@ -3,8 +3,8 @@ package dev.prvt.yawiki.core.wikipage.domain;
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
-import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
@@ -38,7 +38,7 @@ public class WikiPageDomainService {
      * @param wikiPageTitle 수정할 문서 제목
      * @return 수정할 WikiPage 엔티티
      */
-    public WikiPage proclaimUpdate(UUID contributorId, String wikiPageTitle) {
+    public WikiPage proclaimUpdate(UUID contributorId, WikiPageTitle wikiPageTitle) {
         WikiPage wikiPage = getWikiPage(wikiPageTitle);
         validateProclaim(contributorId, wikiPage);
         return wikiPage;
@@ -52,23 +52,23 @@ public class WikiPageDomainService {
      * @param comment 수정 코멘트
      * @param references 파싱되어 참조하고 있는 제목만 추출된 상태의 reference 목록
      */
-    public void commitUpdate(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
+    public void commitUpdate(UUID contributorId, WikiPageTitle title, String content, String comment, String versionToken, Set<WikiPageTitle> references) {
         WikiPage wikiPage = getWikiPage(title);
         validateUpdate(contributorId, versionToken, wikiPage);
         wikiPage.update(contributorId, comment, content);
         updateReferences(wikiPage.getId(), references);
     }
 
-    public void delete(UUID contributorId, String title, String comment, String versionToken) {
-        WikiPage wikiPage = getWikiPage(title);
+    public void delete(UUID contributorId, WikiPageTitle wikiPageTitle, String comment, String versionToken) {
+        WikiPage wikiPage = getWikiPage(wikiPageTitle);
         validateDelete(contributorId, versionToken, wikiPage);
         wikiPage.delete(contributorId, comment);
         deleteReferences(wikiPage);
     }
 
 
-    private WikiPage getWikiPage(String title) {
-        return wikiPageRepository.findByTitle(title)
+    private WikiPage getWikiPage(WikiPageTitle wikiPageTitle) {
+        return wikiPageRepository.findByTitleAndNamespace(wikiPageTitle.title(), wikiPageTitle.namespace())
                 .orElseThrow(NoSuchWikiPageException::new);
     }
 
@@ -76,16 +76,16 @@ public class WikiPageDomainService {
      * <p>WikiPage 엔티티가 존재하지 않으면 생성, 존재하면 예외 반환.</p>
      * <p>생성 성공시 {@link WikiPageCreatedEvent} 발행.</p>
      * todo 권한 체크
-     * @param title 생성할 문서 제목
+     * @param wikiPageTitle 생성할 문서 제목
      * @return 생성된 WikiPage
      */
-    public WikiPage create(String title, Namespace namespace) {
-        WikiPage created = wikiPageRepository.save(WikiPage.create(title, namespace));
+    public WikiPage create(WikiPageTitle wikiPageTitle) {
+        WikiPage created = wikiPageRepository.save(WikiPage.create(wikiPageTitle.title(), wikiPageTitle.namespace()));
         applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getTitle()));
         return created;
     }
 
-    private void updateReferences(UUID pageId, Set<String> references) throws WikiPageReferenceUpdaterException {
+    private void updateReferences(UUID pageId, Set<WikiPageTitle> references) throws WikiPageReferenceUpdaterException {
         try {
             wikiReferenceUpdater.updateReferences(pageId, references);
         } catch (Exception e) {

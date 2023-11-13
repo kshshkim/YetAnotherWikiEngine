@@ -5,6 +5,7 @@ import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,13 +59,13 @@ class WikiPageCommandServiceImplTest {
     private String updaterFailMessage;
 
     private UUID givenContributorId;
-    private String givenTitle;
+    private WikiPageTitle givenTitle;
     private String givenContent;
     private String givenComment;
-    private Set<String> givenReferences;
+    private Set<WikiPageTitle> givenReferences;
     private String givenVersionToken;
 
-    private String createdTitle;
+    private WikiPageTitle createdTitle;
 
     private boolean called_ReferencedTitleExtractor_extractReferencedTitles;
     private boolean called_WikiPageDomainService_commitUpdate;
@@ -78,7 +79,7 @@ class WikiPageCommandServiceImplTest {
         }
 
         @Override
-        public void commitUpdate(UUID contributorId, String title, String content, String comment, String versionToken, Set<String> references) {
+        public void commitUpdate(UUID contributorId, WikiPageTitle title, String content, String comment, String versionToken, Set<WikiPageTitle> references) {
             called_WikiPageDomainService_commitUpdate = true;
             if (updaterFailTrigger.equals(contributorId)) {
                 throw new WikiPageReferenceUpdaterException(updaterFailMessage);
@@ -100,27 +101,27 @@ class WikiPageCommandServiceImplTest {
         }
 
         @Override
-        public WikiPage proclaimUpdate(UUID contributorId, String wikiPageTitle) {
+        public WikiPage proclaimUpdate(UUID contributorId, WikiPageTitle wikiPageTitle) {
             called_WikiPageDomainService_updateProclaim = true;
-            return WikiPage.create(wikiPageTitle);
+            return WikiPage.create(wikiPageTitle.title(), wikiPageTitle.namespace());
         }
 
         @Override
-        public void delete(UUID contributorId, String title, String comment, String versionToken) {
+        public void delete(UUID contributorId, WikiPageTitle title, String comment, String versionToken) {
             called_WikiPageDomainService_delete = true;
         }
 
         @Override
-        public WikiPage create(String title, Namespace namespace) {
+        public WikiPage create(WikiPageTitle title) {
             called_WikiPageDomainService_create = true;
             createdTitle = title;
-            return WikiPage.create(title, namespace);
+            return WikiPage.create(title.title(), title.namespace());
         }
     }
 
     class DummyReferenceTitleExtractor implements ReferencedTitleExtractor {
         @Override
-        public Set<String> extractReferencedTitles(String rawMarkDown) {
+        public Set<WikiPageTitle> extractReferencedTitles(String rawMarkDown) {
             called_ReferencedTitleExtractor_extractReferencedTitles = true;
 
             if (rawMarkDown.equals(extractorFailTrigger)) {
@@ -158,10 +159,14 @@ class WikiPageCommandServiceImplTest {
 
         // given 인자들 초기화. 하위 모듈에서 파라미터를 적절하게 넘겨받는지 확인하기 위해 사용됨.
         givenContributorId = UUID.randomUUID();
-        givenTitle = UUID.randomUUID().toString();
+        givenTitle = new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL);
         givenContent = UUID.randomUUID().toString();
         givenComment = UUID.randomUUID().toString();
-        givenReferences = Set.of(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        givenReferences = Set.of(
+                new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL),
+                new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL),
+                new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL)
+                );
         givenVersionToken = UUID.randomUUID().toString();
 
         // wikiPageCommandService 재생성
@@ -236,7 +241,7 @@ class WikiPageCommandServiceImplTest {
 
     @Test
     void create_call_and_title_check() {
-        wikiPageCommandServiceImpl.create(givenContributorId, givenTitle, Namespace.MAIN);
+        wikiPageCommandServiceImpl.create(givenContributorId, givenTitle);
 
         assertThat(called_WikiPageDomainService_create).isTrue();
         assertThat(createdTitle)

@@ -2,6 +2,8 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,9 +14,9 @@ public interface WikiPageQueryService {
      * @return WikiPageDataForRead
      * @see dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead
      */
-    WikiPageDataForRead getWikiPage(String title);
+    WikiPageDataForRead getWikiPage(String title, Namespace namespace);
 
-    WikiPageDataForRead getWikiPage(String title, int version);
+    WikiPageDataForRead getWikiPage(String title, Namespace namespace, int version);
 
     /**
      * title 을 참조하고 있는 문서들의 title 목록. title 기준으로 오름차순 정렬된 값을 반환함.
@@ -23,7 +25,7 @@ public interface WikiPageQueryService {
      * @param size 페이지 크기
      * @return WikiPage.title in Page
      */
-    Page<String> getBackReferences(String title, Pageable pageable);
+    Page<WikiPageTitle> getBackReferences(String title, Namespace namespace, Pageable pageable);
 
     /**
      * 페이징이 적용된 수정 내역 조회용 메소드.
@@ -32,5 +34,5 @@ public interface WikiPageQueryService {
      * @param size 페이지 크기
      * @return RevisionData in Page
      */
-    Page<RevisionData> getRevisionHistory(String title, Pageable pageable);
+    Page<RevisionData> getRevisionHistory(String title, Namespace namespace, Pageable pageable);
 }

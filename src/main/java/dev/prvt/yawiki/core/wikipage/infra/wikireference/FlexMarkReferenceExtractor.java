@@ -3,9 +3,12 @@ package dev.prvt.yawiki.core.wikipage.infra.wikireference;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class FlexMarkReferenceExtractor implements ReferencedTitleExtractor {
@@ -19,8 +22,12 @@ public class FlexMarkReferenceExtractor implements ReferencedTitleExtractor {
         return parser.parse(markDown);
     }
 
+    private WikiPageTitle parseToWikiPageTitle(String title) { // 임시로 NORMAL 반환하게 둠. todo title parser
+        return new WikiPageTitle(title, Namespace.NORMAL);
+    }
+
     @Override
-    public Set<String> extractReferencedTitles(String rawMarkDown) {
+    public Set<WikiPageTitle> extractReferencedTitles(String rawMarkDown) {
         Document rootNode = parse(rawMarkDown);
 
         FlexMarkWikiRefCollector collector = new FlexMarkWikiRefCollector();
@@ -28,6 +35,8 @@ public class FlexMarkReferenceExtractor implements ReferencedTitleExtractor {
 
         visitor.visit(rootNode);
 
-        return collector.getDistinctPageRefs();
+        return collector.getDistinctPageRefs().stream()
+                .map(this::parseToWikiPageTitle)
+                .collect(Collectors.toSet());
     }
 }

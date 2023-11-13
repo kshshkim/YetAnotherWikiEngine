@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import lombok.Builder;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +30,11 @@ public class WikiPageCommandServiceEditCollisionTest {
     @PersistenceContext
     EntityManager em;
 
-    String givenTitle;
+    WikiPageTitle givenTitle;
     @BeforeEach
     void init() {
-        givenTitle = randString();
-        wikiPageCommandService.create(UUID.randomUUID(), givenTitle, Namespace.NORMAL);
+        givenTitle = new WikiPageTitle(randString(), Namespace.NORMAL);
+        wikiPageCommandService.create(UUID.randomUUID(), givenTitle);
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), givenTitle);
         wikiPageCommandService.commitUpdate(UUID.randomUUID(), givenTitle, randString(), wikiPageDataForUpdate.versionToken(), randString());
     }
@@ -89,7 +90,7 @@ public class WikiPageCommandServiceEditCollisionTest {
             failWorker = workerA;
         }
 
-        WikiPageDataForUpdate found = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), editDataB.title());
+        WikiPageDataForUpdate found = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), editDataB.titleNamespaceToWikiPageTitle());
         assertThat(found.content())
                 .isNotEqualTo(editDataA.content())
                 .isEqualTo(successWorker.getContent())
@@ -113,7 +114,7 @@ public class WikiPageCommandServiceEditCollisionTest {
         @Override
         public void run() {
             try {
-                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.title(), randString(), wikiPageDataForUpdate.versionToken(), content);
+                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.titleNamespaceToWikiPageTitle(), randString(), wikiPageDataForUpdate.versionToken(), content);
             } catch (Exception e) {
                 this.exception = e;
 //                throw e;

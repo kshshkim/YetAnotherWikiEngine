@@ -2,6 +2,7 @@ package dev.prvt.yawiki.core.wikipage.infra.wikireference;
 
 import com.vladsch.flexmark.parser.Parser;
 import dev.prvt.yawiki.config.MarkdownParserConfig;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -30,10 +31,10 @@ class FlexMarkReferenceExtractorTest {
         Set<String> givenRefs = Set.of("마크업 언어", "HTML", "마크다운", "Perl", "파일", "확장자");
 
         // when
-        Set<String> extracted = extractor.extractReferencedTitles(sample);
+        Set<WikiPageTitle> extracted = extractor.extractReferencedTitles(sample);
 
         // then
-        assertThat(extracted)
+        assertThat(extracted.stream().map(WikiPageTitle::title))
                 .containsExactlyInAnyOrderElementsOf(givenRefs);
 
     }
@@ -54,7 +55,7 @@ class FlexMarkReferenceExtractorTest {
         String sample = stringBuilder.toString();
 
         long start = System.currentTimeMillis();
-        Set<String> titles = extractor.extractReferencedTitles(sample);
+        Set<WikiPageTitle> titles = extractor.extractReferencedTitles(sample);
         long end = System.currentTimeMillis();
         log.info("finished in {}ms", end - start);
         int size = titles.size();

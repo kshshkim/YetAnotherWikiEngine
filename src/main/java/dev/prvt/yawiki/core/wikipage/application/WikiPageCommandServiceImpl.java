@@ -4,6 +4,7 @@ import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,9 +37,9 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
      * @param content 본문
      */
     @Override
-    public void commitUpdate(UUID contributorId, String title, String comment, String versionToken, String content) {
+    public void commitUpdate(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String content) {
         // MarkDown 파싱은 트랜잭션의 범위 바깥에서 실행돼야함.
-        Set<String> references = extractReferences(content);
+        Set<WikiPageTitle> references = extractReferences(content);
         
         // 트랜잭션 시작
         executeCommit(contributorId, title, comment, content, versionToken, references);
@@ -53,29 +54,29 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
      */
     @Override
     @Transactional
-    public WikiPageDataForUpdate proclaimUpdate(UUID contributorId, String wikiPageTitle) {
+    public WikiPageDataForUpdate proclaimUpdate(UUID contributorId, WikiPageTitle wikiPageTitle) {
         WikiPage wikiPage = wikiPageDomainService.proclaimUpdate(contributorId, wikiPageTitle);
         return wikiPageMapper.mapFrom(wikiPage);
     }
 
     @Override
     @Transactional
-    public void create(UUID contributorId, String title, Namespace namespace) {
-        wikiPageDomainService.create(title, namespace);
+    public void create(UUID contributorId, WikiPageTitle title) {
+        wikiPageDomainService.create(title);
     }
 
     @Override
     @Transactional
-    public void delete(UUID contributorId, String title, String comment, String versionToken) {
+    public void delete(UUID contributorId, WikiPageTitle title, String comment, String versionToken) {
         wikiPageDomainService.delete(contributorId, title, comment, versionToken);
     }
 
 
-    private Set<String> extractReferences(String content) {
+    private Set<WikiPageTitle> extractReferences(String content) {
         return referencedTitleExtractor.extractReferencedTitles(content);
     }
 
-    private void executeCommit(UUID contributorId, String title, String comment, String content, String versionToken, Set<String> refs) {
+    private void executeCommit(UUID contributorId, WikiPageTitle title, String comment, String content, String versionToken, Set<WikiPageTitle> refs) {
         transactionTemplate.executeWithoutResult(
                 status -> wikiPageDomainService.commitUpdate(contributorId, title, content, comment, versionToken, refs)
         );

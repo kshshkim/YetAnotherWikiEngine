@@ -8,6 +8,7 @@ import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterEx
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
@@ -27,7 +28,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 
 class WikiPageDomainServiceTest {
-    private final String UPDATE_REFERENCE_EXCEPTION_TRIGGER = randomUUID().toString();
+    private final WikiPageTitle UPDATE_REFERENCE_EXCEPTION_TRIGGER = new WikiPageTitle(randomUUID().toString(), Namespace.NORMAL);
     private final String UPDATE_REFERENCE_EXCEPTION_TRIGGERED_MESSAGE = randomUUID().toString();
 
     private final UUID UPDATE_PERMISSION_EXCEPTION_TRIGGER = randomUUID();
@@ -53,7 +54,7 @@ class WikiPageDomainServiceTest {
 
     private final WikiReferenceUpdater dummyWikiReferenceUpdater = new WikiReferenceUpdater() {
         @Override
-        public void updateReferences(UUID documentId, Set<String> referencedTitles) {
+        public void updateReferences(UUID documentId, Set<WikiPageTitle> referencedTitles) {
             wikiReferenceUpdaterCalled_update = true;
             if (referencedTitles.contains(UPDATE_REFERENCE_EXCEPTION_TRIGGER)) {
                 throw new RuntimeException(UPDATE_REFERENCE_EXCEPTION_TRIGGERED_MESSAGE);
@@ -115,12 +116,12 @@ class WikiPageDomainServiceTest {
 
     private WikiPage givenWikiPage;
     private UUID givenActorId;
-    private String givenTitle;
+    private WikiPageTitle givenTitle;
     private String givenContent;
     private String givenComment;
     private String givenVersionToken;
-    private String givenReference;
-    private Set<String> givenReferences;
+    private WikiPageTitle givenReference;
+    private Set<WikiPageTitle> givenReferences;
 
     private List<Object> publishedEvents;
 
@@ -133,14 +134,14 @@ class WikiPageDomainServiceTest {
         wikiReferenceUpdaterCalled_delete = false;
         permissionValidatorCalled_delete = false;
 
-        givenTitle = randomUUID().toString();
-        givenWikiPage = wikiPageRepository.save(WikiPage.create(givenTitle));
+        givenTitle = new WikiPageTitle(randomUUID().toString(), Namespace.NORMAL);
+        givenWikiPage = wikiPageRepository.save(WikiPage.create(givenTitle.title(), givenTitle.namespace()));
         givenActorId = randomUUID();
         givenContent = randomUUID().toString();
         givenComment = randomUUID().toString();
         givenVersionToken = givenWikiPage.getVersionToken();
-        givenReference = randomUUID().toString();
-        givenReferences = Set.of(givenReference);
+        givenReference = new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL);
+        givenReferences = Set.of();
         publishedEvents = new ArrayList<>();
     }
 
@@ -149,7 +150,7 @@ class WikiPageDomainServiceTest {
     }
 
     void commitUpdate_with_titleThatDoesNotExists() {
-        wikiPageDomainService.commitUpdate(givenActorId, randomUUID().toString(), givenContent, givenComment, givenVersionToken, givenReferences);
+        wikiPageDomainService.commitUpdate(givenActorId, new WikiPageTitle(randomUUID().toString(), Namespace.NORMAL), givenContent, givenComment, givenVersionToken, givenReferences);
     }
 
     void commitUpdate_with_UPDATE_REFERENCE_EXCEPTION_TRIGGER() {
@@ -203,9 +204,9 @@ class WikiPageDomainServiceTest {
                 .doesNotThrowAnyException();
 
         // then
-        WikiPage found = wikiPageRepository.findByTitleWithRevisionAndRawContent(givenTitle).orElseThrow();
+        WikiPage found = wikiPageRepository.findByTitleWithRevisionAndRawContent(givenWikiPage.getTitle(), givenWikiPage.getNamespace()).orElseThrow();
 
-        assertThat(tuple(found.getId(), found.getTitle(), found.getContent()))
+        assertThat(tuple(found.getId(), found.getWikiPageTitle(), found.getContent()))
                 .isEqualTo(tuple(givenWikiPage.getId(), givenTitle, givenContent));
         Revision foundCurrentRevision = found.getCurrentRevision();
         assertThat(foundCurrentRevision)
@@ -233,7 +234,7 @@ class WikiPageDomainServiceTest {
         String savedContent = saved.getContent();
 
         // when
-        WikiPage when = wikiPageDomainService.proclaimUpdate(randomUUID(), saved.getTitle());
+        WikiPage when = wikiPageDomainService.proclaimUpdate(randomUUID(), saved.getWikiPageTitle());
 
         // then
         assertThat(when.getContent())
@@ -267,7 +268,7 @@ class WikiPageDomainServiceTest {
     @Test
     void create_should_publish_event() {
         // when
-        WikiPage wikiPage = wikiPageDomainService.create(randString(), Namespace.NORMAL);
+        WikiPage wikiPage = wikiPageDomainService.create(new WikiPageTitle(randString(), Namespace.NORMAL));
         // then
         List<WikiPageCreatedEvent> events = publishedEvents.stream().filter(ev -> ev instanceof WikiPageCreatedEvent)
                 .map(ev -> (WikiPageCreatedEvent) ev)
@@ -284,14 +285,15 @@ class WikiPageDomainServiceTest {
     @Test
     void create_should_create_when_does_not_exist() {
         String notExists = randomUUID().toString();
+        WikiPageTitle nonExistTitle = new WikiPageTitle(notExists, Namespace.NORMAL);
 
-        WikiPage wikiPage = wikiPageDomainService.create(notExists, Namespace.NORMAL);
+        WikiPage wikiPage = wikiPageDomainService.create(nonExistTitle);
 
         assertThat(wikiPage)
                 .describedAs("WikiPage 가 생성되어야함.")
                 .isNotNull();
 
-        assertThat(wikiPageRepository.findByTitle(notExists))
+        assertThat(wikiPageRepository.findByTitleAndNamespace(notExists, Namespace.NORMAL))
                 .describedAs("생성된 WikiPage 가 영속화 되어야함.")
                 .isPresent();
 
@@ -306,6 +308,6 @@ class WikiPageDomainServiceTest {
 
     @Test
     void create_should_fail_on_duplicate_title() {
-        assertThatThrownBy(() -> wikiPageDomainService.create(givenTitle, Namespace.NORMAL));
+        assertThatThrownBy(() -> wikiPageDomainService.create(givenTitle));
     }
 }
