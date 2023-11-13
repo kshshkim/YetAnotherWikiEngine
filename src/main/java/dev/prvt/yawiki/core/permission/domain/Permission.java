@@ -22,19 +22,19 @@ public class Permission {
     private Integer id;
     @Column(nullable = false)
     private String description;
-    @Column(name = "create_new", columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "create_new", columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel create;
-    @Column(name = "edit_commit", columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "edit_commit", columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel editCommit;
-    @Column(name = "edit_request", columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "edit_request", columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel editRequest;
-    @Column(name = "delete_commit",columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "delete_commit",columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel delete;
-    @Column(name = "rename_title", columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "rename_title", columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel rename;
-    @Column(name = "discussion_create",columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "discussion_create",columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel discussionCreate;
-    @Column(name = "discussion_participate", columnDefinition = "TINYINT(3)", updatable = false)
+    @Column(name = "discussion_participate", columnDefinition = "TINYINT", updatable = false)
     private PermissionLevel discussionParticipate;
 
     private void validateDescription(String description) {
