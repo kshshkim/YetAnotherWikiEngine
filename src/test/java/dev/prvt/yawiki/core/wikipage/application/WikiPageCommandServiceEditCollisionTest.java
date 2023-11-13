@@ -6,11 +6,16 @@ import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -23,6 +28,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 public class WikiPageCommandServiceEditCollisionTest {
+
+    @Slf4j
+    @TestConfiguration
+    static class TestConf {
+        @Bean
+        @Primary
+        public ApplicationEventPublisher applicationEventPublisher() {  // 테스트 범위 제한을 위해 이벤트 발행을 막음.
+            return new ApplicationEventPublisher() {
+                @Override
+                public void publishEvent(Object event) {
+                    log.info("event = {}", event);
+                }
+            };
+        }
+    }
 
     @Autowired
     WikiPageCommandService wikiPageCommandService;
