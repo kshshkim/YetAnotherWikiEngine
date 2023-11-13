@@ -4,10 +4,8 @@ import dev.prvt.yawiki.config.permission.DefaultPermissionConfigInitializer;
 import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
 import dev.prvt.yawiki.core.permission.domain.NamespacePermission;
 import dev.prvt.yawiki.core.permission.domain.Permission;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -15,12 +13,15 @@ import java.util.stream.Stream;
 
 import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
 
-@Component
 @Transactional
-@RequiredArgsConstructor
 public class DefaultPermissionConfigInitializerImpl implements DefaultPermissionConfigInitializer {
     private final EntityManager em;
     private final DefaultPermissionProperties defaultPermissionProperties;
+
+    public DefaultPermissionConfigInitializerImpl(EntityManager em, DefaultPermissionProperties defaultPermissionProperties) {
+        this.em = em;
+        this.defaultPermissionProperties = defaultPermissionProperties;
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
