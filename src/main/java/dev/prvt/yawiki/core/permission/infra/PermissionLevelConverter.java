@@ -6,7 +6,7 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.util.Arrays;
 
-@Converter
+@Converter(autoApply = true)
 public class PermissionLevelConverter implements AttributeConverter<PermissionLevel, Integer> {
     static final int MAX_PERMISSION_VALUE = 127;
     private final PermissionLevel[] permissionLevels = new PermissionLevel[MAX_PERMISSION_VALUE + 1];
