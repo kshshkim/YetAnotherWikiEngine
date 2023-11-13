@@ -4,6 +4,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +19,8 @@ import java.util.UUID;
 @Getter
 @Table(name = "perm_authority_profile")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AuthorityProfile {
+@EntityListeners(value = AuditingEntityListener.class)
+public class AuthorityProfile implements Persistable<UUID> {
     @Id
     @Column(name = "profile_id", columnDefinition = "BINARY(16)")
     private UUID id;
@@ -24,6 +28,7 @@ public class AuthorityProfile {
     @Column(name = "contributor_id", columnDefinition = "BINARY(16)")
     private UUID contributorId;
 
+    @CreatedDate
     @Column(name = "joined_date")
     private LocalDateTime joinedDate;
 
@@ -64,12 +69,16 @@ public class AuthorityProfile {
     }
 
     @Builder
-    protected AuthorityProfile(UUID id, UUID contributorId, LocalDateTime joinedDate, List<GrantedPermission> grantedPermissions) {
+    protected AuthorityProfile(UUID id, UUID contributorId, List<GrantedPermission> grantedPermissions) {
         this.id = id;
         this.contributorId = contributorId;
-        this.joinedDate = joinedDate;
         if (grantedPermissions != null) {
             this.grantedPermissions = grantedPermissions;
         }
+    }
+
+    @Override
+    public boolean isNew() {
+        return this.joinedDate == null;
     }
 }
