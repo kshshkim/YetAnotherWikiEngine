@@ -103,11 +103,11 @@ public class WikiPageDomainService {
     }
 
     private void validateProclaim(UUID contributorId, WikiPage wikiPage) {
-        wikiPageCommandPermissionValidator.validateUpdateProclaim(contributorId, wikiPage);
+        wikiPageCommandPermissionValidator.validateEditRequest(contributorId, wikiPage);
     }
 
     private void validateUpdate(UUID contributorId, String versionToken, WikiPage wikiPage) {
         versionCollisionValidator.validate(wikiPage, versionToken);
-        wikiPageCommandPermissionValidator.validateUpdate(contributorId, wikiPage);
+        wikiPageCommandPermissionValidator.validateEditCommit(contributorId, wikiPage);
     }
 }
