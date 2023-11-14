@@ -4,6 +4,8 @@ import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
@@ -31,16 +33,28 @@ class NamespacePermissionTest {
                 ;
     }
 
-    @Test
-    void getRequiredPermissionLevel() {
+    @ParameterizedTest
+    @EnumSource(ActionType.class)
+    void getRequiredPermissionLevel(ActionType givenActionType) {
         Permission givenPermission = givenPermissionBuilder.build();
         NamespacePermission givenNamespacePermission = givenNamespacePermissionBuilder
                 .permission(givenPermission)
                 .build();
-        for (ActionType actionType : ActionType.values()) {
-            assertThat(givenNamespacePermission.getRequiredPermissionLevel(actionType))
-                    .isEqualTo(givenPermission.getPermissionLevel(actionType));
-        }
+
+        assertThat(givenNamespacePermission.getRequiredPermissionLevel(givenActionType))
+                .isEqualTo(givenPermission.getPermissionLevel(givenActionType));
+    }
+
+    @ParameterizedTest
+    @EnumSource(ActionType.class)
+    void isAllowedToEveryone(ActionType givenActionType) {
+        Permission givenPermission = givenPermissionBuilder.build();
+        NamespacePermission givenNamespacePermission = givenNamespacePermissionBuilder
+                .permission(givenPermission)
+                .build();
+
+        assertThat(givenNamespacePermission.isAllowedToEveryone(givenActionType))
+                .isEqualTo(givenNamespacePermission.getRequiredPermissionLevel(givenActionType) == EVERYONE);
     }
 
     @Test

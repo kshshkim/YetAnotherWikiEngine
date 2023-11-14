@@ -1,6 +1,5 @@
 package dev.prvt.yawiki.core.permission.domain;
 
-import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +9,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PermissionEvaluator {
     private final AuthorityLevelFinder authorityLevelFinder;
-    private final PagePermissionRepository pagePermissionRepository;
+    private final ResourceAclFinder resourceAclFinder;
 
     /**
      * @param actionType 행위 유형
@@ -21,23 +20,15 @@ public class PermissionEvaluator {
      * 모두에게 허용된 경우 행위자의 권한 정보에 접근하지 않음. 추후 차단 기능을 도입할 때, 구현 방식에 따라 변경을 고려햘수 있음.
      */
     public boolean hasEnoughPermission(ActionType actionType, UUID actorId, UUID wikiPageId) {
-        PermissionLevel required = getRequiredPermissionLevel(actionType, wikiPageId);
-        return isAllowedToEveryone(required)
-                || hasEnoughPermission(actorId, required);
+        YawikiPermission pageAcl = getRequiredPermission(wikiPageId);
+
+        return pageAcl.isAllowedToEveryone(actionType)
+                || pageAcl.canDo(actionType, getActorPermissionLevel(actorId));
     }
 
-    private PermissionLevel getRequiredPermissionLevel(ActionType actionType, UUID wikiPageId) {
-        PagePermission pagePermission = pagePermissionRepository.findById(wikiPageId)
+    private YawikiPermission getRequiredPermission(UUID wikiPageId) {
+        return resourceAclFinder.findWikiPageAclByWikiPageId(wikiPageId)
                 .orElseThrow(() -> new IllegalStateException("PagePermission 엔티티가 존재하지 않습니다. WikiPage ID: " + wikiPageId));
-        return pagePermission.getRequiredPermissionLevel(actionType);
-    }
-
-    private boolean hasEnoughPermission(UUID actorId, PermissionLevel required) {
-        return getActorPermissionLevel(actorId).isHigherThanOrEqualTo(required);
-    }
-
-    private boolean isAllowedToEveryone(PermissionLevel required) {
-        return required.equals(PermissionLevel.EVERYONE);
     }
 
     /**
