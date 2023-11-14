@@ -4,6 +4,8 @@ package dev.prvt.yawiki.core.wikipage.application;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
+import dev.prvt.yawiki.core.wikipage.infra.validator.DummyWikiPageCommandPermissionValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,12 @@ public class WikiPageCommandServiceEditCollisionTest {
                     log.info("event = {}", event);
                 }
             };
+        }
+
+        @Bean
+        @Primary
+        public WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator() {  // 권한 판정을 하지 않음.
+            return new DummyWikiPageCommandPermissionValidator();
         }
     }
 
