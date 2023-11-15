@@ -1,6 +1,10 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.permission.domain.*;
+import dev.prvt.yawiki.core.permission.domain.PagePermissionUpdateValidator;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionData;
 import dev.prvt.yawiki.core.permission.domain.repository.NamespacePermissionRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
@@ -23,6 +27,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class ResourcePermissionServiceImplTest {
 
+    @Captor
+    ArgumentCaptor<PagePermission> pagePermissionCaptor;
     @Mock
     private PermissionRepository permissionRepository;
     @Mock
@@ -33,22 +39,14 @@ class ResourcePermissionServiceImplTest {
     private PermissionMapper permissionMapper;
     @Mock
     private PagePermissionUpdateValidator pagePermissionUpdateValidator;
-
     @Mock
     private Permission mockPermission;
-
     @Mock
     private PagePermission mockPagePermission;
-
     @Mock
     private NamespacePermission mockNamespacePermission;
-
     @InjectMocks
     private ResourcePermissionServiceImpl resourcePermissionService;
-
-
-    @Captor
-    ArgumentCaptor<PagePermission> pagePermissionCaptor;
 
     @Test
     void createPermission() {

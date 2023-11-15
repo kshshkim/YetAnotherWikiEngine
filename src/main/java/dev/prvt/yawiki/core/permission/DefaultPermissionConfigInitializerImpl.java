@@ -2,8 +2,8 @@ package dev.prvt.yawiki.core.permission;
 
 import dev.prvt.yawiki.config.permission.DefaultPermissionConfigInitializer;
 import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
-import dev.prvt.yawiki.core.permission.domain.NamespacePermission;
-import dev.prvt.yawiki.core.permission.domain.Permission;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
+import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.*;
 
 @Transactional
 public class DefaultPermissionConfigInitializerImpl implements DefaultPermissionConfigInitializer {

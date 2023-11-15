@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.exception;
 
 public class PermissionEvaluationException extends RuntimeException {
     public PermissionEvaluationException() {

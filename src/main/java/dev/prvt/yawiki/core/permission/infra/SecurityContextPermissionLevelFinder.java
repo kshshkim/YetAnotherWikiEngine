@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core.permission.infra;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityLevelFinder;
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

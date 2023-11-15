@@ -1,5 +1,6 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
+import dev.prvt.yawiki.core.permission.domain.AuthorityGrantValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,6 +21,17 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorityProfileTest {
+    @Mock
+    AuthorityGrantValidator mockValidator;
+    @Captor
+    ArgumentCaptor<AuthorityProfile> granterCaptor;
+    @Captor
+    ArgumentCaptor<AuthorityProfile> granteeCaptor;
+    @Captor
+    ArgumentCaptor<PermissionLevel> permissionLevelCaptor;
+    @Mock
+    GrantedPermission mockGrantedPermission;
+
     @Test
     void getMaxPermissionLevel_should_return_the_highest_permission() {
         // given
@@ -91,15 +103,6 @@ class AuthorityProfileTest {
         assertThat(added).isTrue();
     }
 
-    @Mock
-    AuthorityGrantValidator mockValidator;
-
-    @Captor
-    ArgumentCaptor<AuthorityProfile> granterCaptor;
-    @Captor
-    ArgumentCaptor<AuthorityProfile> granteeCaptor;
-    @Captor
-    ArgumentCaptor<PermissionLevel> permissionLevelCaptor;
     @Test
     void grantPermissionTo_should_call_validator() {
         AuthorityProfile granter = AuthorityProfile.builder().build();
@@ -188,9 +191,6 @@ class AuthorityProfileTest {
                 .describedAs("지정한 권한 레벨으로 설정돼야함.")
                 .isEqualTo(PermissionLevel.MEMBER);
     }
-
-    @Mock
-    GrantedPermission mockGrantedPermission;
 
     @Test
     void create_with_id_and_pre_built_granted_permission() {

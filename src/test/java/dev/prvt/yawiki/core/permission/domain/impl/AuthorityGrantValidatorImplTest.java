@@ -1,5 +1,8 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.impl;
 
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.GrantedPermission;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -73,6 +76,6 @@ class AuthorityGrantValidatorImplTest {
         assertThatThrownBy(() -> authorityGrantValidator.validate(givenGranter, givenGrantee, PermissionLevel.ASSISTANT_MANAGER))
                 .describedAs("실패 사유 메시지에 포함.")
                 .hasMessageContaining("granter must have higher permission level than the grantee's")
-                ;
+        ;
     }
 }

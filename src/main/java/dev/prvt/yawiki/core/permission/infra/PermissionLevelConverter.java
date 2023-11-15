@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.infra;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

@@ -1,7 +1,6 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 import dev.prvt.yawiki.fixture.PermissionFixture;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static dev.prvt.yawiki.core.permission.domain.ActionType.*;
+import static dev.prvt.yawiki.core.permission.domain.model.ActionType.*;
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,7 +45,7 @@ class PermissionTest {
 
         for (ActionType actionType : values()) {
             assertThat(givenPermission.getPermissionLevel(actionType))
-                    .describedAs("getPermissionLevel("+actionType+") failed.")
+                    .describedAs("getPermissionLevel(" + actionType + ") failed.")
                     .isEqualTo(givenPermissions.get(actionType));
         }
     }

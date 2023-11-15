@@ -1,5 +1,9 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
+import dev.prvt.yawiki.core.permission.domain.model.ActionType;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.YawikiPermission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

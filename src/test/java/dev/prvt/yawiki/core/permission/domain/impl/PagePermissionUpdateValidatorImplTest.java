@@ -1,5 +1,8 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.impl;
 
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
 import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 /**
  * ActionType-PermissionLevel 쌍을 규정한 ACL(Access Control List) 인터페이스

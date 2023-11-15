@@ -1,8 +1,8 @@
 package dev.prvt.yawiki.core.permission.infra;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityLevelFinder;
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 
 import java.util.Optional;

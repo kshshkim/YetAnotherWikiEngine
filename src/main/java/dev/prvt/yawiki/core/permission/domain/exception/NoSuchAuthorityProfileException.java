@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.exception;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 import lombok.Getter;
 

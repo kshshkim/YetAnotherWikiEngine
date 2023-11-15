@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

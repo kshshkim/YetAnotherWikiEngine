@@ -1,10 +1,10 @@
 package dev.prvt.yawiki.fixture;
 
-import dev.prvt.yawiki.core.permission.domain.GrantedPermission;
-import dev.prvt.yawiki.core.permission.domain.NamespacePermission;
-import dev.prvt.yawiki.core.permission.domain.Permission;
+import dev.prvt.yawiki.core.permission.domain.model.GrantedPermission;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
 
-import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
+import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.*;
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 
 public class PermissionFixture {

@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.model.ActionType;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import lombok.RequiredArgsConstructor;

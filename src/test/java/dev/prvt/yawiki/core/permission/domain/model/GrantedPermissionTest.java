@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GrantedPermissionTest {
 

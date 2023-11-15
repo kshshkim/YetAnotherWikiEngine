@@ -1,8 +1,8 @@
-package dev.prvt.yawiki.core.permission.infra;
+package dev.prvt.yawiki.core.permission.domain.impl;
 
-import dev.prvt.yawiki.core.permission.domain.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
 import dev.prvt.yawiki.core.permission.domain.ResourceAclFinder;
-import dev.prvt.yawiki.core.permission.domain.YawikiPermission;
+import dev.prvt.yawiki.core.permission.domain.model.YawikiPermission;
 import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

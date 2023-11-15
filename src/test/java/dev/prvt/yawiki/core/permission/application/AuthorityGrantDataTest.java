@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -15,12 +15,12 @@ class AuthorityGrantDataTest {
     @Test
     void creationTest() {
         assertThatCode(() -> new AuthorityGrantData(
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        PermissionLevel.MEMBER,
-                        LocalDateTime.now(),
-                        randString()
-                ))
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                PermissionLevel.MEMBER,
+                LocalDateTime.now(),
+                randString()
+        ))
                 .doesNotThrowAnyException();
 
     }
@@ -28,12 +28,12 @@ class AuthorityGrantDataTest {
     @Test
     void constructionTest_not_null() {
         assertThatThrownBy(() -> new AuthorityGrantData(
-                        null,
-                        UUID.randomUUID(),
-                        PermissionLevel.MEMBER,
-                        LocalDateTime.now(),
-                        randString()
-                ))
+                null,
+                UUID.randomUUID(),
+                PermissionLevel.MEMBER,
+                LocalDateTime.now(),
+                randString()
+        ))
                 .isInstanceOf(NullPointerException.class);
 
     }

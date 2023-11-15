@@ -1,5 +1,8 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
+
 public interface AuthorityGrantValidator {
     /**
      * 권한 부여가 가능한지 검증함.

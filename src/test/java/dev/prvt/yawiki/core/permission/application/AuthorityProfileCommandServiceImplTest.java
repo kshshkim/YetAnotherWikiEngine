@@ -1,9 +1,9 @@
 package dev.prvt.yawiki.core.permission.application;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityGrantValidator;
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
-import dev.prvt.yawiki.core.permission.domain.NoSuchAuthorityProfileException;
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.exception.NoSuchAuthorityProfileException;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +21,10 @@ import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.verify;
 
 /**
  * 적절히 argument 를 넘기는지에 대한 유닛 테스트
- *
  */
 @ExtendWith(MockitoExtension.class)
 class AuthorityProfileCommandServiceImplTest {
@@ -42,6 +40,10 @@ class AuthorityProfileCommandServiceImplTest {
 
     @Captor
     ArgumentCaptor<AuthorityProfile> authorityProfileArgumentCaptor;
+    @Mock
+    AuthorityProfile mockGranterProfile;
+    @Mock
+    AuthorityProfile mockGranteeProfile;
 
     @Test
     void createAuthorityProfile() {
@@ -66,12 +68,6 @@ class AuthorityProfileCommandServiceImplTest {
                 .describedAs("초기 권한 수준이 적절히 설정됨.")
                 .isEqualTo(expectedAuthorityProfile.getMaxPermissionLevel(0));
     }
-
-    @Mock
-    AuthorityProfile mockGranterProfile;
-
-    @Mock
-    AuthorityProfile mockGranteeProfile;
 
     @Test
     void grantAuthority() {

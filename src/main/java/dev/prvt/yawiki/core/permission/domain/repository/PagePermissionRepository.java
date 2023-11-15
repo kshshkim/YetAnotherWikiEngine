@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.domain.repository;
 
-import dev.prvt.yawiki.core.permission.domain.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

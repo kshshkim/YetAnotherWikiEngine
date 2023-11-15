@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,8 +9,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
-import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
-import static org.assertj.core.api.Assertions.*;
+import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NamespacePermissionTest {
     Permission.PermissionBuilder givenPermissionBuilder;
@@ -25,12 +26,12 @@ class NamespacePermissionTest {
                 .editRequest(MEMBER)
                 .editCommit(ASSISTANT_MANAGER)
                 .description("hi")
-                ;
+        ;
 
         givenNamespacePermissionBuilder = NamespacePermission.builder()
                 .upwardOverridable(true)
                 .downwardOverridable(true)
-                ;
+        ;
     }
 
     @ParameterizedTest

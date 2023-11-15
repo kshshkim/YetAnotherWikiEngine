@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -53,7 +53,7 @@ public class NamespacePermission implements YawikiPermission {
     /**
      * 주어진 permission에 포함된 모든 actionType-permissionLevel 쌍에 대해서, override 가능한지 검증함.
      */
-    void validatePermissionOverride(Permission permission) {
+    public void validatePermissionOverride(Permission permission) {
         if (!downwardOverridable && !upwardOverridable) {
             throw new IllegalStateException("override forbidden. namespaceId: " + namespaceId);
         }

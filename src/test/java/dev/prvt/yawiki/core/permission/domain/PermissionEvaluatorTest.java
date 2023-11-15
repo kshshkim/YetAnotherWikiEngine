@@ -1,5 +1,9 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
+import dev.prvt.yawiki.core.permission.domain.model.ActionType;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.YawikiPermission;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,12 +46,30 @@ class PermissionEvaluatorTest {
     @Mock
     YawikiPermission mockYawikiPermission;
 
+    private static Stream<ActionType> actionTypeStream() {
+        return Arrays.stream(ActionType.values());
+    }
+
+    private static Stream<PermissionLevel> permissionLevelStream() {
+        return Arrays.stream(PermissionLevel.values());
+    }
+
+    static Stream<Arguments> actionType_requiredPermissionLevel_actorPermissionLevel() {
+        return actionTypeStream()
+                .flatMap(
+                        actionType -> permissionLevelStream().flatMap(
+                                required -> permissionLevelStream().map(
+                                        actorPermission -> Arguments.arguments(actionType, required, actorPermission)
+                                )
+                        )
+                );
+    }
+
     @BeforeEach
     void init() {
         givenActorId = UUID.randomUUID();
         givenPageId = UUID.randomUUID();
     }
-
 
     @ParameterizedTest
     @EnumSource(value = ActionType.class)
@@ -66,25 +88,6 @@ class PermissionEvaluatorTest {
 
         verify(mockAuthorityLevelFinder, never().description("EVERYONE인 경우에는 권한 정보를 가져오려 시도하지 않음."))
                 .findPermissionLevelByActorId(any());
-    }
-
-    private static Stream<ActionType> actionTypeStream() {
-        return Arrays.stream(ActionType.values());
-    }
-
-    private static Stream<PermissionLevel> permissionLevelStream() {
-        return Arrays.stream(PermissionLevel.values());
-    }
-
-    static Stream<Arguments> actionType_requiredPermissionLevel_actorPermissionLevel() {
-        return actionTypeStream()
-                .flatMap(
-                        actionType -> permissionLevelStream().flatMap(
-                                required -> permissionLevelStream().map(
-                                        actorPermission -> Arguments.arguments(actionType, required, actorPermission)
-                                )
-                        )
-                );
     }
 
     @ParameterizedTest

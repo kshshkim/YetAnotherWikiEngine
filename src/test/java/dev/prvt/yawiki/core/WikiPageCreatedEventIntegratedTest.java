@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core;
 
-import dev.prvt.yawiki.core.permission.domain.NamespacePermission;
-import dev.prvt.yawiki.core.permission.domain.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
 import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageCommandService;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;

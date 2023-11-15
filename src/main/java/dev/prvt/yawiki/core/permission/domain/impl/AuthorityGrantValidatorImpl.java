@@ -1,5 +1,8 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.impl;
 
+import dev.prvt.yawiki.core.permission.domain.AuthorityGrantValidator;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.springframework.stereotype.Component;
 
 @Component

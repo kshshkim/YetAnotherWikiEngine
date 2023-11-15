@@ -1,10 +1,11 @@
 package dev.prvt.yawiki.core.permission.domain;
 
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static dev.prvt.yawiki.core.permission.domain.PermissionLevel.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.values;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PermissionLevelTest {
     @Test

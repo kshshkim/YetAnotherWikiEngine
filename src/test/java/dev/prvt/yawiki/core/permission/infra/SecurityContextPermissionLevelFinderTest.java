@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.infra;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +35,8 @@ class SecurityContextPermissionLevelFinderTest {
 
     @Mock
     GrantedAuthority mockGrantedAuthority;
+    @Mock
+    Principal mockPrincipal;
 
     @ParameterizedTest
     @ValueSource(strings = {"MEMBER", "ASSISTANT_MANAGER", "MANAGER", "ADMIN"})
@@ -57,8 +59,6 @@ class SecurityContextPermissionLevelFinderTest {
                 .isEqualTo(PermissionLevel.valueOf(authority));
     }
 
-    @Mock
-    Principal mockPrincipal;
     @Test
     @DisplayName("AnonymousAuthenticationToken 인 경우 EVERYONE 수준 권한")
     void findPermissionLevelByActorId_AnonymousAuthenticationToken() {

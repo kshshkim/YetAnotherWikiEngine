@@ -7,7 +7,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import dev.prvt.yawiki.core.permission.domain.PermissionEvaluationException;
+import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageCommandService;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageQueryService;
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;

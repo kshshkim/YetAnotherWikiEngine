@@ -1,8 +1,8 @@
 package dev.prvt.yawiki.core.permission.application;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityGrantValidator;
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
-import dev.prvt.yawiki.core.permission.domain.NoSuchAuthorityProfileException;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.exception.NoSuchAuthorityProfileException;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

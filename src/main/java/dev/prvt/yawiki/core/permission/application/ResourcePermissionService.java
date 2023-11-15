@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionData;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionData;
 
 import java.util.UUID;
 

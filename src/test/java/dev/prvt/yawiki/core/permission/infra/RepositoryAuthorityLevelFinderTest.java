@@ -1,8 +1,8 @@
 package dev.prvt.yawiki.core.permission.infra;
 
 import dev.prvt.yawiki.core.permission.domain.AuthorityGrantValidator;
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,14 +34,6 @@ class RepositoryAuthorityLevelFinderTest {
     RepositoryAuthorityLevelFinder repositoryAuthorityLevelFinder;
 
     UUID givenActorId;
-
-    @BeforeEach
-    void init() {
-        repositoryAuthorityLevelFinder = new RepositoryAuthorityLevelFinder(authorityProfileRepository);
-        givenActorId = UUID.randomUUID();
-
-    }
-
     @Mock
     AuthorityGrantValidator mockAuthorityGrantValidator;
 
@@ -49,6 +41,13 @@ class RepositoryAuthorityLevelFinderTest {
         return Arrays.stream(PermissionLevel.values())
                 .filter(permissionLevel -> !permissionLevel.equals(PermissionLevel.EVERYONE))
                 .map(Arguments::arguments);
+    }
+
+    @BeforeEach
+    void init() {
+        repositoryAuthorityLevelFinder = new RepositoryAuthorityLevelFinder(authorityProfileRepository);
+        givenActorId = UUID.randomUUID();
+
     }
 
     @ParameterizedTest

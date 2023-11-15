@@ -1,5 +1,6 @@
-package dev.prvt.yawiki.core.permission.domain;
+package dev.prvt.yawiki.core.permission.domain.model;
 
+import dev.prvt.yawiki.core.permission.domain.PagePermissionUpdateValidator;
 import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,14 +14,15 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PagePermissionTest {
-    @BeforeEach
-    void init() {
-    }
-
     PagePermission givenPagePermission;
     Permission givenPageSpecificPermission;
     NamespacePermission givenNamespacePermission;
+    @Mock
+    PagePermissionUpdateValidator mockValidator;
 
+    @BeforeEach
+    void init() {
+    }
 
     @Test
     @DisplayName("PagePermission.permission이 null인 경우, PagePermission.namespacePermission의 값을 불러옴.")
@@ -51,6 +53,7 @@ class PagePermissionTest {
                 .isEqualTo(givenNamespacePermissionLevel);
 
     }
+
     @Test
     @DisplayName("PagePermission.permission이 null이 아니지만, 해당되는 ActionType에 대한 값이 null인 경우, PagePermission.namespacePermission의 값을 불러옴.")
     void getRequiredPermissionLevel_page_specific_permission_is_present_but_permission_level_is_null() {
@@ -84,6 +87,7 @@ class PagePermissionTest {
         assertThat(result)
                 .isEqualTo(givenNamespacePermissionLevel);
     }
+
     @Test
     @DisplayName("PagePermission.permission이 null이 아니고, 해당되는 ActionType에 대한 PermissionLevel이 null이 아닌 경우, PagePermission의 값을 따름.")
     void getRequiredPermissionLevel_page_specific_permission_is_present_and_permission_level_is_not_null() {
@@ -120,9 +124,6 @@ class PagePermissionTest {
                 .isEqualTo(givenPageSpecificPermissionLevel);
 
     }
-
-    @Mock
-    PagePermissionUpdateValidator mockValidator;
 
     @Test
     void updatePermission() {

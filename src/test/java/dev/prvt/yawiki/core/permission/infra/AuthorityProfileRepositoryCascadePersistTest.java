@@ -1,8 +1,8 @@
 package dev.prvt.yawiki.core.permission.infra;
 
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
-import dev.prvt.yawiki.core.permission.domain.GrantedPermission;
-import dev.prvt.yawiki.core.permission.domain.PermissionLevel;
+import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
+import dev.prvt.yawiki.core.permission.domain.model.GrantedPermission;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,6 +58,7 @@ public class AuthorityProfileRepositoryCascadePersistTest {
                 .describedAs("persistable 인터페이스 구현이 제대로 됨.")
                 .isFalse();
     }
+
     @Test
     @DisplayName("따로 생성해서 create 메서드로 넘겼을 때 cascade 영속화 테스트")
     void testSave_custom_GrantedPermission() {
