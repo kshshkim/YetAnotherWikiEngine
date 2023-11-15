@@ -25,9 +25,6 @@ public class AuthorityProfile implements Persistable<UUID> {
     @Column(name = "profile_id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "contributor_id", columnDefinition = "BINARY(16)")
-    private UUID contributorId;
-
     @CreatedDate
     @Column(name = "joined_date")
     private LocalDateTime joinedDate;
@@ -54,6 +51,7 @@ public class AuthorityProfile implements Persistable<UUID> {
      */
     void addPermission(GrantedPermission grantedPermission) {
         this.grantedPermissions.add(grantedPermission);
+        grantedPermission.grantedTo(this);
     }
 
     /**
@@ -65,16 +63,39 @@ public class AuthorityProfile implements Persistable<UUID> {
      */
     public void grantPermissionTo(AuthorityProfile grantee, PermissionLevel permissionLevelToGrant, String comment, LocalDateTime expiresAt, AuthorityGrantValidator validator) {
         validator.validate(this, grantee, permissionLevelToGrant);
-        grantee.addPermission(GrantedPermission.create(this, grantee, permissionLevelToGrant, comment, expiresAt));
+        grantee.addPermission(GrantedPermission.create(this, permissionLevelToGrant, comment, expiresAt));
     }
 
     @Builder
-    protected AuthorityProfile(UUID id, UUID contributorId, List<GrantedPermission> grantedPermissions) {
+    protected AuthorityProfile(UUID id, List<GrantedPermission> grantedPermissions, GrantedPermission grantedPermission) {
         this.id = id;
-        this.contributorId = contributorId;
         if (grantedPermissions != null) {
-            this.grantedPermissions = grantedPermissions;
+            grantedPermissions.forEach(this::addPermission);
         }
+        if (grantedPermission != null) {
+            this.addPermission(grantedPermission);
+        }
+    }
+
+    static public AuthorityProfile create(UUID id) {
+        return create(id, PermissionLevel.NEW_MEMBER);
+    }
+
+    static public AuthorityProfile create(UUID id, PermissionLevel defaultPermissionLevel) {
+        GrantedPermission grantedPermission = GrantedPermission.create(
+                null,
+                defaultPermissionLevel,
+                "default permission level",
+                null
+        );
+        return create(id, grantedPermission);
+    }
+
+    static public AuthorityProfile create(UUID id, GrantedPermission grantedPermission) {
+        return AuthorityProfile.builder()
+                .id(id)
+                .grantedPermission(grantedPermission)
+                .build();
     }
 
     @Override

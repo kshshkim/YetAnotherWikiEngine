@@ -11,18 +11,33 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "perm_granted_permissions")
+@Table(
+        name = "perm_granted_permissions",
+        indexes = {
+                @Index(  // 외래키 제약조건 제거, 따로 인덱스 설정함
+                        name = "idx__perm_granted_permission__grantee_id",
+                        columnList = "grantee_id"
+                ),
+                @Index(  // 외래키 제약조건 제거, 따로 인덱스 설정함
+                        name = "idx__perm_granted_permission__granter_id",
+                        columnList = "granter_id"
+                )
+        }
+)
 public class GrantedPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "grantee_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "grantee_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private AuthorityProfile grantee;
 
+    /**
+     * 권한을 부여한 AuthorityProfile. null 인 경우 system
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "granter_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "granter_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private AuthorityProfile granter;
 
     @Enumerated
@@ -58,6 +73,18 @@ public class GrantedPermission {
         return !isExpired(expirationMargin);
     }
 
+    /**
+     * AuthorityProfile 에서 호출함.
+     * @param authorityProfile
+     */
+    void grantedTo(AuthorityProfile authorityProfile) {
+        if (this.grantee == null) {
+            this.grantee = authorityProfile;
+        } else {
+            throw new IllegalStateException("cannot update grantee");
+        }
+    }
+
     @Builder
     protected GrantedPermission(Long id, AuthorityProfile grantee, AuthorityProfile granter, PermissionLevel permissionLevel, String comment, LocalDateTime grantedAt, LocalDateTime expiresAt) {
         this.id = id;
@@ -69,9 +96,8 @@ public class GrantedPermission {
         this.expiresAt = expiresAt;
     }
 
-    static public GrantedPermission create(AuthorityProfile granter, AuthorityProfile grantee, PermissionLevel permissionLevel, String comment, LocalDateTime expiresAt) {
+    static public GrantedPermission create(AuthorityProfile granter, PermissionLevel permissionLevel, String comment, LocalDateTime expiresAt) {
         return GrantedPermission.builder()
-                .grantee(grantee)
                 .granter(granter)
                 .permissionLevel(permissionLevel)
                 .comment(comment)

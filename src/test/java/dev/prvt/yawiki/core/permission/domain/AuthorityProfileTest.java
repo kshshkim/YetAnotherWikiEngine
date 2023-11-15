@@ -10,9 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,5 +152,68 @@ class AuthorityProfileTest {
         assertThat(presentPermission.getGranter())
                 .describedAs("granter 가 적절히 설정됨.")
                 .isEqualTo(granter);
+    }
+
+    @Test
+    void create_with_id() {
+        // given
+        UUID given = UUID.randomUUID();
+
+        // when
+        AuthorityProfile authorityProfile = AuthorityProfile.create(given);
+
+        // then
+        List<GrantedPermission> grantedPermissions = authorityProfile.getGrantedPermissions();
+        assertThat(grantedPermissions)
+                .describedAs("기본 권한이 생성돼야함.")
+                .isNotEmpty()
+                .hasSize(1);
+
+        assertThat(authorityProfile.getMaxPermissionLevel(0))
+                .describedAs("기본값은 신규 회원")
+                .isEqualTo(PermissionLevel.NEW_MEMBER);
+    }
+
+    @Test
+    void create_with_id_and_permissionLevel() {
+        // given
+        UUID givenId = UUID.randomUUID();
+        PermissionLevel givenPermissionLevel = PermissionLevel.MEMBER;
+
+        // when
+        AuthorityProfile authorityProfile = AuthorityProfile.create(givenId, givenPermissionLevel);
+
+        // then
+        assertThat(authorityProfile.getMaxPermissionLevel(0))
+                .describedAs("지정한 권한 레벨으로 설정돼야함.")
+                .isEqualTo(PermissionLevel.MEMBER);
+    }
+
+    @Mock
+    GrantedPermission mockGrantedPermission;
+
+    @Test
+    void create_with_id_and_pre_built_granted_permission() {
+        // given
+        UUID givenId = UUID.randomUUID();
+        AuthorityProfile authorityProfile = AuthorityProfile.create(givenId, mockGrantedPermission);
+        PermissionLevel givenPermissionLevel = PermissionLevel.NEW_MEMBER;
+        given(mockGrantedPermission.getPermissionLevel())
+                .willReturn(givenPermissionLevel);
+        given(mockGrantedPermission.isValid(anyLong()))
+                .willReturn(true);
+
+        // when
+        List<GrantedPermission> grantedPermissions = authorityProfile.getGrantedPermissions();
+
+        // then
+        assertThat(grantedPermissions)
+                .describedAs("기본 권한이 생성돼야함.")
+                .isNotEmpty()
+                .hasSize(1);
+
+        assertThat(authorityProfile.getMaxPermissionLevel(0))
+                .describedAs("제공된 granted permission 권한 수준은 NEW_MEMBER")
+                .isEqualTo(givenPermissionLevel);
     }
 }

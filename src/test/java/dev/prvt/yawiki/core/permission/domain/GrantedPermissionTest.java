@@ -4,7 +4,10 @@ import dev.prvt.yawiki.fixture.PermissionFixture;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.*;
 
 class GrantedPermissionTest {
@@ -27,5 +30,22 @@ class GrantedPermissionTest {
 
     @Test
     void create() {
+        // given
+        LocalDateTime givenExp = LocalDateTime.now().plusMinutes(10L);
+        String givenComment = randString();
+        PermissionLevel givenPermissionLevel = PermissionLevel.MEMBER;
+        AuthorityProfile givenGranter = AuthorityProfile.create(UUID.randomUUID(), PermissionLevel.MANAGER);
+
+        // when
+        GrantedPermission result = GrantedPermission.create(givenGranter, givenPermissionLevel, givenComment, givenExp);
+
+        // then
+        assertThat(List.of(result.getExpiresAt(), result.getComment(), result.getPermissionLevel()))
+                .describedAs("넘긴 파라미터대로 잘 생성되었는지 검증")
+                .containsExactly(givenExp, givenComment, givenPermissionLevel);
+
+        assertThat(result.getGranter())
+                .describedAs("granter 가 잘 설정됐는지 확인")
+                .isSameAs(givenGranter);
     }
 }
