@@ -4,9 +4,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 @Entity
 @Getter
@@ -26,8 +30,10 @@ import java.time.LocalDateTime;
 )
 public class GrantedPermission {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid-v7")
+    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @Column(name = "granted_permission_id", columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grantee_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -86,7 +92,7 @@ public class GrantedPermission {
     }
 
     @Builder
-    protected GrantedPermission(Long id, AuthorityProfile grantee, AuthorityProfile granter, PermissionLevel permissionLevel, String comment, LocalDateTime grantedAt, LocalDateTime expiresAt) {
+    protected GrantedPermission(UUID id, AuthorityProfile grantee, AuthorityProfile granter, PermissionLevel permissionLevel, String comment, LocalDateTime grantedAt, LocalDateTime expiresAt) {
         this.id = id;
         this.grantee = grantee;
         this.granter = granter;
