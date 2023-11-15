@@ -7,14 +7,17 @@ import dev.prvt.yawiki.core.permission.domain.repository.AuthorityProfileReposit
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import javax.persistence.EntityManager;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,17 +45,17 @@ class RepositoryAuthorityLevelFinderTest {
     @Mock
     AuthorityGrantValidator mockAuthorityGrantValidator;
 
-    @ParameterizedTest
-    @ValueSource(strings = {"MEMBER", "MANAGER", "ADMIN"})
-    void find(String authority) {
-        // given
-        PermissionLevel givenPermissionLevel = PermissionLevel.valueOf(authority);
+    static Stream<Arguments> permissionLevelsHigherThanEveryone() {
+        return Arrays.stream(PermissionLevel.values())
+                .filter(permissionLevel -> !permissionLevel.equals(PermissionLevel.EVERYONE))
+                .map(Arguments::arguments);
+    }
 
-        AuthorityProfile authorityProfile = AuthorityProfile
-                .builder()
-                .id(givenActorId)
-                .contributorId(givenActorId)
-                .build();
+    @ParameterizedTest
+    @MethodSource("permissionLevelsHigherThanEveryone")
+    void find(PermissionLevel givenPermissionLevel) {
+        // given
+        AuthorityProfile authorityProfile = AuthorityProfile.create(givenActorId);
 
         authorityProfile.grantPermissionTo(authorityProfile, givenPermissionLevel, randString(), null, mockAuthorityGrantValidator);
 
