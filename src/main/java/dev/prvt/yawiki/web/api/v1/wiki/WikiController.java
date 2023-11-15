@@ -6,6 +6,8 @@ import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfo;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/wiki/*")
@@ -21,14 +24,17 @@ import org.springframework.web.bind.annotation.*;
 public class WikiController {
     private final WikiPageCommandService wikiPageCommandService;
     private final WikiPageQueryService wikiPageQueryService;
+    private final NamespaceParser namespaceParser;
 
     @GetMapping("/{title}")
     public WikiPageDataForRead getWikiPage(
             @PathVariable String title,
             @RequestParam(required = false) Integer rev
     ) {
-        return rev == null ? wikiPageQueryService.getWikiPage(title):
-                wikiPageQueryService.getWikiPage(title, rev);
+        Namespace namespace = namespaceParser.parseTitle(title);
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        return rev == null ? wikiPageQueryService.getWikiPage(wikiPageTitle):
+                wikiPageQueryService.getWikiPage(wikiPageTitle, rev);
     }
 
     @GetMapping("/{title}/history")
@@ -37,7 +43,12 @@ public class WikiController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "30") int size
     ) {
-        return wikiPageQueryService.getRevisionHistory(title, Pageable.ofSize(size).withPage(page));
+        Namespace namespace = namespaceParser.parseTitle(title);
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        return wikiPageQueryService.getRevisionHistory(
+                wikiPageTitle,
+                Pageable.ofSize(size).withPage(page)
+        );
     }
 
     @GetMapping("/{title}/edit")
@@ -45,11 +56,16 @@ public class WikiController {
             @PathVariable String title,
             @ContributorInfo ContributorInfoArg contributorInfo
     ) {
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespaceParser.parseTitle(title));
+
         try {
-            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
+            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), wikiPageTitle);
         } catch (NoSuchWikiPageException e) {
-            wikiPageCommandService.create(contributorInfo.contributorId(), title);
-            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
+            wikiPageCommandService.create(
+                    contributorInfo.contributorId(),
+                    wikiPageTitle
+            );
+            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), wikiPageTitle);
         }
     }
 
@@ -67,8 +83,11 @@ public class WikiController {
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody CommitEditRequest commitEditRequest
     ) {
-        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), title, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
-        return wikiPageQueryService.getWikiPage(title);
+        Namespace namespace = namespaceParser.parseTitle(title);
+
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), wikiPageTitle, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
+        return wikiPageQueryService.getWikiPage(wikiPageTitle);
     }
 
     public record DeleteRequest(
@@ -84,6 +103,8 @@ public class WikiController {
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody DeleteRequest deleteRequest
     ) {
-        wikiPageCommandService.delete(contributorInfo.contributorId(), title, deleteRequest.comment(), deleteRequest.versionToken());
+        Namespace namespace = namespaceParser.parseTitle(title);
+        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
+        wikiPageCommandService.delete(contributorInfo.contributorId(), wikiPageTitle, deleteRequest.comment(), deleteRequest.versionToken());
     }
 }

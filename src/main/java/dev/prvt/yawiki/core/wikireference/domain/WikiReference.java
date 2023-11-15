@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikireference.domain;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,10 @@ import java.util.UUID;
 @Table(
         name = "wiki_reference",
         indexes = {
-                @Index(name = "idx__wiki_reference__referred_title__referer_id", columnList = "referred_title, referer_id")  // 백링크용
+                @Index(
+                        name = "idx__wiki_reference__referred_title__referer_id"
+                        , columnList = "referred_title, referred_namespace, referer_id"
+                )  // 백링크용
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,11 +34,15 @@ public class WikiReference {
         return tuple.getReferredTitle();
     }
 
+    public Namespace getNamespace() {
+        return tuple.getNamespace();
+    }
+
     public UUID getRefererId() {
         return tuple.getRefererId();
     }
 
-    public WikiReference(UUID refererId, String referredTitle) {
-        this.tuple = new WikiReferenceTuple(refererId, referredTitle);
+    public WikiReference(UUID refererId, String title, Namespace namespace) {
+        this.tuple = new WikiReferenceTuple(refererId, title, namespace);
     }
 }

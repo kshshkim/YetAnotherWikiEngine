@@ -2,13 +2,22 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
+import dev.prvt.yawiki.core.wikipage.infra.validator.DummyWikiPageCommandPermissionValidator;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -22,16 +31,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 public class WikiPageCommandServiceEditCollisionTest {
 
+    @Slf4j
+    @TestConfiguration
+    static class TestConf {
+        @Bean
+        @Primary
+        public ApplicationEventPublisher applicationEventPublisher() {  // 테스트 범위 제한을 위해 이벤트 발행을 막음.
+            return new ApplicationEventPublisher() {
+                @Override
+                public void publishEvent(Object event) {
+                    log.info("event = {}", event);
+                }
+            };
+        }
+
+        @Bean
+        @Primary
+        public WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator() {  // 권한 판정을 하지 않음.
+            return new DummyWikiPageCommandPermissionValidator();
+        }
+    }
+
     @Autowired
     WikiPageCommandService wikiPageCommandService;
 
     @PersistenceContext
     EntityManager em;
 
-    String givenTitle;
+    WikiPageTitle givenTitle;
     @BeforeEach
     void init() {
-        givenTitle = randString();
+        givenTitle = new WikiPageTitle(randString(), Namespace.NORMAL);
         wikiPageCommandService.create(UUID.randomUUID(), givenTitle);
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), givenTitle);
         wikiPageCommandService.commitUpdate(UUID.randomUUID(), givenTitle, randString(), wikiPageDataForUpdate.versionToken(), randString());
@@ -88,7 +118,7 @@ public class WikiPageCommandServiceEditCollisionTest {
             failWorker = workerA;
         }
 
-        WikiPageDataForUpdate found = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), editDataB.title());
+        WikiPageDataForUpdate found = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), editDataB.titleNamespaceToWikiPageTitle());
         assertThat(found.content())
                 .isNotEqualTo(editDataA.content())
                 .isEqualTo(successWorker.getContent())
@@ -112,7 +142,7 @@ public class WikiPageCommandServiceEditCollisionTest {
         @Override
         public void run() {
             try {
-                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.title(), randString(), wikiPageDataForUpdate.versionToken(), content);
+                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.titleNamespaceToWikiPageTitle(), randString(), wikiPageDataForUpdate.versionToken(), content);
             } catch (Exception e) {
                 this.exception = e;
 //                throw e;

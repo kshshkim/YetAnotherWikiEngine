@@ -1,57 +1,68 @@
 package dev.prvt.yawiki.core.permission.application;
 
-import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
 import dev.prvt.yawiki.core.permission.domain.*;
-import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluator;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionData;
+import dev.prvt.yawiki.core.permission.domain.repository.NamespacePermissionRepository;
+import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
-import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ResourcePermissionServiceImpl implements ResourcePermissionService {
-    private final PermissionEvaluator permissionEvaluator;
-    private final DefaultPermissionProperties defaultPermissionProperties;
-    private final ResourcePermissionRepository resourcePermissionRepository;
     private final PermissionRepository permissionRepository;
+    private final PagePermissionRepository pagePermissionRepository;
+    private final NamespacePermissionRepository namespacePermissionRepository;
+
+    private final PermissionMapper permissionMapper;
+    private final PagePermissionUpdateValidator pagePermissionUpdateValidator;
 
     @Override
-    public void updateResourcePermission(UUID resourceId) {
-        updateResourcePermission(resourceId, defaultPermissionProperties.getDefaultPermissionGroupId());
+    public Integer createPermission(PermissionData permissionData) {
+         return permissionRepository.save(permissionMapper.map(permissionData)).getId();
     }
 
     @Override
-    public void updateResourcePermission(UUID resourceId, UUID permissionGroupId) {
-        updateResourcePermission(resourceId, permissionGroupId, null);
+    public void createPagePermission(UUID pageId, Integer namespaceId) {
+        NamespacePermission namespacePermission = namespacePermissionRepository.findById(namespaceId)
+                .orElseThrow();
+
+        PagePermission newPagePermission = PagePermission.builder()
+                .id(pageId)
+                .namespacePermission(namespacePermission)
+                .build();
+
+        pagePermissionRepository.save(newPagePermission);
     }
 
     @Override
-    public void updateResourcePermission(UUID resourceId, UUID permissionGroupId, PermissionData permissionData) {
-        Permission specificPermission = getPermission(permissionData);
-        ResourcePermission resourcePermission = getResourcePermission(resourceId);
-        resourcePermission.updatePermission(specificPermission);
-        resourcePermission.updateOwnerGroup(new PermissionGroup(permissionGroupId));
+    public void updatePagePermission(UUID pageId, Integer permissionId) {
+        Permission permission = permissionRepository.findById(permissionId)
+                .orElseThrow();
+        PagePermission pagePermission = pagePermissionRepository.findById(pageId)
+                .orElseThrow();
+
+        pagePermission.updatePermission(
+                permission,
+                pagePermissionUpdateValidator
+        );
     }
 
-    private Permission getPermission(PermissionData permissionData) {
-        return permissionData == null ? null :
-                permissionRepository.getOrCreateByAllAttributes(permissionData);
+    @Override
+    public void updateNamespacePermission(Integer namespaceId, PermissionData permissionData) {
+
     }
 
-    // jpa merge 사용하지 않기 위해 분리
-    private ResourcePermission getResourcePermission(UUID resourceId) {
-        Optional<ResourcePermission> resourcePermission = resourcePermissionRepository.findById(resourceId);
-        return resourcePermission.orElseGet(
-                () -> resourcePermissionRepository.save(
-                        ResourcePermission.builder()
-                                .id(resourceId)
-                                .ownerGroup(new PermissionGroup(defaultPermissionProperties.getDefaultPermissionGroupId()))
-                                .build()));
+    @Override
+    public void updateNamespacePermission(Integer namespaceId, Integer permissionId) {
+
     }
 }

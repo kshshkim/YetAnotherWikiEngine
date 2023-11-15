@@ -46,23 +46,19 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
         name = "wiki_page",
         indexes = {
                 @Index(
-                        name = "idx__page_title",
-                        columnList = "title",
+                        name = "idx__wiki_page__title__namespace",
+                        columnList = "title, namespace",
                         unique = true
-                )})
+                )
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class WikiPage {
-    static private final UUID DEFAULT_GROUP_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-
     @Id
     @GeneratedValue(generator = "uuid-v7")
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
     @Column(name = "page_id", columnDefinition = "BINARY(16)")
     private UUID id;
-
-    @Column(name = "owner_group_id", columnDefinition = "BINARY(16)")
-    private UUID ownerGroupId;
 
     /**
      * <p>JPA 에서 관리하는 낙관락에 사용되는 필드</p>
@@ -87,6 +83,13 @@ public class WikiPage {
      * 문서 제목. PK 는 외부로 노출하지 않도록 함.
      */
     private String title;
+
+    /**
+     * 네임스페이스
+     * @see Namespace
+     */
+    @Column(name = "namespace", columnDefinition = "INTEGER")
+    private Namespace namespace;
 
     /**
      * 문서를 삭제하거나, 처음 생성되어 내용이 없는 경우 false
@@ -119,6 +122,10 @@ public class WikiPage {
     public String getContent() {
         return this.currentRevision == null ? "" : this.currentRevision
                 .getContent();
+    }
+
+    public WikiPageTitle getWikiPageTitle() {  // todo test
+        return new WikiPageTitle(title, namespace);
     }
 
     /**
@@ -178,20 +185,30 @@ public class WikiPage {
                 .build();
     }
 
-    private WikiPage(String title, UUID ownerGroupId, boolean isActive, Revision currentRevision) {
+    private WikiPage(String title, Namespace namespace) {
         this.title = title;
-        this.ownerGroupId = ownerGroupId;
-        this.isActive = isActive;
-        this.currentRevision = currentRevision;
+        this.namespace = namespace;
+        this.isActive = false;
+        this.currentRevision = null;
     }
 
-    public static WikiPage create(String title) {
-        return WikiPage.create(title, DEFAULT_GROUP_ID);
-    }
-
-    public static WikiPage create(String title, UUID ownerGroupId) {
-        WikiPage created = new WikiPage(title, ownerGroupId, false, null);
+    /**
+     * @param title 네임스페이스 구분자가 포함되지 않은 문서 제목. (ex. '틀: 아무개' -> '아무개')
+     * @param namespace 네임스페이스 enum
+     * @return isActive가 false이고 currentRevision이 null인 새 문서.
+     */
+    public static WikiPage create(String title, Namespace namespace) {
+        WikiPage created = new WikiPage(title, namespace);
         created.updateVersionToken();
         return created;
+    }
+
+    /**
+     * @param title 네임스페이스 구분자가 포함되지 않은 제목.
+     * @return 네임스페이스가 Normal로 설정된 WikiPage 인스턴스.
+     * @deprecated 되도록 네임스페이스까지 파라미터로 받는 메서드를 사용할것.
+     */
+    public static WikiPage create(String title) {
+        return create(title, Namespace.NORMAL);
     }
 }

@@ -1,6 +1,8 @@
 package dev.prvt.yawiki.core.wikipage.infra.repository;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import lombok.SneakyThrows;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class WikiPageMemoryRepository implements WikiPageRepository {
-    static private final ConcurrentMap<String, WikiPage> titleStore = new ConcurrentHashMap<>();
+    static private final ConcurrentMap<WikiPageTitle, WikiPage> titleStore = new ConcurrentHashMap<>();
     static private final ConcurrentMap<UUID, WikiPage> idStore = new ConcurrentHashMap<>();
 
     @Override
@@ -22,7 +24,7 @@ public class WikiPageMemoryRepository implements WikiPageRepository {
             throw new IllegalStateException("엔티티가 이미 영속화된 상태임.");
         }
 
-        if (titleStore.containsKey(entity.getTitle())) {
+        if (titleStore.containsKey(entity.getWikiPageTitle())) {
             throw new IllegalStateException("제목이 중복됨.");
         }
 
@@ -31,29 +33,23 @@ public class WikiPageMemoryRepository implements WikiPageRepository {
         id.setAccessible(true);
         id.set(entity, UUID.randomUUID());  // 리플렉션으로 ID 설정
 
-        titleStore.put(entity.getTitle(), entity);
+        titleStore.put(entity.getWikiPageTitle(), entity);
         idStore.put(entity.getId(), entity);
         return entity;
     }
 
     @Override
-    public Optional<WikiPage> findByTitle(String title) {
-        return Optional.ofNullable(titleStore.get(title));
+    public Optional<WikiPage> findByTitleAndNamespace(String title, Namespace namespace) {
+        return Optional.ofNullable(titleStore.get(new WikiPageTitle(title, namespace)));
+    }
+
+    @Override
+    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title, Namespace namespace) {
+        return Optional.ofNullable(titleStore.get(new WikiPageTitle(title, namespace)));
     }
 
     @Override
     public Optional<WikiPage> findById(UUID uuid) {
         return Optional.ofNullable(idStore.get(uuid));
-    }
-
-    @Override
-    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title) {
-        return findByTitle(title);
-    }
-
-    @Override
-    public WikiPage findOrCreate(String title) {
-        return findByTitle(title)
-                .orElseGet(() -> save(WikiPage.create(title)));
     }
 }

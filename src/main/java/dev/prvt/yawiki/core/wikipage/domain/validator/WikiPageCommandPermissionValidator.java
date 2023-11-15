@@ -1,12 +1,15 @@
 package dev.prvt.yawiki.core.wikipage.domain.validator;
 
-import dev.prvt.yawiki.core.wikipage.domain.exception.UpdatePermissionException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 
 import java.util.UUID;
 
 public interface WikiPageCommandPermissionValidator {
-    void validateUpdate(UUID actorId, WikiPage wikiPage) throws UpdatePermissionException;
+    void validateEditCommit(UUID actorId, WikiPage wikiPage);
+
+    void validateRename(UUID actorId, WikiPage wikiPage);
+
+    void validateCreate(UUID actorId, WikiPage wikiPage);
 
     void validateDelete(UUID actorId, WikiPage wikiPage);
 
@@ -15,5 +18,5 @@ public interface WikiPageCommandPermissionValidator {
      * @param actorId
      * @param wikiPage
      */
-    void validateUpdateProclaim(UUID actorId, WikiPage wikiPage);
+    void validateEditRequest(UUID actorId, WikiPage wikiPage);
 }

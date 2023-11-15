@@ -11,14 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class WikiPageTest {
 
-    WikiPage givenDoc;
+    WikiPage givenWikiPage;
     String givenComment;
     String givenContent;
     UUID givenContributorId;
 
     @BeforeEach
     void beforeEach() {
-        givenDoc = WikiPage.create(randString());
+        givenWikiPage = WikiPage.create(randString(), Namespace.NORMAL);
 
         givenComment = "comment " + randString();
         givenContent = "content " + randString();
@@ -26,187 +26,210 @@ class WikiPageTest {
     }
 
     @Test
-    void creationTest() {
+    void create_only_with_title() {
         // given
-        WikiPage wikiPage = WikiPage.create(randString());
-        String comment = "comment " + randString();
-        String content = "content" + randString();
-        // when
-        wikiPage.update(givenContributorId, comment, content);
-
-        // then
-        Revision rev = wikiPage.getCurrentRevision();
-
-        assertThat(rev).isNotNull();
-        assertThat(rev.getWikiPage())
-                .isNotNull()
-                .isSameAs(wikiPage);
-        assertThat(rev.getRevVersion()).isEqualTo(1);
-        assertThat(rev.getComment()).isEqualTo(comment);
-
-        RawContent raw = rev.getRawContent();
-        assertThat(raw.getContent()).isEqualTo(content);
-
-    }
-
-    @Test
-    void should_be_created_with_edit_token() {
-        String editToken = givenDoc.getVersionToken();
-
-        assertThat(editToken)
-                .isNotNull()
-                .describedAs("현재 UUID를 토큰으로 사용중임.")
-                .hasSameSizeAs(UUID.randomUUID().toString());
-    }
-
-    @Test
-    void should_be_created_with_default_owner_group() {
-        UUID givenOwnerGroupId = givenDoc.getOwnerGroupId();
-
-        assertThat(givenOwnerGroupId)
-                .describedAs("owner group id parameter 없이 생성될 경우, 기본값으로 \"00000000-0000-0000-0000-000000000001\"이 들어가야함.")
-                .isNotNull()
-                .isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000001"));
-    }
-
-    @Test
-    void should_be_created_with_owner_group() {
-        // given
-        UUID givenUuid = UUID.randomUUID();
         String givenTitle = randString();
 
         // when
-        WikiPage created = WikiPage.create(givenTitle, givenUuid);
+        WikiPage wikiPage = WikiPage.create(givenTitle);
 
         // then
-        assertThat(created.getOwnerGroupId()).isEqualTo(givenUuid);
-        assertThat(created.getTitle()).isEqualTo(givenTitle);
+        assertThat(wikiPage.isActive())
+                .describedAs("만들어진 직후에는 isActive가 false여야함.")
+                .isFalse();
+
+        assertThat(wikiPage.getTitle())
+                .describedAs("제목이 제대로 설정되어야함.")
+                .isEqualTo(givenTitle);
+
+        assertThat(wikiPage.getNamespace())
+                .describedAs("namespace 기본값은 NORMAL임.")
+                .isEqualTo(Namespace.NORMAL);
+
+        assertThat(wikiPage.getVersionToken())
+                .describedAs("버전 토큰이 초기화 되어야함. 공백, 혹은 null이어서는 안 됨.")
+                .isNotNull()
+                .isNotBlank();
     }
 
     @Test
-    void should_success_update_when_current_revision_is_null() {
+    void create_with_title_and_namespace() {
+        // given
+        String givenTitle = randString();
+        Namespace givenNamespace = Namespace.MAIN;
+
+        // when
+        WikiPage wikiPage = WikiPage.create(givenTitle, givenNamespace);
+
+        // then
+        assertThat(wikiPage.isActive())
+                .describedAs("만들어진 직후에는 isActive가 false여야함.")
+                .isFalse();
+
+        assertThat(wikiPage.getTitle())
+                .describedAs("제목이 제대로 설정되어야함.")
+                .isEqualTo(givenTitle);
+
+        assertThat(wikiPage.getNamespace())
+                .describedAs("namespace가 제대로 설정되어야함.")
+                .isEqualTo(givenNamespace);
+
+        assertThat(wikiPage.getVersionToken())
+                .describedAs("버전 토큰이 초기화 되어야함. 공백, 혹은 null이어서는 안 됨.")
+                .isNotNull()
+                .isNotBlank();
+    }
+
+    @Test
+    void create_isActive_should_be_set_false_when_created() {
+        assertThat(givenWikiPage.isActive())
+                .isFalse();
+    }
+
+    @Test
+    void update_should_success_when_current_revision_is_null() {
         // given
 
         // when
-        givenDoc.update(givenContributorId, givenComment, givenContent);
+        givenWikiPage.update(givenContributorId, givenComment, givenContent);
 
         // then
-        Revision rev = givenDoc.getCurrentRevision();
+        Revision rev = givenWikiPage.getCurrentRevision();
         assertThat(rev)
+                .describedAs("새로 생성된 리비전이 설정돼야함.")
                 .isNotNull();
+
         assertThat(rev.getWikiPage())
+                .describedAs("Revision.wikiPage가 givenWikiPage로 설정돼야함.")
                 .isNotNull()
-                .isSameAs(givenDoc);
+                .isSameAs(givenWikiPage);
+
         assertThat(rev.getRevVersion())
+                .describedAs("처음 생성된 리비전의 버전은 1임.")
                 .isEqualTo(1);
 
         RawContent raw = rev.getRawContent();
 
         assertThat(raw)
+                .describedAs("RawContent가 생성되어야함.")
                 .isNotNull();
+
         assertThat(raw.getContent())
+                .describedAs("RawContent의 본문이 제대로 생성되어야함.")
                 .isEqualTo(givenContent);
     }
 
     @Test
-    void should_regenerate_edit_token_when_successfully_updated() {
+    void update_should_regenerate_edit_token_when_successfully_updated() {
         // given
-        String givenEditToken = givenDoc.getVersionToken();
+        String givenEditToken = givenWikiPage.getVersionToken();
         assertThat(givenEditToken).isNotNull();
 
         // when
-        givenDoc.update(givenContributorId, givenComment, givenContent);
+        givenWikiPage.update(givenContributorId, givenComment, givenContent);
 
         // then
-        assertThat(givenDoc.getVersionToken()).isNotEqualTo(givenEditToken);
+        assertThat(givenWikiPage.getVersionToken())
+                .describedAs("버전 토큰이 재생성되어 이전의 버전 토큰과 일치하지 않아야함.")
+                .isNotEqualTo(givenEditToken)
+                .isNotNull()
+                .isNotBlank();
     }
 
     @Test
-    void should_rev_version_incremented_when_updated() {
+    void update_should_rev_version_incremented_when_updated() {
         // given
-        givenDoc.update(givenContributorId, givenComment, givenContent);
-        Revision givenRev = givenDoc.getCurrentRevision();
+        givenWikiPage.update(givenContributorId, givenComment, givenContent);
+        Revision givenRev = givenWikiPage.getCurrentRevision();
         RawContent givenRaw = givenRev.getRawContent();
         String newComment = "comment " + randString();
         String newContent = "content " + randString() + randString();
 
         // when
-        givenDoc.update(givenContributorId, newComment, newContent);
+        givenWikiPage.update(givenContributorId, newComment, newContent);
 
         // then
-        Revision newRev = givenDoc.getCurrentRevision();
+        Revision newRev = givenWikiPage.getCurrentRevision();
         assertThat(newRev)
+                .describedAs("새 Revision이 생성돼야함.")
                 .isNotNull()
                 .isNotSameAs(givenRev);
 
         assertThat(newRev.getRevVersion())
+                .describedAs("이전 revVersion보다 커야함.")
                 .isGreaterThan(givenRev.getRevVersion());
+
         assertThat(newRev.getWikiPage())
+                .describedAs("새로 생성된 Revision의 wikiPage가 제대로 설정됨.")
                 .isNotNull()
-                .isSameAs(givenDoc);
+                .isSameAs(givenWikiPage);
+
         assertThat(newRev.getComment())
+                .describedAs("comment가 제대로 설정됨.")
                 .isEqualTo(newComment);
 
         RawContent newRaw = newRev.getRawContent();
+
         assertThat(newRaw)
+                .describedAs("새 RawContent가 설정돼야함.")
                 .isNotNull()
                 .isNotSameAs(givenRaw);
+
         assertThat(newRaw.getContent())
+                .describedAs("새 RawContent의 본문이 제대로 설정되어야함.")
                 .isEqualTo(newContent)
+                .describedAs("이전의 본문과 달라야함.")
                 .isNotEqualTo(givenRaw.getContent());
 
     }
 
     @Test
-    void isActive_should_be_set_false_when_created() {
-        assertThat(givenDoc.isActive())
-                .isFalse();
-    }
-
-    @Test
-    void isActive_should_be_true_after_update() {
+    void update_isActive_should_be_true_after_update() {
         // when
-        givenDoc.update(givenContributorId, givenComment, givenContent);
+        givenWikiPage.update(givenContributorId, givenComment, givenContent);
 
         // then
-        assertThat(givenDoc.isActive())
+        assertThat(givenWikiPage.isActive())
                 .isTrue();
     }
 
     @Test
     void delete_test() {
         // given
-        givenDoc.update(givenContributorId, givenComment, givenContent);
+        givenWikiPage.update(givenContributorId, givenComment, givenContent);
         givenComment = randString();
-        Revision givenRevision = givenDoc.getCurrentRevision();
+        Revision givenRevision = givenWikiPage.getCurrentRevision();
 
         // when
-        givenDoc.delete(givenContributorId, givenComment);
+        givenWikiPage.delete(givenContributorId, givenComment);
 
         // then
-        assertThat(givenDoc.isActive())
+        assertThat(givenWikiPage.isActive())
                 .describedAs("isActive status should be changed")
                 .isFalse();
 
-        assertThat(givenDoc.getContent())
+        assertThat(givenWikiPage.getContent())
                 .describedAs("content should be blank")
                 .isBlank();
 
-        Revision currentRevision = givenDoc.getCurrentRevision();
+        Revision currentRevision = givenWikiPage.getCurrentRevision();
 
         assertThat(currentRevision)
+                .describedAs("현재 Revision이 null이어선 안 됨.")
                 .isNotNull();
 
         assertThat(currentRevision.getRevVersion())
-                .isNotEqualTo(givenRevision.getRevVersion());
-
-
+                .describedAs("이전 Revision과 버전 숫자가 달라야함.")
+                .isNotEqualTo(givenRevision.getRevVersion())
+                .describedAs("이전 Revision보다 버전 숫자가 커야함.")
+                .isGreaterThan(givenRevision.getRevVersion())
+        ;
     }
 
     @Test
     void getContent_should_return_blank_string_if_current_rev_is_null() {
         // given
-        WikiPage givenWikiPage = WikiPage.create(randString());
+        WikiPage givenWikiPage = WikiPage.create(randString(), Namespace.NORMAL);
         assertThat(givenWikiPage.getCurrentRevision())
                 .describedAs("테스트 선행 조건 만족")
                 .isNull();
@@ -221,7 +244,7 @@ class WikiPageTest {
     @Test
     void getContent_should_return_correct_string() {
         // given
-        WikiPage wikiPage = WikiPage.create(randString());
+        WikiPage wikiPage = WikiPage.create(randString(), Namespace.NORMAL);
         updateWikiPageRandomly(wikiPage);
         updateWikiPageRandomly(wikiPage);
 

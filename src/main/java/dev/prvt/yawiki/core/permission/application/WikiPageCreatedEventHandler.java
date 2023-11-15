@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class WikiPageCreatedEventHandler {
+
     private final ResourcePermissionService resourcePermissionService;
 
     @EventListener
     public void handle(WikiPageCreatedEvent wikiPageCreatedEvent) {
-        resourcePermissionService.updateResourcePermission(wikiPageCreatedEvent.id());
+        resourcePermissionService.createPagePermission(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.wikiPageTitle().namespace().getIntValue());
     }
 }

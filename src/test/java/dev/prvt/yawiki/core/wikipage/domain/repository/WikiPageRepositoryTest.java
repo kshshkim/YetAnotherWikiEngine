@@ -48,11 +48,11 @@ class WikiPageRepositoryTest {
     }
 
     @Test
-    void findByTitle() {
+    void findByTitleAndNamespace() {
         // given
 
         // when
-        WikiPage foundWikiPage = wikiPageRepository.findByTitle(testWikiPage.getTitle()).orElseThrow();
+        WikiPage foundWikiPage = wikiPageRepository.findByTitleAndNamespace(testWikiPage.getTitle(), testWikiPage.getNamespace()).orElseThrow();
 
         // then
         WikiPageFixture.assertEqualWikiPage(foundWikiPage, testWikiPage);
@@ -73,7 +73,7 @@ class WikiPageRepositoryTest {
         em.flush();
         em.clear();
         // when
-        Optional<WikiPage> found = wikiPageRepository.findByTitleWithRevisionAndRawContent(givenWikiPage.getTitle());
+        Optional<WikiPage> found = wikiPageRepository.findByTitleWithRevisionAndRawContent(givenWikiPage.getTitle(), givenWikiPage.getNamespace());
 
         // then
         assertThat(found).isPresent();
@@ -130,32 +130,5 @@ class WikiPageRepositoryTest {
         // then
         assertThat(updatedVersion)
                 .isGreaterThan(oldVersion);
-    }
-
-    @Test
-    void findOrCreate_should_create() {
-        // given
-        String givenTitle = randString();
-
-        // when
-        WikiPage created = wikiPageRepository.findOrCreate(givenTitle);
-
-        // then
-        assertThat(created.getTitle())
-                .isEqualTo(givenTitle);
-        assertThat(created.getId())
-                .isNotNull();
-
-        em.flush();
-        em.clear();
-
-        WikiPage found = em.find(WikiPage.class, created.getId());
-        WikiPageFixture.assertEqualWikiPage(found, created);
-    }
-
-    @Test
-    void findOrCreate_should_get() {
-        WikiPage found = wikiPageRepository.findOrCreate(testWikiPage.getTitle());
-        WikiPageFixture.assertEqualWikiPage(found, testWikiPage);
     }
 }

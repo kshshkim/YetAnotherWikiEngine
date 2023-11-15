@@ -1,6 +1,5 @@
 package dev.prvt.yawiki.auth.member.domain;
 
-import dev.prvt.yawiki.core.permission.domain.AuthorityProfile;
 import lombok.Getter;
 
 import javax.persistence.*;

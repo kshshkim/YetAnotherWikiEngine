@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.web.api.v1.wiki;
 
-import dev.prvt.yawiki.core.permission.domain.PermissionEvaluationException;
+import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
 import dev.prvt.yawiki.web.api.v1.ErrorMessage;

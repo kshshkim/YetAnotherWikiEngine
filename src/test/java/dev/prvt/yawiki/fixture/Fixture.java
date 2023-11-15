@@ -10,7 +10,7 @@ public class Fixture {
     public static String randString() {
         return RandomString.make();
     }
-
+    public static Random random = new Random();
     @SneakyThrows
     public static InetAddress aInetV4Address() {
         Random random = new Random();

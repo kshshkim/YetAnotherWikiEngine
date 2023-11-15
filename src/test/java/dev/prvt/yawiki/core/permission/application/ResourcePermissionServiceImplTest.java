@@ -1,115 +1,97 @@
 package dev.prvt.yawiki.core.permission.application;
 
-
-import dev.prvt.yawiki.config.permission.DefaultPermissionProperties;
-import dev.prvt.yawiki.core.permission.domain.Permission;
-import dev.prvt.yawiki.core.permission.domain.PermissionData;
-import dev.prvt.yawiki.core.permission.domain.PermissionGroup;
-import dev.prvt.yawiki.core.permission.domain.ResourcePermission;
-import dev.prvt.yawiki.core.permission.domain.evaluator.PermissionEvaluator;
+import dev.prvt.yawiki.core.permission.domain.PagePermissionUpdateValidator;
+import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
+import dev.prvt.yawiki.core.permission.domain.model.PagePermission;
+import dev.prvt.yawiki.core.permission.domain.model.Permission;
+import dev.prvt.yawiki.core.permission.domain.model.PermissionData;
+import dev.prvt.yawiki.core.permission.domain.repository.NamespacePermissionRepository;
+import dev.prvt.yawiki.core.permission.domain.repository.PagePermissionRepository;
 import dev.prvt.yawiki.core.permission.domain.repository.PermissionRepository;
-import dev.prvt.yawiki.core.permission.domain.repository.ResourcePermissionRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
+import java.util.Optional;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class ResourcePermissionServiceImplTest {
-    @Autowired
-    DefaultPermissionProperties defaultPermissionProperties;
 
-    @Autowired
-    ResourcePermissionRepository resourcePermissionRepository;
+    @Captor
+    ArgumentCaptor<PagePermission> pagePermissionCaptor;
+    @Mock
+    private PermissionRepository permissionRepository;
+    @Mock
+    private PagePermissionRepository pagePermissionRepository;
+    @Mock
+    private NamespacePermissionRepository namespacePermissionRepository;
+    @Mock
+    private PermissionMapper permissionMapper;
+    @Mock
+    private PagePermissionUpdateValidator pagePermissionUpdateValidator;
+    @Mock
+    private Permission mockPermission;
+    @Mock
+    private PagePermission mockPagePermission;
+    @Mock
+    private NamespacePermission mockNamespacePermission;
+    @InjectMocks
+    private ResourcePermissionServiceImpl resourcePermissionService;
 
-    @Autowired
-    PermissionRepository permissionRepository;
+    @Test
+    void createPermission() {
+        PermissionData givenPermissionData = PermissionData.builder().build();
+        given(permissionMapper.map(givenPermissionData))
+                .willReturn(mockPermission);
+        given(permissionRepository.save(any())).willReturn(mockPermission);
+        // when
+        resourcePermissionService.createPermission(givenPermissionData);
 
-    @Autowired
-    PermissionEvaluator permissionEvaluator;
-
-    @Autowired
-    EntityManager em;
-
-    ResourcePermissionService resourcePermissionService;
-
-    UUID givenId;
-
-    @BeforeEach
-    void init() {
-        givenId = UUID.randomUUID();
-        resourcePermissionService = new ResourcePermissionServiceImpl(permissionEvaluator, defaultPermissionProperties, resourcePermissionRepository, permissionRepository);
+        // then
+        verify(permissionRepository).save(mockPermission);
     }
 
     @Test
-    void updatePermission_default() {
-        // when
-        resourcePermissionService.updateResourcePermission(givenId);
-        em.flush();
-        em.clear();
+    void createPagePermission() {
+        Integer givenNamespaceId = 1;
+        UUID givenPageId = UUID.randomUUID();
+        given(namespacePermissionRepository.findById(1))
+                .willReturn(Optional.of(mockNamespacePermission));
 
-        // then
-        ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();
-        assertThat(resourcePermission.getSpecificPermission())
-                .isNull();
-        assertThat(resourcePermission.getOwnerGroup().getId())
-                .isEqualTo(defaultPermissionProperties.getDefaultPermissionGroupId());
-        assertThat(resourcePermission.getOwnerGroup().getDefaultResourcePermission())
-                .isNotNull();
+        // when
+        resourcePermissionService.createPagePermission(givenPageId, givenNamespaceId);
+
+        verify(pagePermissionRepository).save(pagePermissionCaptor.capture());
+
+        assertThat(pagePermissionCaptor.getValue().getNamespacePermission())
+                .isSameAs(mockNamespacePermission);
     }
 
     @Test
-    void updatePermission_with_groupId() {
-        // given
-        UUID givenPermissionGroupId = UUID.randomUUID();
-        Permission givenPermission = permissionRepository.getOrCreateByAllAttributes(1, 2, 3, 4, 4);
-        em.persist(new PermissionGroup(givenPermissionGroupId, randString(), givenPermission));
-        em.flush();
-        em.clear();
+    void updatePagePermission_with_predefined_id() {
+        Integer givenPermissionId = 10;
+        UUID givenPageId = UUID.randomUUID();
+        given(permissionRepository.findById(givenPermissionId))
+                .willReturn(Optional.of(mockPermission));
+        given(pagePermissionRepository.findById(givenPageId))
+                .willReturn(Optional.of(mockPagePermission));
 
         // when
-        resourcePermissionService.updateResourcePermission(givenId, givenPermissionGroupId);
-        em.flush();
-        em.clear();
+        resourcePermissionService.updatePagePermission(givenPageId, givenPermissionId);
 
         // then
-        ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();
-        assertThat(resourcePermission.getSpecificPermission())
-                .isNull();
-        assertThat(resourcePermission.getOwnerGroup().getId())
-                .isEqualTo(givenPermissionGroupId);
-    }
-
-    @Test
-    void updatePermission_with_groupId_and_specific_permission() {
-        // given
-        UUID givenPermissionGroupId = UUID.randomUUID();
-        Permission givenPermission = permissionRepository.getOrCreateByAllAttributes(1, 2, 3, 4, 4);
-        em.persist(new PermissionGroup(givenPermissionGroupId, randString(), givenPermission));
-        em.flush();
-        em.clear();
-        // when
-        resourcePermissionService.updateResourcePermission(givenId, givenPermissionGroupId, PermissionData.from(givenPermission));
-        em.flush();
-        em.clear();
-
-        // then
-        ResourcePermission resourcePermission = resourcePermissionRepository.findById(givenId).orElseThrow();
-        Permission specificPermission = resourcePermission.getSpecificPermission();
-        assertThat(specificPermission)
-                .isNotNull();
-        assertThat(tuple(specificPermission.getCreate(), specificPermission.getRead(), specificPermission.getUpdate(), specificPermission.getDelete(), specificPermission.getManage()))
-                .isEqualTo(tuple(1, 2, 3, 4, 4));
-        assertThat(resourcePermission.getOwnerGroup().getId())
-                .isEqualTo(givenPermissionGroupId);
+        verify(permissionRepository).findById(givenPermissionId);
+        verify(pagePermissionRepository).findById(givenPageId);
+        verify(mockPagePermission).updatePermission(mockPermission, pagePermissionUpdateValidator);
     }
 }

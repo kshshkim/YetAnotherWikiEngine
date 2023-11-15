@@ -1,9 +1,16 @@
 package dev.prvt.yawiki.core.wikireference.infra;
 
 import com.fasterxml.uuid.impl.UUIDUtil;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EnumPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
+import dev.prvt.yawiki.core.wikipage.domain.model.QWikiPageTitle;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
@@ -26,7 +33,7 @@ import java.util.stream.Collectors;
 import static dev.prvt.yawiki.core.wikipage.domain.model.QWikiPage.wikiPage;
 import static dev.prvt.yawiki.core.wikireference.domain.QWikiReference.wikiReference;
 
-
+// todo in 절이 or 절로 바뀌었음. 관련 부분 인덱스 잘 타는지 체크해야함.
 @Repository
 @Slf4j
 @Transactional(readOnly = true)
@@ -36,7 +43,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
     private final JdbcTemplate jdbcTemplate;
 
 
-    public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate, UuidGenerator uuidGenerator) {
+    public WikiReferenceRepositoryImpl(EntityManager em, WikiReferenceJpaRepository wikiReferenceJpaRepository, JdbcTemplate jdbcTemplate) {
         this.queryFactory = new JPAQueryFactory(em);
         this.wikiReferenceJpaRepository = wikiReferenceJpaRepository;
         this.jdbcTemplate = jdbcTemplate;
@@ -44,22 +51,25 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
 
 
     @Override
-    public Set<String> findReferredTitlesByRefererId(UUID refererId) {
+    public Set<WikiPageTitle> findReferredTitlesByRefererId(UUID refererId) {
         return queryFactory
-                .select(wikiReference.tuple.referredTitle).from(wikiReference)
-                    .where(refererIdMatches(refererId))
+                .select(new QWikiPageTitle(wikiReference.tuple.referredTitle, wikiReference.tuple.namespace))
+                    .from(wikiReference)
+                    .where(wikiReferenceRefererIdMatches(refererId))
                 .stream()
                 .collect(Collectors.toSet());
     }
 
     @Override
-    public Set<String> findExistingWikiPageTitlesByRefererId(UUID refererId) {
+    public Set<WikiPageTitle> findExistingWikiPageTitlesByRefererId(UUID refererId) {
         return queryFactory
-                .select(wikiReference.tuple.referredTitle)
+                .select(new QWikiPageTitle(wikiReference.tuple.referredTitle, wikiReference.tuple.namespace))
                     .from(wikiReference)
                         .innerJoin(wikiPage)
-                            .on(titleMatches(), wikiPageIsActive())
-                    .where(refererIdMatches(refererId))
+                            .on(wikiReferenceTitleAndNamespaceMatches(wikiPage.title, wikiPage.namespace))
+                    .where(
+                            wikiReferenceRefererIdMatches(refererId),
+                            wikiPage.isActive.isTrue())
                 .stream()
                 .collect(Collectors.toSet());
     }
@@ -67,15 +77,15 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
     /**
      * 페이징을 위한 추가 Count 쿼리
      */
-    private long backReferencesCount(String referredTitle) {
+    private long backReferencesCount(String title, Namespace namespace) {
         //count 쿼리 특성상 null 값을 걱정하지 않아도 될듯함.
         //noinspection DataFlowIssue
         return queryFactory
                 .select(wikiPage.count())
                 .from(wikiPage)
                     .join(wikiReference)
-                    .on(wikiReference.tuple.refererId.eq(wikiPage.id))
-                .where(wikiReference.tuple.referredTitle.eq(referredTitle))
+                    .on(wikiReferenceTitleAndNamespaceMatches(wikiPage.title, wikiPage.namespace))
+                .where(wikiReferenceTitleAndNamespaceMatches(title, namespace))
                 .fetchOne();
     }
 
@@ -83,28 +93,31 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
      * <p>지정된 페이지 크기보다 BackReference 의 숫자가 적다면, 페이징을 위한 추가 count 쿼리가 나가지 않아야함.</p>
      */
     @Override
-    public Page<String> findBackReferencesByWikiPageTitle(String wikiPageTitle, Pageable pageable) {
-        List<String> content = queryFactory
-                .select(wikiPage.title)
+    public Page<WikiPageTitle> findBackReferencesByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable) {
+        List<WikiPageTitle> content = queryFactory
+                .select(new QWikiPageTitle(wikiPage.title, wikiPage.namespace))
                 .from(wikiPage)
                     .join(wikiReference)
                     .on(wikiReference.tuple.refererId.eq(wikiPage.id))
-                .where(wikiReference.tuple.referredTitle.eq(wikiPageTitle))
+                .where(
+                        wikiReference.tuple.referredTitle.eq(wikiPageTitle),
+                        wikiReference.tuple.namespace.eq(namespace)
+                )
                 .orderBy(wikiPage.title.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, () -> backReferencesCount(wikiPageTitle));
+        return PageableExecutionUtils.getPage(content, pageable, () -> backReferencesCount(wikiPageTitle, namespace));
     }
 
     @Override
     @Transactional
-    public long delete(UUID refererId, Collection<String> titlesToDelete) {
+    public long delete(UUID refererId, Collection<WikiPageTitle> titlesToDelete) {
         return queryFactory
                 .delete(wikiReference)
                     .where(
-                            refererIdMatches(refererId),
+                            wikiReferenceRefererIdMatches(refererId),
                             titleIn(titlesToDelete)
                     )
                 .execute();
@@ -112,11 +125,11 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
 
     @Override
     @Transactional
-    public long deleteExcept(UUID refererId, Collection<String> titlesNotToDelete) {
+    public long deleteExcept(UUID refererId, Collection<WikiPageTitle> titlesNotToDelete) {
         return queryFactory
                 .delete(wikiReference)
                     .where(
-                            refererIdMatches(refererId),
+                            wikiReferenceRefererIdMatches(refererId),
                             titleNotIn(titlesNotToDelete)
                     )
                 .execute();
@@ -135,36 +148,46 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
      */
     @Override
     @Transactional
-    public void bulkInsert(UUID refererId, List<String> titles) {
-        String sql = "INSERT INTO wiki_reference (referer_id, referred_title) VALUES (?, ?)";
+    public void bulkInsert(UUID refererId, List<WikiPageTitle> titles) {
+        String sql = "INSERT INTO wiki_reference (referer_id, referred_title, referred_namespace) VALUES (?, ?, ?)";
         byte[] byteRefererId = UUIDUtil.asByteArray(refererId);
         jdbcTemplate.batchUpdate(sql,
                 titles,
                 titles.size(),
-                (PreparedStatement ps, String title) -> {
+                (PreparedStatement ps, WikiPageTitle title) -> {
                     ps.setBytes(1, byteRefererId);
-                    ps.setString(2, title);
+                    ps.setString(2, title.title());
+                    ps.setInt(3, title.namespace().getIntValue());
                 }
         );
     }
 
-    private BooleanExpression titleMatches() {
-        return wikiReference.tuple.referredTitle.eq(wikiPage.title);
-    }
-
-    private BooleanExpression wikiPageIsActive() {
-        return wikiPage.isActive.isTrue();
-    }
-
-    private BooleanExpression refererIdMatches(UUID documentId) {
+    private BooleanExpression wikiReferenceRefererIdMatches(UUID documentId) {
         return wikiReference.tuple.refererId.eq(documentId);
     }
 
-    private BooleanExpression titleNotIn(Collection<String> titles) {
-        return wikiReference.tuple.referredTitle.notIn(titles);
+    private Predicate titleNotIn(Collection<WikiPageTitle> titles) {
+        return titleIn(titles).not();
     }
 
-    private BooleanExpression titleIn(Collection<String> titles) {
-        return wikiReference.tuple.referredTitle.in(titles);
+    private Predicate titleIn(Collection<WikiPageTitle> titles) {
+        BooleanBuilder builder = new BooleanBuilder();
+        for (WikiPageTitle title : titles) {
+            builder.or(
+                    wikiReferenceTitleAndNamespaceMatches(title.title(), title.namespace())
+            );
+        }
+        return builder;
+    }
+
+    private static BooleanExpression wikiReferenceTitleAndNamespaceMatches(String title, Namespace namespace) {
+        return wikiReference.tuple.referredTitle.eq(title)
+                .and(wikiReference.tuple.namespace.eq(namespace))
+                ;
+    }
+    private static BooleanExpression wikiReferenceTitleAndNamespaceMatches(StringPath title, EnumPath<Namespace> namespace) {
+        return wikiReference.tuple.referredTitle.eq(title)
+                .and(wikiReference.tuple.namespace.eq(namespace))
+                ;
     }
 }

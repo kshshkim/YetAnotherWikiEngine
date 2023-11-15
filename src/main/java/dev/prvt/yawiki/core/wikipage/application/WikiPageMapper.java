@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
-import dev.prvt.yawiki.core.contributor.domain.ContributorState;
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
@@ -14,7 +13,7 @@ import java.util.UUID;
 @Component
 public class WikiPageMapper {
     public WikiPageDataForUpdate mapFrom(WikiPage wikiPage) {
-        return new WikiPageDataForUpdate(wikiPage.getTitle(), wikiPage.getContent(), wikiPage.getVersionToken());
+        return new WikiPageDataForUpdate(wikiPage.getTitle(), wikiPage.getNamespace(), wikiPage.getContent(), wikiPage.getVersionToken());
     }
 
     private String extractContributorName(Contributor contributor) {

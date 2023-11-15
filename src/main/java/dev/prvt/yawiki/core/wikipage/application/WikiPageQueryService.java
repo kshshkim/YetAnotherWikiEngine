@@ -2,35 +2,32 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface WikiPageQueryService {
     /**
      * 조회용 WikiPage DTO.
-     * @param title 찾을 WikiPage 의 title
+     * @param wikiPageTitle 위키 페이지 제목과 네임스페이스
      * @return WikiPageDataForRead
      * @see dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead
      */
-    WikiPageDataForRead getWikiPage(String title);
+    WikiPageDataForRead getWikiPage(WikiPageTitle wikiPageTitle);
 
-    WikiPageDataForRead getWikiPage(String title, int version);
+    WikiPageDataForRead getWikiPage(WikiPageTitle wikiPageTitle, int version);
 
     /**
      * title 을 참조하고 있는 문서들의 title 목록. title 기준으로 오름차순 정렬된 값을 반환함.
-     * @param title 참조되고 있는 문서 제목
-     * @param page 페이지 번호
-     * @param size 페이지 크기
-     * @return WikiPage.title in Page
+     * @param wikiPageTitle 참조되고 있는 문서 제목&네임스페이스
+     * @return WikiPageTitle in Page
      */
-    Page<String> getBackReferences(String title, Pageable pageable);
+    Page<WikiPageTitle> getBackReferences(WikiPageTitle wikiPageTitle, Pageable pageable);
 
     /**
      * 페이징이 적용된 수정 내역 조회용 메소드.
-     * @param title 조회할 문서 제목
-     * @param page 페이지 번호
-     * @param size 페이지 크기
+     * @param wikiPageTitle 참조되고 있는 문서 제목&네임스페이스
      * @return RevisionData in Page
      */
-    Page<RevisionData> getRevisionHistory(String title, Pageable pageable);
+    Page<RevisionData> getRevisionHistory(WikiPageTitle wikiPageTitle, Pageable pageable);
 }

@@ -10,7 +10,7 @@ spring:
       data-source-properties:
         rewriteBatchedStatements: true  # highly recommended due to performance reasons
   jdbc:
-    batch_size: 1000
+    batch_size: 100
     show-sql: true
   jpa:
     open-in-view: false
@@ -20,28 +20,20 @@ spring:
       order_updates: true
       jdbc:
         batch_size: 100
-        show-sql: true
+#        show-sql: true
     properties:
       hibernate:
-        format_sql: true
+#        format_sql: true
 #        default_batch_fetch_size: 100
 
 yawiki:
-  default-permission:
-    doInitialize: true
-    create: 0
-    read: 0
-    update: 0
-    delete: 0
-    manage: 3
+#  default-permission:
+#    doInitialize: true # 기본값 false, permission 관련 설정값을 초기화하려면 true
   jwt:
     lifespan: 1800
-#  cors:
-#    allowed-origins: *
-#    allowed-methods: *
 
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.jdbc: DEBUG
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.springframework.jdbc: DEBUG
