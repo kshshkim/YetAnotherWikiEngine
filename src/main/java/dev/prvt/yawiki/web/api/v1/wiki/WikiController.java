@@ -24,48 +24,41 @@ import org.springframework.web.bind.annotation.*;
 public class WikiController {
     private final WikiPageCommandService wikiPageCommandService;
     private final WikiPageQueryService wikiPageQueryService;
-    private final NamespaceParser namespaceParser;
 
     @GetMapping("/{title}")
     public WikiPageDataForRead getWikiPage(
-            @PathVariable String title,
+            @PathVariable WikiPageTitle title,
             @RequestParam(required = false) Integer rev
     ) {
-        Namespace namespace = namespaceParser.parseTitle(title);
-        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
-        return rev == null ? wikiPageQueryService.getWikiPage(wikiPageTitle):
-                wikiPageQueryService.getWikiPage(wikiPageTitle, rev);
+        return rev == null ? wikiPageQueryService.getWikiPage(title):
+                wikiPageQueryService.getWikiPage(title, rev);
     }
 
     @GetMapping("/{title}/history")
     public Page<RevisionData> getWikiHistory(
-            @PathVariable String title,
+            @PathVariable WikiPageTitle title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "30") int size
     ) {
-        Namespace namespace = namespaceParser.parseTitle(title);
-        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
         return wikiPageQueryService.getRevisionHistory(
-                wikiPageTitle,
+                title,
                 Pageable.ofSize(size).withPage(page)
         );
     }
 
     @GetMapping("/{title}/edit")
     public WikiPageDataForUpdate proclaimEdit(
-            @PathVariable String title,
+            @PathVariable WikiPageTitle title,
             @ContributorInfo ContributorInfoArg contributorInfo
     ) {
-        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespaceParser.parseTitle(title));
-
         try {
-            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), wikiPageTitle);
+            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
         } catch (NoSuchWikiPageException e) {
             wikiPageCommandService.create(
                     contributorInfo.contributorId(),
-                    wikiPageTitle
+                    title
             );
-            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), wikiPageTitle);
+            return wikiPageCommandService.proclaimUpdate(contributorInfo.contributorId(), title);
         }
     }
 
@@ -79,15 +72,12 @@ public class WikiController {
 
     @PutMapping("/{title}/edit")
     public WikiPageDataForRead commitEdit(
-            @PathVariable String title,
+            @PathVariable WikiPageTitle title,
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody CommitEditRequest commitEditRequest
     ) {
-        Namespace namespace = namespaceParser.parseTitle(title);
-
-        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
-        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), wikiPageTitle, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
-        return wikiPageQueryService.getWikiPage(wikiPageTitle);
+        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), title, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
+        return wikiPageQueryService.getWikiPage(title);
     }
 
     public record DeleteRequest(
@@ -99,12 +89,10 @@ public class WikiController {
 
     @DeleteMapping("/{title}/edit")
     public void delete(
-            @PathVariable String title,
+            @PathVariable WikiPageTitle title,
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody DeleteRequest deleteRequest
     ) {
-        Namespace namespace = namespaceParser.parseTitle(title);
-        WikiPageTitle wikiPageTitle = new WikiPageTitle(title, namespace);
-        wikiPageCommandService.delete(contributorInfo.contributorId(), wikiPageTitle, deleteRequest.comment(), deleteRequest.versionToken());
+        wikiPageCommandService.delete(contributorInfo.contributorId(), title, deleteRequest.comment(), deleteRequest.versionToken());
     }
 }

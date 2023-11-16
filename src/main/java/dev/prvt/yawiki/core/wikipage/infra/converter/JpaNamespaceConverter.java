@@ -11,7 +11,7 @@ import java.util.Arrays;
  * @see Namespace
  */
 @Converter(autoApply = true)
-public class NamespaceConverter implements AttributeConverter<Namespace, Integer> {
+public class JpaNamespaceConverter implements AttributeConverter<Namespace, Integer> {
 
     /**
      * 변환시마다 인스턴스가 생성되는 것을 막고, 오버헤드 없이 빠르게 변환되도록 내부에 배열을 가짐. 생성 시점에 초기화됨.
@@ -19,7 +19,7 @@ public class NamespaceConverter implements AttributeConverter<Namespace, Integer
      */
     private final Namespace[] namespaces;
 
-    public NamespaceConverter() {
+    public JpaNamespaceConverter() {
         namespaces = new Namespace[256];
         Arrays.stream(Namespace.values())
                 .forEach(namespace -> namespaces[namespace.getIntValue()] = namespace);

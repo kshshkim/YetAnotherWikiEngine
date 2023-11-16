@@ -17,6 +17,9 @@ import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikipage.infra.converter.NamespaceParser;
+import dev.prvt.yawiki.core.wikipage.infra.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.core.wikipage.infra.converter.WikiPageTitleConverterImpl;
 import dev.prvt.yawiki.web.api.v1.ErrorMessage;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArgumentResolver;
@@ -30,8 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -61,10 +65,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
@@ -85,6 +86,9 @@ class WikiControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private GenericConversionService genericConversionService;
+
     @MockBean
     private WikiPageCommandService wikiPageCommandService;
 
@@ -97,14 +101,14 @@ class WikiControllerTest {
     @MockBean
     private JwtAuthenticationTokenContributorInfoConverter jwtAuthenticationTokenContributorInfoConverter;
 
-    @SpyBean
-    private NamespaceParser namespaceParser;
+    @Autowired
+    private Converter<String, WikiPageTitle> converter;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     // security
     @TestConfiguration
-    static class SecurityConf {
+    static class TestConf {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
             httpSecurity
@@ -181,8 +185,13 @@ class WikiControllerTest {
             return new NimbusJwtEncoder(jwkSource);
         }
 
+        //
+        @Bean
+        public WikiPageTitleConverter wikiPageTitleConverter() {
+            return new WikiPageTitleConverterImpl(new NamespaceParser(new HashMap<>()));
+        }
+
     }
-    // end security
 
     WikiPageTitle givenTitle;
     String givenContent;
