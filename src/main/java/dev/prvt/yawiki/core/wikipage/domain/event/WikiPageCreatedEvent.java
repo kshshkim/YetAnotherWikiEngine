@@ -2,7 +2,10 @@ package dev.prvt.yawiki.core.wikipage.domain.event;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * 위키 문서가 생성되었다는 이벤트
@@ -11,14 +14,18 @@ import java.util.UUID;
  */
 public record WikiPageCreatedEvent(
         UUID id,
-        WikiPageTitle wikiPageTitle
+        WikiPageTitle wikiPageTitle,
+        LocalDateTime timestamp
 ) {
     public WikiPageCreatedEvent {
-        if (id == null) {
-            throw new NullPointerException("id cannot be null");
+        requireNonNull(id);
+        requireNonNull(wikiPageTitle);
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
         }
-        if (wikiPageTitle == null) {
-            throw new NullPointerException("wikiPageTitle cannot be null");
-        }
+    }
+
+    public WikiPageCreatedEvent(UUID id, WikiPageTitle wikiPageTitle) {
+        this(id, wikiPageTitle, null);
     }
 }

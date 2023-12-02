@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageDeletedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
@@ -63,6 +64,9 @@ public class WikiPageDomainService {
         WikiPage wikiPage = getWikiPage(wikiPageTitle);
         validateDelete(contributorId, versionToken, wikiPage);
         wikiPage.delete(contributorId, comment);
+        applicationEventPublisher.publishEvent(
+                new WikiPageDeletedEvent(contributorId, wikiPage.getId(), wikiPage.getWikiPageTitle())
+        );
         deleteReferences(wikiPage);
     }
 

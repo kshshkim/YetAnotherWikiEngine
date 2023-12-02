@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageDeletedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
@@ -262,10 +263,10 @@ class WikiPageDomainServiceTest {
 
         willThrow(givenException)
                 .given(mockVersionCollisionValidator)
-                        .validate(
-                                wikiPageThatWikiPageTitleEquals(givenTitle),
-                                eq(givenVersionToken)
-                        );
+                .validate(
+                        wikiPageThatWikiPageTitleEquals(givenTitle),
+                        eq(givenVersionToken)
+                );
 
         assertThatThrownBy(this::deleteWithGivenParameters)
                 .hasMessageContaining(givenException.getMessage());
@@ -284,6 +285,36 @@ class WikiPageDomainServiceTest {
                         eq(givenActorId),
                         wikiPageThatWikiPageTitleEquals(givenTitle)
                 );
+    }
+
+    @Test
+    void delete_should_publish_event() {
+        // when
+        deleteWithGivenParameters();
+
+        // then
+        verify(mockEventPublisher).publishEvent(publishedEventsCaptor.capture());
+
+        List<WikiPageDeletedEvent> events = publishedEventsCaptor.getAllValues().stream()
+                .filter(ev -> ev instanceof WikiPageDeletedEvent)
+                .map(ev -> (WikiPageDeletedEvent) ev)
+                .toList();
+
+        assertThat(events)
+                .describedAs("문서 생성시 WikiPageCreated 이벤트가 한 번만 발행되어야함.")
+                .isNotEmpty()
+                .hasSize(1);
+
+        WikiPageDeletedEvent event = events.get(0);
+
+        assertThat(
+                List.of(
+                        event.wikiPageId(),
+                        event.contributorId(),
+                        event.deletedTitle()
+                ))
+                .describedAs("이벤트 객체의 내용이 적절히 설정됨.")
+                .containsExactly(givenWikiPage.getId(), givenActorId, givenTitle);
     }
 
     @Test
@@ -309,6 +340,7 @@ class WikiPageDomainServiceTest {
         assertThat(List.of(wikiPageCreatedEvent.id(), wikiPageCreatedEvent.wikiPageTitle()))
                 .describedAs("이벤트 객체의 내용이 적절히 설정됨.")
                 .containsExactly(wikiPage.getId(), wikiPage.getWikiPageTitle());
+
     }
 
     @Test
