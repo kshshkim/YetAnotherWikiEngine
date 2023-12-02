@@ -244,7 +244,7 @@ class WikiControllerTest {
     void getWikiPage_ok() {
         // given
         given(wikiPageQueryService.getWikiPage(givenTitle))
-                .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
+                .willReturn(new WikiPageDataForRead(givenTitle, givenContent));
 
         // when then
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString()))
@@ -264,7 +264,7 @@ class WikiControllerTest {
         // given
         int givenVersion = 22;
         given(wikiPageQueryService.getWikiPage(givenTitle, givenVersion))
-                .willReturn(new WikiPageDataForRead(givenTitle.title(), givenTitle.namespace(), givenContent, new ArrayList<>()));
+                .willReturn(new WikiPageDataForRead(givenTitle, givenContent));
 
         // when then
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "?rev=" + givenVersion))

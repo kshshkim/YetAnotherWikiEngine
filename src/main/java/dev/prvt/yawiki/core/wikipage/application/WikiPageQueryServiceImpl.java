@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,8 +37,7 @@ public class WikiPageQueryServiceImpl implements WikiPageQueryService {
     public WikiPageDataForRead getWikiPage(WikiPageTitle wikiPageTitle) {
         WikiPage found = wikiPageRepository.findByTitleWithRevisionAndRawContent(wikiPageTitle.title(), wikiPageTitle.namespace())
                 .orElseThrow(NoSuchWikiPageException::new);
-        Set<WikiPageTitle> validWikiReferences = wikiReferenceRepository.findExistingWikiPageTitlesByRefererId(found.getId());
-        return new WikiPageDataForRead(wikiPageTitle.title(), found.getNamespace(), found.getContent(), validWikiReferences);
+        return new WikiPageDataForRead(wikiPageTitle, found.getContent());
     }
 
     /**
@@ -49,9 +47,10 @@ public class WikiPageQueryServiceImpl implements WikiPageQueryService {
     public WikiPageDataForRead getWikiPage(WikiPageTitle wikiPageTitle, int version) {
         Revision found = wikiPageQueryRepository.findRevisionByWikiPageTitleWithRawContent(wikiPageTitle, version)
                 .orElseThrow(NoSuchWikiPageException::new);
-        return new WikiPageDataForRead(wikiPageTitle.title(), wikiPageTitle.namespace(), found.getContent(), null);
+        return new WikiPageDataForRead(wikiPageTitle, found.getContent());
     }
 
+    // todo wikireference 도메인으로 이동
     @Override
     public Page<WikiPageTitle> getBackReferences(WikiPageTitle wikiPageTitle, Pageable pageable) {
         return wikiReferenceRepository.findBackReferencesByWikiPageTitle(wikiPageTitle.title(), wikiPageTitle.namespace(), pageable);
