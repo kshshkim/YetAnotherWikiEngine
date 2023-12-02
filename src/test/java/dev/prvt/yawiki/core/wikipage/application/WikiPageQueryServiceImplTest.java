@@ -186,8 +186,8 @@ class WikiPageQueryServiceImplTest {
         // then
         assertThat(revisionData)
                 .isNotNull()
-                .isEqualTo(new WikiPageDataForRead(givenWikiPageTitle.title(), Namespace.NORMAL, givenRevision.getContent(), null))
-                .isNotEqualTo(new WikiPageDataForRead(givenWikiPageTitle.title(), Namespace.NORMAL, givenWikiPage.getContent(), null))
+                .isEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenRevision.getContent()))
+                .isNotEqualTo(new WikiPageDataForRead(givenWikiPageTitle, givenWikiPage.getContent()))
         ;
     }
 
