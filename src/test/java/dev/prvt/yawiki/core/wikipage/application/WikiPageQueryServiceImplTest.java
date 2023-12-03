@@ -100,7 +100,7 @@ class WikiPageQueryServiceImplTest {
     }
 
     private UUID pickRandomContributorId() {
-        return givenContributors.get(random.nextInt(TOTAL_CONTRIBUTORS)).getId();
+        return givenContributors.get(random().nextInt(TOTAL_CONTRIBUTORS)).getId();
     }
 
     // 없앨 예정인 기능이기 때문에 테스트를 제거함.
@@ -145,7 +145,7 @@ class WikiPageQueryServiceImplTest {
     @Test
     void getRevisionHistory_test() {
         // given
-        int givenPageNumber = random.nextInt(10);
+        int givenPageNumber = random().nextInt(10);
 
         Pageable givenPageable = Pageable.ofSize(10).withPage(givenPageNumber);
         given(wikiPageQueryRepository.findRevisionsByWikiPageId(givenWikiPage.getId(), givenPageable))
@@ -172,7 +172,7 @@ class WikiPageQueryServiceImplTest {
     @DisplayName("최신버전이 아닌 과거의 Revision을 불러옴")
     void getRevisionTest() {
         // given
-        int givenVersion = random.nextInt(1, TOTAL_REVS - 1);  // 최신버전이 아닌 과거의 리비전
+        int givenVersion = random().nextInt(1, TOTAL_REVS - 1);  // 최신버전이 아닌 과거의 리비전
         Revision givenRevision = givenRevisions.stream()
                 .filter(rv -> rv.getRevVersion().equals(givenVersion))
                 .findFirst()
