@@ -2,12 +2,12 @@ package dev.prvt.yawiki.fixture;
 
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
-import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
-import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.*;
 
 import java.util.UUID;
 
+import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.Fixture.random;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -20,11 +20,21 @@ public class WikiPageFixture {
         return new RawContent(sb.toString());
     }
 
+    public static WikiPageTitle aWikiPageTitle() {
+        return new WikiPageTitle(randString(5, 255), aNamespace());
+    }
+
+    private static final Namespace[] namespaces = Namespace.values();
+
+    public static Namespace aNamespace() {
+        return namespaces[random().nextInt(namespaces.length)];
+    }
+
     public static Revision.RevisionBuilder aRevision() {
         return Revision.builder()
                 .contributorId(UUID.randomUUID())
                 .rawContent(aRawContent())
-                .comment(Fixture.randString());
+                .comment(randString());
     }
 
     public static MemberContributor.MemberContributorBuilder aMemberContributor() {
@@ -40,11 +50,11 @@ public class WikiPageFixture {
     }
 
     public static void updateWikiPageRandomly(WikiPage wikiPage) {
-        wikiPage.update(UUID.randomUUID(), Fixture.randString(), Fixture.randString() + Fixture.randString() + Fixture.randString());
+        wikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
     }
 
     public static void updateWikiPageRandomlyWithContributorId(WikiPage wikiPage, UUID contributorId) {
-        wikiPage.update(contributorId, Fixture.randString(), Fixture.randString() + Fixture.randString() + Fixture.randString());
+        wikiPage.update(contributorId, randString(), randString() + randString() + randString());
     }
 
     public static void assertEqualRawContent(RawContent actual, RawContent expected) {
