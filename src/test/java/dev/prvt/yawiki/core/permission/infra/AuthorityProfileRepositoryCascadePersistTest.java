@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.permission.infra;
 
+import dev.prvt.yawiki.config.JpaAuditingConfig;
 import dev.prvt.yawiki.core.permission.domain.model.AuthorityProfile;
 import dev.prvt.yawiki.core.permission.domain.model.GrantedPermission;
 import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
+@Import(JpaAuditingConfig.class)
 public class AuthorityProfileRepositoryCascadePersistTest {
 
     @Autowired

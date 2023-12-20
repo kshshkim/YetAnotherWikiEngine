@@ -31,7 +31,7 @@ public class RemoteChangesRepositoryImpl implements RemoteChangesRepository {
         return queryFactory
                 .select(remoteChangeLogProjection())
                 .from(titleHistory)
-                .where(titleHistory.createdAt.between(after, before))
+                .where(titleHistory.createdAt.after(after), titleHistory.createdAt.before(before))
                 .orderBy(titleHistory.createdAt.asc())
                 .fetch();
     }
