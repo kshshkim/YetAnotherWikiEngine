@@ -1,13 +1,15 @@
 package dev.prvt.yawiki.core.wikipage.infra.converter;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
-import dev.prvt.yawiki.core.wikipage.infra.converter.NamespaceParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NamespaceParserTest {
@@ -71,5 +73,17 @@ class NamespaceParserTest {
         // then
         assertThat(result)
                 .isEqualTo(Namespace.FILE);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Namespace.class)
+    void noArgsConstructorTest(Namespace namespace) {
+        NamespaceParser defaultParser = new NamespaceParser();
+
+        // when
+        Namespace parsed = defaultParser.getNamespace(namespace.name() + ":" + randString());
+
+        // then
+        assertThat(parsed).isEqualTo(namespace);
     }
 }

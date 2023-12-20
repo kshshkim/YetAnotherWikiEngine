@@ -53,4 +53,20 @@ class WikiPageTitleConverterImplTest {
         assertThat(result)
                 .isEqualTo(new WikiPageTitle("file.png", Namespace.FILE));
     }
+
+    @Test
+    void convert_NORMAL() {
+        // given
+        String givenTitle = Namespace.NORMAL.name() + ":제목";
+        given(mockNamespaceParser.getNamespace(givenTitle))
+                .willReturn(Namespace.NORMAL);
+
+        // when
+        WikiPageTitle result = wikiPageTitleConverter.convert(givenTitle);
+
+        // then
+        assertThat(result)
+                .describedAs("기본 네임스페이스는 구분자가 존재하지 않음.")
+                .isEqualTo(new WikiPageTitle(givenTitle, Namespace.NORMAL));
+    }
 }
