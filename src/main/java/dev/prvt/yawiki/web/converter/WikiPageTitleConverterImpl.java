@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikipage.infra.converter;
+package dev.prvt.yawiki.web.converter;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;

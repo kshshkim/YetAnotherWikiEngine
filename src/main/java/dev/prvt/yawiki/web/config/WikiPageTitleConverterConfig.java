@@ -1,8 +1,8 @@
-package dev.prvt.yawiki.config;
+package dev.prvt.yawiki.web.config;
 
-import dev.prvt.yawiki.core.wikipage.infra.converter.WikiPageTitleConverter;
-import dev.prvt.yawiki.core.wikipage.infra.converter.NamespaceParser;
-import dev.prvt.yawiki.core.wikipage.infra.converter.WikiPageTitleConverterImpl;
+import dev.prvt.yawiki.web.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.web.converter.NamespaceParser;
+import dev.prvt.yawiki.web.converter.WikiPageTitleConverterImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

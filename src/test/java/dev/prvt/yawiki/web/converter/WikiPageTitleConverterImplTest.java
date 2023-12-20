@@ -1,9 +1,7 @@
-package dev.prvt.yawiki.core.wikipage.infra.converter;
+package dev.prvt.yawiki.web.converter;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikipage.infra.converter.NamespaceParser;
-import dev.prvt.yawiki.core.wikipage.infra.converter.WikiPageTitleConverterImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

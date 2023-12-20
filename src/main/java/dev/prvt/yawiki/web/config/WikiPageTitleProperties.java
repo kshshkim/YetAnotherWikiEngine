@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config;
+package dev.prvt.yawiki.web.config;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Getter
 @ConstructorBinding
-@ConfigurationProperties(prefix = "yawiki.title-identifier")
+@ConfigurationProperties(prefix = "yawiki.web.title-identifier")
 public class WikiPageTitleProperties {
     private final Map<String, Namespace> identifierMap;
 
