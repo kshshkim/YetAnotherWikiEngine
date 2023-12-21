@@ -21,16 +21,6 @@ public record WikiPageCreatedEvent(
     public WikiPageCreatedEvent {
         requireNonNull(id);
         requireNonNull(wikiPageTitle);
-        if (timestamp == null) {
-            timestamp = LocalDateTime.now();
-        }
-    }
-
-    public WikiPageCreatedEvent(UUID id, WikiPageTitle wikiPageTitle) {
-        this(id, wikiPageTitle, null);
-    }
-
-    public static WikiPageCreatedEvent from(WikiPage wikiPage) {
-        return new WikiPageCreatedEvent(wikiPage.getId(), wikiPage.getWikiPageTitle());
+        requireNonNull(timestamp);
     }
 }

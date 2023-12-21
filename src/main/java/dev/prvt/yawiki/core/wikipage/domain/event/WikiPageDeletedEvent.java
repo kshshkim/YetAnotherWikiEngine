@@ -21,8 +21,4 @@ public record WikiPageDeletedEvent(
             timestamp = LocalDateTime.now();
         }
     }
-
-    public WikiPageDeletedEvent(UUID contributorId, UUID wikiPageId, WikiPageTitle deletedTitle) {
-        this(contributorId, wikiPageId, deletedTitle, null);
-    }
 }

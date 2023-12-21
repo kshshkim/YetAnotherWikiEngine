@@ -4,6 +4,7 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 위키 문서가 활성화 상태가 될 때 발행되는 이벤트. DB에 insert 될 때 발행되는 이벤트가 아님.
@@ -14,7 +15,8 @@ public record WikiPageActivatedEvent(
         WikiPageTitle wikiPageTitle,
         LocalDateTime timestamp
 ) {
-    public static WikiPageActivatedEvent from(WikiPage wikiPage) {
-        return new WikiPageActivatedEvent(wikiPage.getWikiPageTitle(), wikiPage.getLastModifiedAt());
+    public WikiPageActivatedEvent {
+        Objects.requireNonNull(wikiPageTitle);
+        Objects.requireNonNull(timestamp);
     }
 }

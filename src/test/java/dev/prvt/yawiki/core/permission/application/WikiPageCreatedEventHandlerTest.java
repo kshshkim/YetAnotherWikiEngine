@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
@@ -30,7 +31,8 @@ class WikiPageCreatedEventHandlerTest {
         UUID createdWikiPageId = UUID.randomUUID();
         WikiPageCreatedEvent givenEvent = new WikiPageCreatedEvent(
                 createdWikiPageId,
-                createdWikiPageTitle
+                createdWikiPageTitle,
+                LocalDateTime.now()
         );
 
         // when

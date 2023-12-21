@@ -1,19 +1,16 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
-import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageActivatedEvent;
-import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
-import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageDeletedEvent;
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageEventPublisher;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
-import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -32,7 +29,7 @@ public class WikiPageDomainService {
     private final WikiReferenceUpdater wikiReferenceUpdater;
     private final VersionCollisionValidator versionCollisionValidator;
     private final WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final WikiPageEventPublisher wikiPageEventPublisher;
     private final WikiPageFactory wikiPageFactory;
 
     /**
@@ -62,7 +59,7 @@ public class WikiPageDomainService {
         wikiPage.update(contributorId, comment, content);
         updateReferences(wikiPage.getId(), references);
         if (wikiPage.isActivated()) {  // todo refactor
-            applicationEventPublisher.publishEvent(WikiPageActivatedEvent.from(wikiPage));
+            wikiPageEventPublisher.activated(wikiPage);
         }
     }
 
@@ -70,9 +67,7 @@ public class WikiPageDomainService {
         WikiPage wikiPage = getWikiPage(wikiPageTitle);
         validateDelete(contributorId, versionToken, wikiPage);
         wikiPage.delete(contributorId, comment);
-        applicationEventPublisher.publishEvent(
-                new WikiPageDeletedEvent(contributorId, wikiPage.getId(), wikiPage.getWikiPageTitle())
-        );
+        wikiPageEventPublisher.deactivated(wikiPage);
         deleteReferences(wikiPage);
     }
 
@@ -84,14 +79,12 @@ public class WikiPageDomainService {
 
     /**
      * <p>WikiPage 엔티티가 존재하지 않으면 생성, 존재하면 예외 반환.</p>
-     * <p>생성 성공시 {@link WikiPageCreatedEvent} 발행.</p>
-     * todo 권한 체크
      * @param wikiPageTitle 생성할 문서 제목
      * @return 생성된 WikiPage
      */
     public WikiPage create(WikiPageTitle wikiPageTitle) {
         WikiPage created = wikiPageRepository.save(wikiPageFactory.create(wikiPageTitle.title(), wikiPageTitle.namespace()));
-        applicationEventPublisher.publishEvent(new WikiPageCreatedEvent(created.getId(), created.getWikiPageTitle()));
+        wikiPageEventPublisher.created(created);
         return created;
     }
 

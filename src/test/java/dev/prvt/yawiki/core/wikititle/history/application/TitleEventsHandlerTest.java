@@ -41,7 +41,7 @@ class TitleEventsHandlerTest {
     @Test
     void handleDeletedEvent() {
         WikiPageTitle givenTitle = new WikiPageTitle(randString(), Namespace.NORMAL);
-        WikiPageDeletedEvent givenEvent = new WikiPageDeletedEvent(UUID.randomUUID(), UUID.randomUUID(), givenTitle);
+        WikiPageDeletedEvent givenEvent = new WikiPageDeletedEvent(UUID.randomUUID(), UUID.randomUUID(), givenTitle, LocalDateTime.now());
 
         // when
         titleEventsHandler.handleDeletedEvent(givenEvent);
