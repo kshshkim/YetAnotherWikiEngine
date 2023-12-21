@@ -7,6 +7,7 @@ import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,16 +15,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.*;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 class WikiPageMapperTest {
-    private WikiPageMapper wikiPageMapper = new WikiPageMapper();
+    private final WikiPageMapper wikiPageMapper = new WikiPageMapper();
+
+    @NotNull
+    private WikiPage createWikiPage() {
+        return aNormalWikiPage();
+    }
 
     @Test
     void mapFrom_WikiPage_new_WikiPage() {
-        WikiPage wikiPage = WikiPage.create(randString());
+        WikiPage wikiPage = createWikiPage();
         WikiPageDataForUpdate mapped = wikiPageMapper.mapFrom(wikiPage);
 
         assertThat(tuple(mapped.title(), mapped.content(), mapped.versionToken()))
@@ -38,7 +44,7 @@ class WikiPageMapperTest {
 
     @Test
     void mapFrom_WikiPage_existing_WikiPage() {
-        WikiPage wikiPage = WikiPage.create(randString());
+        WikiPage wikiPage = createWikiPage();
         WikiPageFixture.updateWikiPageRandomly(wikiPage);
         WikiPageDataForUpdate mapped = wikiPageMapper.mapFrom(wikiPage);
 

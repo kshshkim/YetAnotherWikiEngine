@@ -1,9 +1,8 @@
 package dev.prvt.yawiki.core.wikipage.domain.repository;
 
-import dev.prvt.yawiki.core.wikipage.domain.model.RawContent;
-import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.*;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.*;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -28,9 +28,14 @@ class WikiPageRepositoryTest {
     WikiPageRepository wikiPageRepository;
     WikiPage testWikiPage;
 
+    @NotNull
+    private WikiPage createRandomWikiPage() {
+        return aNormalWikiPage();
+    }
+
     @BeforeEach
     void initGivenWikiPage() {
-        testWikiPage = WikiPage.create(randString());
+        testWikiPage = createRandomWikiPage();
         testWikiPage = wikiPageRepository.save(testWikiPage);
         em.flush();
         em.clear();
@@ -61,10 +66,10 @@ class WikiPageRepositoryTest {
     @Test
     void findByTitleWithRevisionAndRawContent() {
         // given
-        WikiPage givenWikiPage = WikiPage.create(randString());
+        WikiPage givenWikiPage = createRandomWikiPage();
         givenWikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
 
-        WikiPage testWikiPage1 = WikiPage.create(randString());
+        WikiPage testWikiPage1 = createRandomWikiPage();
         WikiPageFixture.updateWikiPageRandomly(testWikiPage1);  // where 문이 누락되어있었는데, ID 내림차순 기준으로 1개만 불러오는 바람에 테스트에 성공했음. 걸러낼 수 있도록 추가함.
 
         wikiPageRepository.save(givenWikiPage);

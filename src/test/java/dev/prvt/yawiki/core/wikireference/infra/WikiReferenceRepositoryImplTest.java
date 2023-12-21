@@ -2,6 +2,7 @@ package dev.prvt.yawiki.core.wikireference.infra;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -32,6 +34,8 @@ class WikiReferenceRepositoryImplTest {
     @Autowired
     WikiReferenceRepositoryImpl wikiReferenceRepository;
 
+    private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
+
     private final int REF_LIMIT_PER_NAMESPACE = 10;
     private WikiPage givenWikiPage;
 
@@ -40,7 +44,7 @@ class WikiReferenceRepositoryImplTest {
 
     @BeforeEach
     void initData() {
-        givenWikiPage = WikiPage.create(randString());
+        givenWikiPage = aNormalWikiPage();
         em.persist(givenWikiPage);
         log.info("wiki page persisted");
 
@@ -112,7 +116,7 @@ class WikiReferenceRepositoryImplTest {
                 .limit(3)
                 .map(title ->
                         {
-                            WikiPage created = WikiPage.create(title, Namespace.NORMAL);
+                            WikiPage created = wikiPageFactory.create(title, Namespace.NORMAL);
                             created.delete(UUID.randomUUID(), randString());
                             return created;
                         }
@@ -136,7 +140,7 @@ class WikiReferenceRepositoryImplTest {
 
         List<WikiPage> createdWikiPage = namespaceWikiPageTitleMap.get(Namespace.NORMAL).stream()
                 .limit(3)
-                .map(wpt -> WikiPage.create(wpt.title(), wpt.namespace()))
+                .map(wpt -> wikiPageFactory.create(wpt.title(), wpt.namespace()))
                 .toList();
 
         for (WikiPage wikiPage : createdWikiPage) {
@@ -258,7 +262,7 @@ class WikiReferenceRepositoryImplTest {
     void findBackReferencesByWikiPageTitle_paging_not_triggered() {
         // given
         List<WikiPage> givenWikiPages = IntStream.range(0, 10)
-                .mapToObj(i -> WikiPage.create(randString()))
+                .mapToObj(i -> aNormalWikiPage())
                 .toList();
 
         List<WikiPageTitle> givenWikiPageTitles = givenWikiPages.stream()
@@ -297,7 +301,7 @@ class WikiReferenceRepositoryImplTest {
     void findBackReferencesByWikiPageTitle_paging_triggered() {
         // given
         List<WikiPage> givenWikiPages = IntStream.range(0, 10)
-                .mapToObj(i -> WikiPage.create(randString()))
+                .mapToObj(i -> aNormalWikiPage())
                 .toList();
 
         List<WikiPageTitle> givenWikiPageTitles = givenWikiPages.stream()

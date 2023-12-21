@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
 import dev.prvt.yawiki.fixture.WikiPageFixture;
-import org.assertj.core.data.TemporalOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +8,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.*;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.*;
 
 class RevisionTest {
@@ -18,7 +17,7 @@ class RevisionTest {
     UUID testContributorId;
     @BeforeEach
     void beforeEach() {
-        testWikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        testWikiPage = aNormalWikiPage();
         testContributorId = UUID.randomUUID();
         testRev = WikiPageFixture.aRevision()
                 .contributorId(testContributorId)
@@ -85,14 +84,11 @@ class RevisionTest {
 
     @Test
     void construction_asAfter_diff_should_be_the_size_of_itself_when_beforeRev_is_null() {
-        // given
+        // given when
         Revision given = Revision.builder()
                 .rawContent(new RawContent("sizeOf7"))
                 .beforeRevision(null)
                 .build();
-
-        // when
-//        given.asAfter(null);
 
         // then
         assertThat(given.getDiff())

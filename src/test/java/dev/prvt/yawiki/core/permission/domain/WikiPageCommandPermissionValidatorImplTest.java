@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -40,7 +40,7 @@ class WikiPageCommandPermissionValidatorImplTest {
     void init() {
         givenContributorId = UUID.randomUUID();
         givenWikiPageId = UUID.randomUUID();
-        givenWikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        givenWikiPage = aNormalWikiPage();
         Field wikiPageIdField = WikiPage.class.getDeclaredField("id");
         wikiPageIdField.setAccessible(true);
         wikiPageIdField.set(givenWikiPage, givenWikiPageId);  // 리플렉션으로 ID 지정

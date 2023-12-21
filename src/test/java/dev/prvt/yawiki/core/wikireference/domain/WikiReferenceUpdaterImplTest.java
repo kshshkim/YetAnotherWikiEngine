@@ -3,6 +3,7 @@ package dev.prvt.yawiki.core.wikireference.domain;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
@@ -38,7 +40,7 @@ class WikiReferenceUpdaterImplTest {
 
     @BeforeEach
     void initData() {
-        givenWikiPage = WikiPage.create(randString());
+        givenWikiPage = aNormalWikiPage();
         em.persist(givenWikiPage);
 
         List<WikiReference> givenReferences = IntStream.range(0, 10)

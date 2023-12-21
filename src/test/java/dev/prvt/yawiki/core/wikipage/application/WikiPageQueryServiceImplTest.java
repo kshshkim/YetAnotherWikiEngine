@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 // todo 통합테스트
 @ExtendWith(MockitoExtension.class)
 class WikiPageQueryServiceImplTest {
+    private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
     int TOTAL_REVS = 10;
     int TOTAL_CONTRIBUTORS = 5;  // CONTRIBUTOR 숫자가 더 적기 때문에 distinct 테스트 가능
 
@@ -63,7 +64,7 @@ class WikiPageQueryServiceImplTest {
     void init() {
         wikiPageQueryService = new WikiPageQueryServiceImpl(wikiPageRepository, wikiPageQueryRepository, wikiPageReferenceRepository, contributorRepository, wikiPageMapper);
         givenWikiPageTitle = new WikiPageTitle(UUID.randomUUID().toString(), Namespace.NORMAL);
-        givenWikiPage = wikiPageRepository.save(WikiPage.create(givenWikiPageTitle.title(), givenWikiPageTitle.namespace()));
+        givenWikiPage = wikiPageRepository.save(wikiPageFactory.create(givenWikiPageTitle.title(), givenWikiPageTitle.namespace()));
         WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
         givenWikiReferences = IntStream.range(0, 10)
                 .mapToObj(i -> new WikiPageTitle(randString(), Namespace.NORMAL))

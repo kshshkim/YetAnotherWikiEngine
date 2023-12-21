@@ -5,6 +5,7 @@ import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 class WikiPageCommandServiceImplTest {
     private final String PARAMETER_CHECK = "파라미터가 적절히 넘어와야함.";
+    private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
 
 
     private String extractorFailTrigger;
@@ -75,7 +77,7 @@ class WikiPageCommandServiceImplTest {
 
     class TestWikiPageDomainService extends WikiPageDomainService {
         public TestWikiPageDomainService() {
-            super(null, null, null, null, null);
+            super(null, null, null, null, null, null);
         }
 
         @Override
@@ -103,7 +105,7 @@ class WikiPageCommandServiceImplTest {
         @Override
         public WikiPage proclaimUpdate(UUID contributorId, WikiPageTitle wikiPageTitle) {
             called_WikiPageDomainService_updateProclaim = true;
-            return WikiPage.create(wikiPageTitle.title(), wikiPageTitle.namespace());
+            return wikiPageFactory.create(wikiPageTitle.title(), wikiPageTitle.namespace());
         }
 
         @Override
@@ -115,7 +117,7 @@ class WikiPageCommandServiceImplTest {
         public WikiPage create(WikiPageTitle title) {
             called_WikiPageDomainService_create = true;
             createdTitle = title;
-            return WikiPage.create(title.title(), title.namespace());
+            return wikiPageFactory.create(title.title(), title.namespace());
         }
     }
 

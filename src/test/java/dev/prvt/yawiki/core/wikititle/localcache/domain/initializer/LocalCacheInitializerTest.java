@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikititle.localcache.domain.initializer;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 class LocalCacheInitializerTest {
+    private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
     @Autowired
     EntityManager em;
 
@@ -41,7 +43,7 @@ class LocalCacheInitializerTest {
         List<WikiPage> wikiPages = givenTitles.stream()
                 .map(
                         wpt -> {
-                            WikiPage wikiPage = WikiPage.create(wpt.title(), wpt.namespace());
+                            WikiPage wikiPage = wikiPageFactory.create(wpt.title(), wpt.namespace());
                             wikiPage.update(UUID.randomUUID(), randString(), randString());
                             return wikiPage;
                         }

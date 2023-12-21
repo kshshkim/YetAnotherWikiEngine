@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -126,6 +127,12 @@ public class WikiPage {
     private LocalDateTime lastModifiedAt;
 
     /**
+     * 마지막 수정자 ID
+     */
+    @Column(name = "last_modified_by", columnDefinition = "BINARY(16)")
+    private UUID lastModifiedBy;
+
+    /**
      * <p>객체 그래프를 타고 현재 content 를 반환함.</p>
      *
      * @return 렌더링 되지 않은 본문
@@ -150,7 +157,7 @@ public class WikiPage {
     public void update(UUID contributorId, String comment, String content) {
         Revision newRev = buildNewRevision(contributorId, comment, content);
         update(newRev);
-        modified();
+        modified(contributorId);
     }
 
 
@@ -160,7 +167,7 @@ public class WikiPage {
     public void delete(UUID contributorId, String comment) {
         update(contributorId, comment, "");
         deactivate();
-        modified();
+        modified(contributorId);
     }
 
 
@@ -199,11 +206,20 @@ public class WikiPage {
         activate();
     }
 
+    private void modified() {
+        modified(null);
+    }
+
     /**
      * 엔티티의 값을 수정하는 메서드가 실행된 경우 함께 호출되어야함.
      */
-    private void modified() {
-        this.lastModifiedAt = LocalDateTime.now();
+    private void modified(UUID contributorId) {
+        modified(contributorId, LocalDateTime.now());
+    }
+
+    private void modified(UUID contributorId, LocalDateTime modifiedAt) {
+        this.lastModifiedAt = modifiedAt == null ? LocalDateTime.now() : modifiedAt;
+        this.lastModifiedBy = contributorId;
     }
 
     private Revision buildNewRevision(UUID contributorId, String comment, String content) {
@@ -216,30 +232,29 @@ public class WikiPage {
                 .build();
     }
 
-    private WikiPage(String title, Namespace namespace) {
+    @Builder(access = AccessLevel.PROTECTED)
+    protected WikiPage(
+            UUID id,
+            int version,
+            String versionToken,
+            String title,
+            Namespace namespace,
+            boolean active,
+            boolean activated,
+            Revision currentRevision,
+            LocalDateTime lastModifiedAt,
+            UUID lastModifiedBy
+    ) {
+        this.id = id;
+        this.version = version;
+        this.versionToken = versionToken;
         this.title = title;
         this.namespace = namespace;
-        this.active = false;
-        this.currentRevision = null;
+        this.active = active;
+        this.activated = activated;
+        this.currentRevision = currentRevision;
+
+        modified(lastModifiedBy, lastModifiedAt);
         updateVersionToken();
-        modified();
-    }
-
-    /**
-     * @param title 네임스페이스 구분자가 포함되지 않은 문서 제목. (ex. '틀: 아무개' -> '아무개')
-     * @param namespace 네임스페이스 enum
-     * @return isActive가 false이고 currentRevision이 null인 새 문서.
-     */
-    public static WikiPage create(String title, Namespace namespace) {
-        return new WikiPage(title, namespace);
-    }
-
-    /**
-     * @param title 네임스페이스 구분자가 포함되지 않은 제목.
-     * @return 네임스페이스가 Normal로 설정된 WikiPage 인스턴스.
-     * @deprecated 되도록 네임스페이스까지 파라미터로 받는 메서드를 사용할것.
-     */
-    public static WikiPage create(String title) {
-        return create(title, Namespace.NORMAL);
     }
 }

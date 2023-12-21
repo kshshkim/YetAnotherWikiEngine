@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -15,7 +15,7 @@ class VersionCollisionValidatorImplTest {
 
     @Test
     void validate_should_fail() {
-        WikiPage givenWikiPage = WikiPage.create(randString());
+        WikiPage givenWikiPage = aNormalWikiPage();
         String givenToken = UUID.randomUUID().toString();
         assertThatThrownBy(() -> versionCollisionValidator.validate(givenWikiPage, givenToken))
                 .describedAs("토큰 불일치시 실패하여야하고, 지정된 예외를 전달받은 토큰과 함께 반환해야함.")
@@ -26,7 +26,7 @@ class VersionCollisionValidatorImplTest {
 
     @Test
     void validate_should_success() {
-        WikiPage givenWikiPage = WikiPage.create(randString());
+        WikiPage givenWikiPage = aNormalWikiPage();
         assertThatCode(() -> versionCollisionValidator.validate(givenWikiPage, givenWikiPage.getVersionToken()))
                 .describedAs("동일한 토큰이 들어왔으니 성공해야함.")
                 .doesNotThrowAnyException();

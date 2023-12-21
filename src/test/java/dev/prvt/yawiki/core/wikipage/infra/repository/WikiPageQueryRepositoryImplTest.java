@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +38,7 @@ class WikiPageQueryRepositoryImplTest {
     int TOTAL_REFS = 10;
     @BeforeEach
     void init() {
-        givenWikiPage = WikiPage.create(randString());
+        givenWikiPage = aNormalWikiPage();
         givenRevisions = new ArrayList<>();
         em.persist(givenWikiPage);
 

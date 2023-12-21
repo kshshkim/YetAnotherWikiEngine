@@ -5,10 +5,7 @@ import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageDeletedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageReferenceUpdaterException;
-import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
-import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikipage.domain.model.*;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import dev.prvt.yawiki.core.wikipage.domain.validator.VersionCollisionValidator;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
@@ -38,6 +35,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class WikiPageDomainServiceTest {
+    private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
+
     @Mock
     private VersionCollisionValidator mockVersionCollisionValidator;
 
@@ -71,10 +70,10 @@ class WikiPageDomainServiceTest {
 
     @BeforeEach
     void init() {
-        wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, mockWikiReferenceUpdater, mockVersionCollisionValidator, mockPermissionValidator, mockEventPublisher);
+        wikiPageDomainService = new WikiPageDomainService(wikiPageRepository, mockWikiReferenceUpdater, mockVersionCollisionValidator, mockPermissionValidator, mockEventPublisher, wikiPageFactory);
 
         givenTitle = new WikiPageTitle(randomUUID().toString(), Namespace.NORMAL);
-        givenWikiPage = wikiPageRepository.save(WikiPage.create(givenTitle.title(), givenTitle.namespace()));
+        givenWikiPage = wikiPageRepository.save(wikiPageFactory.create(givenTitle.title(), givenTitle.namespace()));
         givenActorId = randomUUID();
         givenContent = randomUUID().toString();
         givenComment = randomUUID().toString();

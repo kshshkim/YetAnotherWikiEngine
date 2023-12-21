@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class WikiPageFixture {
+    private static final WikiPageFactory wikiPageFactory = new WikiPageFactory();
+
     public static RawContent aRawContent() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 20; i++) {
@@ -22,6 +24,10 @@ public class WikiPageFixture {
 
     public static WikiPageTitle aWikiPageTitle() {
         return new WikiPageTitle(randString(5, 255), aNamespace());
+    }
+
+    public static WikiPage aNormalWikiPage() {
+        return wikiPageFactory.create(randString(), Namespace.NORMAL);
     }
 
     private static final Namespace[] namespaces = Namespace.values();

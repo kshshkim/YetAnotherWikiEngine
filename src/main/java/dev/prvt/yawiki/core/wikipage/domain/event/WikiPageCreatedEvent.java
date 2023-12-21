@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.event;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 
 import java.time.LocalDateTime;
@@ -27,5 +28,9 @@ public record WikiPageCreatedEvent(
 
     public WikiPageCreatedEvent(UUID id, WikiPageTitle wikiPageTitle) {
         this(id, wikiPageTitle, null);
+    }
+
+    public static WikiPageCreatedEvent from(WikiPage wikiPage) {
+        return new WikiPageCreatedEvent(wikiPage.getId(), wikiPage.getWikiPageTitle());
     }
 }
