@@ -46,7 +46,7 @@ public class InitialCacheDataReaderImpl implements InitialCacheDataReader {
         int count = queryFactory
                 .select(wikiPage.count())
                 .from(wikiPage)
-                .where(wikiPage.isActive.isTrue())
+                .where(wikiPage.active.isTrue())
                 .fetchOne()
                 .intValue();
 

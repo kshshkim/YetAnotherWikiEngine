@@ -2,7 +2,6 @@ package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
-import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
@@ -59,6 +58,11 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
         return wikiPageMapper.mapFrom(wikiPage);
     }
 
+    /**
+     * 넘겨받은 제목을 가진 문서를 생성함. 단, 문서 레코드가 생성되었을 뿐, <b>비즈니스 로직상 문서가 실제로 생성된 것은 아님.</b>
+     * @param contributorId 생성한 기여자의 ID
+     * @param title WikiPageTitle
+     */
     @Override
     @Transactional
     public void create(UUID contributorId, WikiPageTitle title) {

@@ -8,7 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
-
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
@@ -73,6 +73,11 @@ public class Revision {
     @Column(name = "size", nullable = false, updatable = false)
     private int size;
 
+    /**
+     * 한 번 생성된 Revision 은 변경될 일이 없기 때문에 EntityListener 활용하지 않음.
+     */
+    private LocalDateTime timestamp;
+
     public String getContent() {
         boolean hasContent = (this.rawContent != null) && (this.size > 0);
         return hasContent ? this.rawContent.getContent() : "";
@@ -80,11 +85,12 @@ public class Revision {
 
     /**
      * <p>생성 시점에만 호출됨. 생성 시점에 beforeRevision 이 할당되지 않으면 첫 Revision 으로 간주.</p>
+     *
      * @param beforeRev 이전 Revision
      */
     private void asAfter(Revision beforeRev) {
         if (this.revVersion != null) {
-            throw new IllegalStateException("cannot change finalized field: revVersion="+this.revVersion);
+            throw new IllegalStateException("cannot change finalized field: revVersion=" + this.revVersion);
         }
         this.revVersion = getNewVersion(beforeRev);
         this.diff = getDiff(beforeRev);
@@ -103,7 +109,8 @@ public class Revision {
                        @NotNull String comment,  // 생성 시점에 반드시 필요함.
                        @NotNull WikiPage wikiPage,  // 생성 시점에 반드시 필요함.
                        RawContent rawContent,  // rawContent 는 null 일 수 있음. (삭제된 문서 등)
-                       Revision beforeRevision  // 첫 Revision 일 경우 null 값이 들어올 수 있음.
+                       Revision beforeRevision,  // 첫 Revision 일 경우 null 값이 들어올 수 있음.
+                       LocalDateTime timestamp  //
     ) {
         this.contributorId = contributorId;
         this.rawContent = rawContent;
@@ -111,5 +118,6 @@ public class Revision {
         this.comment = comment;
         this.wikiPage = wikiPage;
         this.asAfter(beforeRevision);
+        this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
     }
 }

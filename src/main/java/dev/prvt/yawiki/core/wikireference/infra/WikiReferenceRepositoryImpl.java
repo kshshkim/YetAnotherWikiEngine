@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.EnumPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.QWikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
@@ -69,7 +68,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, Wik
                             .on(wikiReferenceTitleAndNamespaceMatches(wikiPage.title, wikiPage.namespace))
                     .where(
                             wikiReferenceRefererIdMatches(refererId),
-                            wikiPage.isActive.isTrue())
+                            wikiPage.active.isTrue())
                 .stream()
                 .collect(Collectors.toSet());
     }

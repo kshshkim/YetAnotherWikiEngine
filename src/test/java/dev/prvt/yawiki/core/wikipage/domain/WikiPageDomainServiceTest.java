@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain;
 
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageActivatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageCreatedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageDeletedEvent;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
@@ -178,6 +179,24 @@ class WikiPageDomainServiceTest {
                 eq(givenWikiPage.getId()),
                 eq(givenReferences)
         );
+    }
+
+    @Captor
+    ArgumentCaptor<WikiPageActivatedEvent> activatedEventCaptor;
+
+    @Test
+    void commitUpdate_should_publish_activated_event_when_activated() {
+        // given
+
+        // when
+        commitUpdateWithGivenParameters();
+
+        // then
+        verify(mockEventPublisher).publishEvent(activatedEventCaptor.capture());
+        WikiPageActivatedEvent captured = activatedEventCaptor.getValue();
+
+        assertThat(captured)
+                .isEqualTo(WikiPageActivatedEvent.from(givenWikiPage));
     }
 
     @Test

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
@@ -94,8 +95,15 @@ public class WikiPage {
     /**
      * 문서를 삭제하거나, 처음 생성되어 내용이 없는 경우 false
      */
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Column(name = "active")
+    private boolean active;
+
+    /**
+     * 수정으로 인해 문서가 활성화 되었는지 여부. active 가 false 에서 true 로 수정된 경우 true.
+     * Transient 이기 때문에 초기값은 false
+     */
+    @Transient
+    private boolean activated;
 
     /**
      * <p>모든 Revision 은 WikiPage 에 대해서 ManyToOne 관계를 가짐.</p>
@@ -114,6 +122,9 @@ public class WikiPage {
     @JoinColumn(name = "current_revision_id")//, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Revision currentRevision;
 
+    @Column(name = "last_modified_at")
+    private LocalDateTime lastModifiedAt;
+
     /**
      * <p>객체 그래프를 타고 현재 content 를 반환함.</p>
      *
@@ -124,15 +135,51 @@ public class WikiPage {
                 .getContent();
     }
 
+    @Transient
     public WikiPageTitle getWikiPageTitle() {  // todo test
         return new WikiPageTitle(title, namespace);
     }
+
+    /**
+     * Root Aggregate 로써 Revision 엔티티의 생성과 영속화에 대한 책임이 포함된 update<br>
+     *
+     * @param contributorId 수정자 ID
+     * @param comment       수정 코멘트
+     * @param content       마크다운 문법에 따라서 파싱되지 않은 순수 문자열 본문
+     */
+    public void update(UUID contributorId, String comment, String content) {
+        Revision newRev = buildNewRevision(contributorId, comment, content);
+        update(newRev);
+        modified();
+    }
+
+
+    /**
+     * <p>빈 리비전을 생성하고, 문서의 상태를 삭제됨으로 변경.</p>
+     */
+    public void delete(UUID contributorId, String comment) {
+        update(contributorId, comment, "");
+        deactivate();
+        modified();
+    }
+
 
     /**
      * 편집 성공시 버전 토큰을 재생성함.
      */
     private void updateVersionToken() {
         this.versionToken = UUID.randomUUID().toString();
+    }
+
+    private void activate() {
+        if (!isActive()) {
+            this.active = true;
+            this.activated = true;
+        }
+    }
+
+    private void deactivate() {
+        this.active = false;
     }
 
     /**
@@ -148,32 +195,16 @@ public class WikiPage {
      */
     private void update(Revision newRevision) {
         replaceCurrentRevisionWith(newRevision);
-        this.isActive = true;
         updateVersionToken();
+        activate();
     }
-
 
     /**
-     * Root Aggregate 로써 Revision 엔티티의 생성과 영속화에 대한 책임이 포함된 update<br>
-     *
-     * @param contributorId 수정자 ID
-     * @param comment       수정 코멘트
-     * @param content       마크다운 문법에 따라서 파싱되지 않은 순수 문자열 본문
+     * 엔티티의 값을 수정하는 메서드가 실행된 경우 함께 호출되어야함.
      */
-    public void update(UUID contributorId, String comment, String content) {
-        Revision newRev = buildNewRevision(contributorId, comment, content);
-        update(newRev);
+    private void modified() {
+        this.lastModifiedAt = LocalDateTime.now();
     }
-
-
-    /**
-     * <p>빈 리비전을 생성하고, 문서의 상태를 삭제됨으로 변경.</p>
-     */
-    public void delete(UUID contributorId, String comment) {
-        update(contributorId, comment, "");
-        this.isActive = false;
-    }
-
 
     private Revision buildNewRevision(UUID contributorId, String comment, String content) {
         return Revision.builder()
@@ -188,8 +219,10 @@ public class WikiPage {
     private WikiPage(String title, Namespace namespace) {
         this.title = title;
         this.namespace = namespace;
-        this.isActive = false;
+        this.active = false;
         this.currentRevision = null;
+        updateVersionToken();
+        modified();
     }
 
     /**
@@ -198,9 +231,7 @@ public class WikiPage {
      * @return isActive가 false이고 currentRevision이 null인 새 문서.
      */
     public static WikiPage create(String title, Namespace namespace) {
-        WikiPage created = new WikiPage(title, namespace);
-        created.updateVersionToken();
-        return created;
+        return new WikiPage(title, namespace);
     }
 
     /**

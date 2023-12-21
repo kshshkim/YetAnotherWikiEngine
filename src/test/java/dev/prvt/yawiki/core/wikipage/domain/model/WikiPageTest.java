@@ -1,8 +1,11 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
@@ -259,4 +262,82 @@ class WikiPageTest {
                         .getContent());
     }
 
+    @Test
+    void getLastModifiedAt_when_modified() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdTime = wikiPage.getLastModifiedAt();
+
+        // when
+        updateWikiPageRandomly(wikiPage);
+
+        // then
+        LocalDateTime lastModifiedAt = wikiPage.getLastModifiedAt();
+
+        assertThat(lastModifiedAt)
+                .describedAs("수정된 순간 필드도 업데이트됨.")
+                .isAfter(createdTime);
+
+        assertThat(lastModifiedAt)
+                .describedAs("수정된 시간이 적절히 설정됨.")
+                .isBetween(now.minusSeconds(1), now.plusSeconds(1));
+    }
+
+    @Test
+    void getLastModifiedAt_when_created() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        LocalDateTime now = LocalDateTime.now();
+
+        // when
+
+        // then
+        LocalDateTime lastModifiedAt = wikiPage.getLastModifiedAt();
+        assertThat(lastModifiedAt)
+                .describedAs("생성된 시간이 적절히 설정됨.")
+                .isBetween(now.minusSeconds(1), now.plusSeconds(1));
+    }
+
+
+    @Test
+    void activated_true_after_modified_not_active() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        LocalDateTime now = LocalDateTime.now();
+
+        // when
+        updateWikiPageRandomly(wikiPage);
+
+        // then
+        assertThat(wikiPage.isActivated())
+                .describedAs("문서가 생성되었으므로 true")
+                .isTrue();
+    }
+
+    /**
+     * 이미 active 값이 참인 상태에서 수정하는 경우, activated 는 false.
+     */
+    @SneakyThrows
+    @Test
+    void activated_false_when_already_active() {
+        // given
+        WikiPage wikiPage = WikiPage.create(randString(), Namespace.NORMAL);
+        LocalDateTime now = LocalDateTime.now();
+        updateWikiPageRandomly(wikiPage);
+
+        // activated 필드 false set
+        Field activated = WikiPage.class.getDeclaredField("activated");
+        activated.setAccessible(true);
+        activated.set(wikiPage, false);
+
+
+        // when
+        updateWikiPageRandomly(wikiPage);
+
+        // then
+        assertThat(wikiPage.isActivated())
+                .describedAs("이미 생성된 상태였으므로 false")
+                .isFalse();
+    }
 }

@@ -1,10 +1,12 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
 import dev.prvt.yawiki.fixture.WikiPageFixture;
+import org.assertj.core.data.TemporalOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.*;
@@ -16,13 +18,14 @@ class RevisionTest {
     UUID testContributorId;
     @BeforeEach
     void beforeEach() {
-        testWikiPage = WikiPage.create(randString());
+        testWikiPage = WikiPage.create(randString(), Namespace.NORMAL);
         testContributorId = UUID.randomUUID();
         testRev = WikiPageFixture.aRevision()
                 .contributorId(testContributorId)
                 .wikiPage(testWikiPage)
                 .build();
     }
+
     @Test
     void construction_contributorId_should_be_set() {
         assertThat(testRev.getContributorId())
@@ -32,12 +35,22 @@ class RevisionTest {
     }
 
     @Test
+    void construction_timestamp_should_be_set() {
+        LocalDateTime now = LocalDateTime.now();
+
+        assertThat(testRev.getTimestamp())
+                .describedAs("생성시 timestamp 설정되어야함.")
+                .isNotNull()
+                .describedAs("시간이 적절히 설정되어야함.")
+                .isBetween(now.minusSeconds(1), now.plusSeconds(1));
+    }
+
+    @Test
     void construction_should_throw_exception_if_contributorId_is_null() {
         assertThatThrownBy(() -> Revision.builder().contributorId(null).build())
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("contributorId");
     }
-
 
     @Test
     void construction_asAfter_can_be_called_only_in_constructor() throws NoSuchMethodException {
