@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import dev.prvt.yawiki.web.config.MarkdownParserConfig;
 import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageCommandService;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageQueryService;
@@ -25,6 +26,7 @@ import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArgumentResolver;
 import dev.prvt.yawiki.web.contributorresolver.converters.AnonymousAuthenticationTokenContributorInfoConverter;
 import dev.prvt.yawiki.web.contributorresolver.converters.JwtAuthenticationTokenContributorInfoConverter;
+import dev.prvt.yawiki.web.markdown.ReferencedTitleExtractor;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.domain.PageImpl;
@@ -71,13 +74,13 @@ import java.util.stream.IntStream;
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @WebMvcTest(WikiController.class)
+@Import(MarkdownParserConfig.class)
 class WikiControllerTest {
 
     @Autowired
@@ -88,6 +91,9 @@ class WikiControllerTest {
 
     @Autowired
     private GenericConversionService genericConversionService;
+
+    @Autowired
+    private ReferencedTitleExtractor referencedTitleExtractor;
 
     @MockBean
     private WikiPageCommandService wikiPageCommandService;
@@ -356,7 +362,7 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void commitEdit_version_collision_exception() {
-        doThrow(new VersionCollisionException(givenMessage)).when(wikiPageCommandService).commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent);
+        doThrow(new VersionCollisionException(givenMessage)).when(wikiPageCommandService).commitUpdate(eq(givenContributorId), eq(givenTitle), eq(givenComment), eq(givenVersionToken), eq(givenContent), anySet());
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when
@@ -379,7 +385,7 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void commitEdit_permission_exception() {
-        doThrow(new PermissionEvaluationException(givenMessage)).when(wikiPageCommandService).commitUpdate(givenContributorId, givenTitle, givenComment, givenVersionToken, givenContent);
+        doThrow(new PermissionEvaluationException(givenMessage)).when(wikiPageCommandService).commitUpdate(eq(givenContributorId), eq(givenTitle), eq(givenComment), eq(givenVersionToken), eq(givenContent), anySet());
         String body = objectMapper.writeValueAsString(new WikiController.CommitEditRequest(givenComment, givenVersionToken, givenContent));
 
         // when

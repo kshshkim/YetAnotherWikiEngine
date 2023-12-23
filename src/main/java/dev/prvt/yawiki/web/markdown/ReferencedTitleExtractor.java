@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikipage.domain.wikireference;
+package dev.prvt.yawiki.web.markdown;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 

@@ -1,88 +1,74 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
-import dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService;
+import dev.prvt.yawiki.core.wikipage.domain.event.WikiPageEventPublisher;
+import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
+import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
+import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageValidator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Set;
 import java.util.UUID;
 
+
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class WikiPageCommandServiceImpl implements WikiPageCommandService {
-    private final ReferencedTitleExtractor referencedTitleExtractor;
-    private final WikiPageDomainService wikiPageDomainService;
+    private final WikiPageRepository wikiPageRepository;
+    private final WikiPageValidator wikiPageValidator;
+    private final WikiPageEventPublisher wikiPageEventPublisher;
     private final WikiPageMapper wikiPageMapper;
-    private final TransactionTemplate transactionTemplate;
+    private final WikiPageFactory wikiPageFactory;
 
-    public WikiPageCommandServiceImpl(ReferencedTitleExtractor referencedTitleExtractor, WikiPageDomainService wikiPageDomainService, PlatformTransactionManager platformTransactionManager, WikiPageMapper wikiPageMapper) {
-        this.referencedTitleExtractor = referencedTitleExtractor;
-        this.wikiPageDomainService = wikiPageDomainService;
-        this.transactionTemplate = new TransactionTemplate(platformTransactionManager);
-        this.wikiPageMapper = wikiPageMapper;
+    @Override
+    public void commitUpdate(
+            UUID contributorId,
+            WikiPageTitle title,
+            String comment,
+            String versionToken,
+            String content,
+            Set<WikiPageTitle> referencedTitles
+    ) {
+        WikiPage wikiPage = getWikiPage(title);
+
+        wikiPageValidator.validateUpdate(contributorId, versionToken, wikiPage);
+        wikiPage.update(contributorId, comment, content);
+        wikiPageEventPublisher.updateCommitted(wikiPage, referencedTitles);
     }
 
-    /**
-     * 마크다운 파싱 작업이 오래 걸릴 수 있기 때문에 트랜잭션을 분리함.
-     * @param contributorId 편집자 ID
-     * @param title 문서 제목
-     * @param comment 편집 코멘트
-     * @param versionToken 편집 충돌 방지용 토큰
-     * @param content 본문
-     */
+    @Transactional(readOnly = true)
     @Override
-    public void commitUpdate(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String content) {
-        // MarkDown 파싱은 트랜잭션의 범위 바깥에서 실행돼야함.
-        Set<WikiPageTitle> references = extractReferences(content);
-        
-        // 트랜잭션 시작
-        executeCommit(contributorId, title, comment, content, versionToken, references);
-    }
+    public WikiPageDataForUpdate proclaimUpdate(UUID contributorId, WikiPageTitle title) {
+        WikiPage wikiPage = getWikiPage(title);
+        wikiPageValidator.validateProclaim(contributorId, wikiPage);
 
-    /**
-     * <p>수정 요청 데이터 반환 이전에 이루어져야할 작업이 수행됨. 이후 수정 요청에 필요한 데이터를 반환함.</p>
-     * <p>수정 요청을 위해 필요한 데이터를 반환함.</p>
-     * @param contributorId 편집 요청자 ID
-     * @param wikiPageTitle 편집할 문서 제목
-     * @return 편집에 필요한 DTO
-     */
-    @Override
-    @Transactional
-    public WikiPageDataForUpdate proclaimUpdate(UUID contributorId, WikiPageTitle wikiPageTitle) {
-        WikiPage wikiPage = wikiPageDomainService.proclaimUpdate(contributorId, wikiPageTitle);
         return wikiPageMapper.mapFrom(wikiPage);
     }
 
-    /**
-     * 넘겨받은 제목을 가진 문서를 생성함. 단, 문서 레코드가 생성되었을 뿐, <b>비즈니스 로직상 문서가 실제로 생성된 것은 아님.</b>
-     * @param contributorId 생성한 기여자의 ID
-     * @param title WikiPageTitle
-     */
     @Override
-    @Transactional
-    public void create(UUID contributorId, WikiPageTitle title) {
-        wikiPageDomainService.create(title);
+    public void create(UUID contributorId, WikiPageTitle wikiPageTitle) {
+        wikiPageValidator.validateCreate(contributorId, wikiPageTitle);
+        WikiPage created = wikiPageRepository.save(wikiPageFactory.create(wikiPageTitle.title(), wikiPageTitle.namespace(), contributorId));
+        wikiPageEventPublisher.created(created);
     }
 
     @Override
-    @Transactional
     public void delete(UUID contributorId, WikiPageTitle title, String comment, String versionToken) {
-        wikiPageDomainService.delete(contributorId, title, comment, versionToken);
+        WikiPage wikiPage = getWikiPage(title);
+
+        wikiPageValidator.validateDelete(contributorId, versionToken, wikiPage);
+        wikiPage.deactivate(contributorId, comment);
+        wikiPageEventPublisher.deactivated(wikiPage);
     }
 
-
-    private Set<WikiPageTitle> extractReferences(String content) {
-        return referencedTitleExtractor.extractReferencedTitles(content);
-    }
-
-    private void executeCommit(UUID contributorId, WikiPageTitle title, String comment, String content, String versionToken, Set<WikiPageTitle> refs) {
-        transactionTemplate.executeWithoutResult(
-                status -> wikiPageDomainService.commitUpdate(contributorId, title, content, comment, versionToken, refs)
-        );
+    private WikiPage getWikiPage(WikiPageTitle title) {
+        return wikiPageRepository.findByTitleAndNamespace(title.title(), title.namespace())
+                .orElseThrow(NoSuchWikiPageException::new);
     }
 }

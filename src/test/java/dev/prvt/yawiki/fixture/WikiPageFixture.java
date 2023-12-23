@@ -74,6 +74,13 @@ public class WikiPageFixture {
     }
 
     @SneakyThrows
+    public static void setWikiPageLastModifiedBy(WikiPage wikiPage, UUID lastModifiedBy) {
+        Field lastModifiedByField = WikiPage.class.getDeclaredField("lastModifiedBy");
+        lastModifiedByField.setAccessible(true);
+        lastModifiedByField.set(wikiPage, lastModifiedBy);
+    }
+
+    @SneakyThrows
     public static void setWikiPageActivated(WikiPage wikiPage, boolean activated) {
         Field activatedField = WikiPage.class.getDeclaredField("activated");
         activatedField.setAccessible(true);

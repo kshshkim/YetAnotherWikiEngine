@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.web.markdown;
 
 import com.vladsch.flexmark.ext.wikilink.WikiLink;
 import com.vladsch.flexmark.util.ast.NodeVisitor;

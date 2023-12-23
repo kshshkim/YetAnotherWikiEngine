@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config;
+package dev.prvt.yawiki.web.config;
 
 import com.vladsch.flexmark.ext.admonition.AdmonitionExtension;
 import com.vladsch.flexmark.ext.footnotes.FootnoteExtension;
@@ -11,8 +11,8 @@ import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import dev.prvt.yawiki.core.wikipage.infra.wikireference.FlexMarkReferenceExtractor;
-import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
+import dev.prvt.yawiki.web.markdown.FlexMarkReferenceExtractor;
+import dev.prvt.yawiki.web.markdown.ReferencedTitleExtractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

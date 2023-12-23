@@ -6,8 +6,8 @@ import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForRead;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
-import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.web.markdown.ReferencedTitleExtractor;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfo;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class WikiController {
     private final WikiPageCommandService wikiPageCommandService;
     private final WikiPageQueryService wikiPageQueryService;
+    private final ReferencedTitleExtractor referencedTitleExtractor;
 
     @GetMapping("/{title}")
     public WikiPageDataForRead getWikiPage(
@@ -76,7 +77,14 @@ public class WikiController {
             @ContributorInfo ContributorInfoArg contributorInfo,
             @RequestBody CommitEditRequest commitEditRequest
     ) {
-        wikiPageCommandService.commitUpdate(contributorInfo.contributorId(), title, commitEditRequest.comment(), commitEditRequest.versionToken(), commitEditRequest.content());
+        wikiPageCommandService.commitUpdate(
+                contributorInfo.contributorId(),
+                title,
+                commitEditRequest.comment(),
+                commitEditRequest.versionToken(),
+                commitEditRequest.content(),
+                referencedTitleExtractor.extractReferencedTitles(commitEditRequest.content())
+        );
         return wikiPageQueryService.getWikiPage(title);
     }
 

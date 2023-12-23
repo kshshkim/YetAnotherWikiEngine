@@ -1,11 +1,10 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.web.markdown;
 
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikipage.domain.wikireference.ReferencedTitleExtractor;
 
 import java.util.Set;
 import java.util.stream.Collectors;

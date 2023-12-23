@@ -1,8 +1,8 @@
-package dev.prvt.yawiki.core.wikipage.infra.wikireference;
+package dev.prvt.yawiki.web.markdown;
 
 import com.vladsch.flexmark.parser.Parser;
-import dev.prvt.yawiki.config.MarkdownParserConfig;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.web.config.MarkdownParserConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,8 @@ class FlexMarkReferenceExtractorTest {
 
     }
 
-//    @Test
+    @Test
+    @Disabled
     void extractingBenchmark() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader("src/test/resources/namu_raw_2022년_230802.txt"));
         StringBuilder stringBuilder = new StringBuilder();

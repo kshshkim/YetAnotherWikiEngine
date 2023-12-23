@@ -1,7 +1,6 @@
 package dev.prvt.yawiki.core.wikireference.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikipage.domain.wikireference.WikiReferenceUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
+public class WikiReferenceUpdater {
     private final WikiReferenceRepository wikiReferenceRepository;
 
     private Set<WikiPageTitle> titlesToCreate(Set<WikiPageTitle> existingRefs, Set<WikiPageTitle> updatedRefs) {
@@ -38,10 +37,6 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
                 .stream()
                 .toList();
         wikiReferenceRepository.bulkInsert(refererId, titles);
-//        wikiReferenceRepository.saveAll(
-//                titlesToCreate(existingRefs, updatedRefs).stream()
-//                        .map(title -> new WikiReference(refererId, title)).toList()
-//        );
     }
 
     /**
@@ -65,7 +60,6 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
      * @param documentId 업데이트할 문서의 ID
      * @param updatedRefTitles InnerReference.referredTitle
      */
-    @Override
     public void updateReferences(UUID documentId, Set<WikiPageTitle> updatedRefTitles) {
         Set<WikiPageTitle> existingRefTitles = wikiReferenceRepository.findReferredTitlesByRefererId(documentId);
 
@@ -73,7 +67,6 @@ public class WikiReferenceUpdaterImpl implements WikiReferenceUpdater {
         createRefs(documentId, existingRefTitles, updatedRefTitles);
     }
 
-    @Override
     public void deleteReferences(UUID documentId) {
         wikiReferenceRepository.deleteExcept(documentId, List.of());
     }

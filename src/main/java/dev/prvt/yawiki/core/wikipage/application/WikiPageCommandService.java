@@ -1,9 +1,9 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
-import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface WikiPageCommandService {
@@ -16,7 +16,7 @@ public interface WikiPageCommandService {
      * @param versionToken 편집 충돌 방지용 토큰
      * @param content 본문
      */
-    void commitUpdate(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String content);
+    void commitUpdate(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String content, Set<WikiPageTitle> referencedTitles);
 
     /**
      * <p>편집을 시작하기 위해서 사용됨. DTO 형태로 반환하는 것을 고려할것.</p>

@@ -3,7 +3,6 @@ package dev.prvt.yawiki.core.wikireference.domain;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @SpringBootTest
-class WikiReferenceUpdaterImplTest {
+class WikiReferenceUpdaterTest {
 
     @Autowired
-    WikiReferenceUpdaterImpl service;
+    WikiReferenceUpdater service;
 
     @Autowired
     WikiReferenceRepository wikiReferenceRepository;
