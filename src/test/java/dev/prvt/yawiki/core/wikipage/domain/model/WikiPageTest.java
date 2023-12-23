@@ -1,17 +1,14 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
 import lombok.SneakyThrows;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
-import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
-import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WikiPageTest {
@@ -29,67 +26,6 @@ class WikiPageTest {
         givenContent = "content " + randString();
         givenContributorId = UUID.randomUUID();
     }
-
-//    @Test
-//    void create_only_with_title() {
-//        // given
-//        String givenTitle = randString();
-//
-//        // when
-//        WikiPage givenWikiPage = WikiPage.create(givenTitle);
-//
-//        // then
-//        assertThat(givenWikiPage.isActive())
-//                .describedAs("만들어진 직후에는 isActive가 false여야함.")
-//                .isFalse();
-//
-//        assertThat(givenWikiPage.getTitle())
-//                .describedAs("제목이 제대로 설정되어야함.")
-//                .isEqualTo(givenTitle);
-//
-//        assertThat(givenWikiPage.getNamespace())
-//                .describedAs("namespace 기본값은 NORMAL임.")
-//                .isEqualTo(Namespace.NORMAL);
-//
-//        assertThat(givenWikiPage.getVersionToken())
-//                .describedAs("버전 토큰이 초기화 되어야함. 공백, 혹은 null이어서는 안 됨.")
-//                .isNotNull()
-//                .isNotBlank();
-//    }
-//
-//    @Test
-//    void create_with_title_and_namespace() {
-//        // given
-//        String givenTitle = randString();
-//        Namespace givenNamespace = Namespace.MAIN;
-//
-//        // when
-//        WikiPage wikiPage = WikiPage.create(givenTitle, givenNamespace);
-//
-//        // then
-//        assertThat(wikiPage.isActive())
-//                .describedAs("만들어진 직후에는 isActive가 false여야함.")
-//                .isFalse();
-//
-//        assertThat(wikiPage.getTitle())
-//                .describedAs("제목이 제대로 설정되어야함.")
-//                .isEqualTo(givenTitle);
-//
-//        assertThat(wikiPage.getNamespace())
-//                .describedAs("namespace가 제대로 설정되어야함.")
-//                .isEqualTo(givenNamespace);
-//
-//        assertThat(wikiPage.getVersionToken())
-//                .describedAs("버전 토큰이 초기화 되어야함. 공백, 혹은 null이어서는 안 됨.")
-//                .isNotNull()
-//                .isNotBlank();
-//    }
-//
-//    @Test
-//    void create_isActive_should_be_set_false_when_created() {
-//        assertThat(givenWikiPage.isActive())
-//                .isFalse();
-//    }
 
     @Test
     void update_should_success_when_current_revision_is_null() {
@@ -328,11 +264,7 @@ class WikiPageTest {
         LocalDateTime now = LocalDateTime.now();
         updateWikiPageRandomly(wikiPage);
 
-        // activated 필드 false set
-        Field activated = WikiPage.class.getDeclaredField("activated");
-        activated.setAccessible(true);
-        activated.set(wikiPage, false);
-
+        setWikiPageActivated(wikiPage, false);
 
         // when
         updateWikiPageRandomly(wikiPage);

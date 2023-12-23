@@ -13,10 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -44,7 +43,7 @@ class LocalCacheInitializerTest {
                 .map(
                         wpt -> {
                             WikiPage wikiPage = wikiPageFactory.create(wpt.title(), wpt.namespace());
-                            wikiPage.update(UUID.randomUUID(), randString(), randString());
+                            updateWikiPageRandomly(wikiPage);
                             return wikiPage;
                         }
                 )

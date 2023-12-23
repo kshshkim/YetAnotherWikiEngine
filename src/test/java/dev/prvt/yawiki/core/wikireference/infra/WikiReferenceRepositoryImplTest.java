@@ -20,8 +20,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
-import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -114,12 +113,7 @@ class WikiReferenceRepositoryImplTest {
         // given
         givenRefTitles.stream()
                 .limit(3)
-                .map(title ->
-                        {
-                            WikiPage created = wikiPageFactory.create(title, Namespace.NORMAL);
-                            created.delete(UUID.randomUUID(), randString());
-                            return created;
-                        }
+                .map(title -> wikiPageFactory.create(title, Namespace.NORMAL)
                 )
                 .forEach(em::persist);
 
@@ -144,7 +138,7 @@ class WikiReferenceRepositoryImplTest {
                 .toList();
 
         for (WikiPage wikiPage : createdWikiPage) {
-            wikiPage.update(UUID.randomUUID(), randString(), randString());  // 무작위 업데이트(isActive가 true로 설정됨.)
+            updateWikiPageRandomly(wikiPage); // 무작위 업데이트(isActive가 true로 설정됨.)
             em.persist(wikiPage);
         }
 

@@ -24,18 +24,24 @@ class WikiPageFactoryTest {
         WikiPage wikiPage = wikiPageFactory.create(givenWikiPageTitle.title(), givenWikiPageTitle.namespace());
 
         assertThat(wikiPage.getTitle())
+                .describedAs("문서 제목이 적절히 설정되어야함.")
                 .isEqualTo(givenWikiPageTitle.title());
 
         assertThat(wikiPage.getNamespace())
+                .describedAs("네임스페이스가 적절히 설정되어야함.")
                 .isEqualTo(givenWikiPageTitle.namespace());
 
         assertThat(wikiPage.getVersionToken())
-                .isNotNull();
+                .describedAs("생성시 버전토큰도 생성되어야함.")
+                .isNotNull()
+                .isNotBlank();
 
         assertThat(wikiPage.getLastModifiedAt())
+                .describedAs("생성시에도 마지막 변경 시간이 설정됨.")
                 .isNotNull();
 
         assertThat(wikiPage.getLastModifiedBy())
+                .describedAs("생성 시점에 contributorId를 지정하지 않은 경우 null")
                 .isNull();
     }
 
@@ -46,20 +52,34 @@ class WikiPageFactoryTest {
         WikiPage wikiPage = wikiPageFactory.create(givenWikiPageTitle.title(), givenWikiPageTitle.namespace(), givenContributor);
 
         assertThat(wikiPage.getTitle())
+                .describedAs("문서 제목이 적절히 설정되어야함.")
                 .isEqualTo(givenWikiPageTitle.title());
 
         assertThat(wikiPage.getNamespace())
+                .describedAs("네임스페이스가 적절히 설정되어야함.")
                 .isEqualTo(givenWikiPageTitle.namespace());
 
         assertThat(wikiPage.getVersionToken())
-                .isNotNull();
+                .describedAs("생성시 버전토큰도 생성되어야함.")
+                .isNotNull()
+                .isNotBlank();
 
         assertThat(wikiPage.getLastModifiedAt())
                 .describedAs("생성시에도 마지막 변경 시간이 설정됨.")
                 .isNotNull();
 
         assertThat(wikiPage.getLastModifiedBy())
-                .describedAs("마지막 수정자가 기입됨.")
+                .describedAs("생성 시점에 contributorId를 지정하지 않은 경우 null")
                 .isEqualTo(givenContributor);
+    }
+
+    @Test
+    void create_active_should_false_when_just_created() {
+        WikiPage wikiPage = wikiPageFactory.create(givenWikiPageTitle.title(), givenWikiPageTitle.namespace());
+
+        assertThat(wikiPage.isActive())
+                .isFalse();
+        assertThat(wikiPage.isActivated())
+                .isFalse();
     }
 }

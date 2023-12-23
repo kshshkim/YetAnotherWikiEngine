@@ -5,66 +5,67 @@ import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.validator.WikiPageCommandPermissionValidator;
-import dev.prvt.yawiki.core.wikipage.infra.validator.DummyWikiPageCommandPermissionValidator;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 public class WikiPageCommandServiceEditCollisionTest {
 
-    @Slf4j
-    @TestConfiguration
-    static class TestConf {
-        @Bean
-        @Primary
-        public ApplicationEventPublisher applicationEventPublisher() {  // 테스트 범위 제한을 위해 이벤트 발행을 막음.
-            return new ApplicationEventPublisher() {
-                @Override
-                public void publishEvent(Object event) {
-                    log.info("event = {}", event);
-                }
-            };
-        }
+    @MockBean
+    ApplicationEventPublisher applicationEventPublisher;
 
-        @Bean
-        @Primary
-        public WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator() {  // 권한 판정을 하지 않음.
-            return new DummyWikiPageCommandPermissionValidator();
-        }
-    }
+    @MockBean
+    WikiPageCommandPermissionValidator wikiPageCommandPermissionValidator;
 
     @Autowired
     WikiPageCommandService wikiPageCommandService;
+
+    @Autowired
+    TransactionTemplate transactionTemplate;
 
     @PersistenceContext
     EntityManager em;
 
     WikiPageTitle givenTitle;
+
     @BeforeEach
     void init() {
         givenTitle = new WikiPageTitle(randString(), Namespace.NORMAL);
         wikiPageCommandService.create(UUID.randomUUID(), givenTitle);
         WikiPageDataForUpdate wikiPageDataForUpdate = wikiPageCommandService.proclaimUpdate(UUID.randomUUID(), givenTitle);
-        wikiPageCommandService.commitUpdate(UUID.randomUUID(), givenTitle, randString(), wikiPageDataForUpdate.versionToken(), randString());
+        wikiPageCommandService.commitUpdate(UUID.randomUUID(), givenTitle, randString(), wikiPageDataForUpdate.versionToken(), randString(), new HashSet<>());
+    }
+
+    @AfterEach
+    void clean() {
+        transactionTemplate.executeWithoutResult(
+                status -> em.createQuery("delete WikiPage wp where wp.title=:title and wp.namespace=:namespace")
+                        .setParameter("title", givenTitle.title())
+                        .setParameter("namespace", givenTitle.namespace())
+                        .executeUpdate()
+        );
     }
 
     @Test
@@ -126,10 +127,11 @@ public class WikiPageCommandServiceEditCollisionTest {
         ;
 
         assertThat(failWorker.getException())
-                .describedAs("락으로 인해 .")
+                .describedAs("락 확보 실패(데드락 포함)로 인한 예외가 아니어야함.")
                 .isNotInstanceOf(CannotAcquireLockException.class)
                 .describedAs("유니크 인덱스(page_id, rev_version)가 설정되었기 때문에, Revision 테이블에 insert 가 일어나는 시점에 실패하게 됨.")
                 .isInstanceOf(DataIntegrityViolationException.class);
+
     }
 
     @Getter
@@ -139,15 +141,16 @@ public class WikiPageCommandServiceEditCollisionTest {
         private final UUID contributorId;
         private final String content;
         private Exception exception;
+
         @Override
         public void run() {
             try {
-                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.titleNamespaceToWikiPageTitle(), randString(), wikiPageDataForUpdate.versionToken(), content);
+                wikiPageCommandService.commitUpdate(contributorId, wikiPageDataForUpdate.titleNamespaceToWikiPageTitle(), randString(), wikiPageDataForUpdate.versionToken(), content, new HashSet<>());
             } catch (Exception e) {
                 this.exception = e;
-//                throw e;
             }
         }
+
         @Builder
         public EditWorker(WikiPageDataForUpdate wikiPageDataForUpdate, WikiPageCommandService wikiPageCommandService, UUID contributorId, String content) {
             this.wikiPageDataForUpdate = wikiPageDataForUpdate;

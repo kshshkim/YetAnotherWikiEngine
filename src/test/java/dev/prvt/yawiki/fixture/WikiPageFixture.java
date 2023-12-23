@@ -3,7 +3,10 @@ package dev.prvt.yawiki.fixture;
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.domain.model.*;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.Fixture.randString;
@@ -55,12 +58,42 @@ public class WikiPageFixture {
                 .ipAddress(Fixture.aInetV4Address());
     }
 
+    @SneakyThrows
+    public static void wikiPageUpdate(WikiPage wikiPage, UUID contributorId, String comment, String content) {
+//        Method update = WikiPage.class.getDeclaredMethod("update", UUID.class, String.class, String.class);
+//        update.setAccessible(true);
+//        update.invoke(wikiPage, contributorId, comment, content);
+        wikiPage.update(contributorId, comment, content);
+    }
+
+    @SneakyThrows
+    public static void setWikiPageId(WikiPage wikiPage, UUID id) {
+        Field idField = WikiPage.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(wikiPage, id);
+    }
+
+    @SneakyThrows
+    public static void setWikiPageActivated(WikiPage wikiPage, boolean activated) {
+        Field activatedField = WikiPage.class.getDeclaredField("activated");
+        activatedField.setAccessible(true);
+        activatedField.set(wikiPage, activated);
+    }
+
+    @SneakyThrows
+    public static void setWikiPageActive(WikiPage wikiPage, boolean active) {
+        Field activeField = WikiPage.class.getDeclaredField("active");
+        activeField.setAccessible(true);
+        activeField.set(wikiPage, active);
+    }
+
+
     public static void updateWikiPageRandomly(WikiPage wikiPage) {
-        wikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
+        wikiPageUpdate(wikiPage, UUID.randomUUID(), randString(), randString() + randString() + randString());
     }
 
     public static void updateWikiPageRandomlyWithContributorId(WikiPage wikiPage, UUID contributorId) {
-        wikiPage.update(contributorId, randString(), randString() + randString() + randString());
+        wikiPageUpdate(wikiPage, contributorId, randString(), randString() + randString() + randString());
     }
 
     public static void assertEqualRawContent(RawContent actual, RawContent expected) {

@@ -6,7 +6,6 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.InitialCacheDataReader;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.fixture.Fixture.randString;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -42,7 +40,7 @@ class InitialCacheDataReaderImplTest {
                 .map(
                         wpt -> {
                             WikiPage wikiPage = wikiPageFactory.create(wpt.title(), wpt.namespace());
-                            wikiPage.update(UUID.randomUUID(), randString(), randString());
+                            updateWikiPageRandomly(wikiPage);
                             return wikiPage;
                         }
                 )

@@ -13,10 +13,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnitUtil;
 import java.util.Optional;
-import java.util.UUID;
 
-import static dev.prvt.yawiki.fixture.Fixture.*;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -67,7 +66,7 @@ class WikiPageRepositoryTest {
     void findByTitleWithRevisionAndRawContent() {
         // given
         WikiPage givenWikiPage = createRandomWikiPage();
-        givenWikiPage.update(UUID.randomUUID(), randString(), randString() + randString() + randString());
+        updateWikiPageRandomly(givenWikiPage);
 
         WikiPage testWikiPage1 = createRandomWikiPage();
         WikiPageFixture.updateWikiPageRandomly(testWikiPage1);  // where 문이 누락되어있었는데, ID 내림차순 기준으로 1개만 불러오는 바람에 테스트에 성공했음. 걸러낼 수 있도록 추가함.
