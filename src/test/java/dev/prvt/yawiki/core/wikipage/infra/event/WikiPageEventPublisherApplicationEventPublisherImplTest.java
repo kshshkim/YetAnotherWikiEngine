@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -165,5 +166,23 @@ class WikiPageEventPublisherApplicationEventPublisherImplTest {
         assertThat(committedEvent.referencedTitles())
                 .describedAs("이벤트에 레퍼런스 정보가 적절히 들어갔는지 검증")
                 .containsExactlyElementsOf(givenReferences);
+    }
+
+    @Test
+    void renamed() {
+        UUID givenContributorId = UUID.randomUUID();
+        WikiPageTitle beforeTitle = givenWikiPage.getWikiPageTitle();
+        String newTitle = randString();
+        updateWikiPageRandomly(givenWikiPage);
+
+        givenWikiPage.rename(givenContributorId, newTitle, randString());
+
+        // when
+        wikiPageEventPublisher.renamed(givenWikiPage, beforeTitle);
+
+        // then
+        WikiPageRenamedEvent expected = wikiPageEventFactory.wikiPageRenamedEvent(givenWikiPage, beforeTitle);
+        verify(mockApplicationEventPublisher, description("renamed 이벤트가 적절히 발행됨."))
+                .publishEvent(eq(expected));
     }
 }

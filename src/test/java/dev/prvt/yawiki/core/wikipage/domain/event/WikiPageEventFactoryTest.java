@@ -15,9 +15,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WikiPageEventFactoryTest {
 
@@ -86,5 +86,40 @@ class WikiPageEventFactoryTest {
 
         assertThat(event.referencedTitles())
                 .containsExactlyInAnyOrderElementsOf(referencedTitles);
+    }
+
+    @Test
+    void wikiPageRenamedEvent() {
+        // given
+        updateWikiPageRandomly(givenWikiPage);
+        WikiPageTitle beforeTitle = givenWikiPage.getWikiPageTitle();
+        WikiPageTitle newTitle = new WikiPageTitle(randString(), beforeTitle.namespace());
+        UUID contributorId = UUID.randomUUID();
+        givenWikiPage.rename(contributorId, newTitle.title(), randString());
+
+        // when
+        WikiPageRenamedEvent event = eventFactory.wikiPageRenamedEvent(givenWikiPage, beforeTitle);
+
+        // then
+        assertThat(event.timestamp())
+                .isNotNull()
+                .isEqualTo(givenWikiPage.getLastModifiedAt());
+
+        assertThat(event.wikiPageId())
+                .isNotNull()
+                .isEqualTo(givenWikiPage.getId());
+
+        assertThat(event.contributorId())
+                .isNotNull()
+                .isEqualTo(contributorId);
+
+        assertThat(event.beforeTitle())
+                .isNotNull()
+                .isEqualTo(beforeTitle);
+
+        assertThat(event.afterTitle())
+                .isNotNull()
+                .isEqualTo(newTitle);
+
     }
 }

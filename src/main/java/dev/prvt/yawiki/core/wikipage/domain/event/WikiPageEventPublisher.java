@@ -13,4 +13,6 @@ public interface WikiPageEventPublisher {
     void deactivated(WikiPage wikiPage);
 
     void updateCommitted(WikiPage wikiPage, Set<WikiPageTitle> referencedTitles);
+
+    void renamed(WikiPage wikiPage, WikiPageTitle beforeTitle);
 }

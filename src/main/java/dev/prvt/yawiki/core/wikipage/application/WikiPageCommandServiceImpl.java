@@ -67,6 +67,15 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
         wikiPageEventPublisher.deactivated(wikiPage);
     }
 
+    @Override
+    public void rename(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String newTitle) {
+        WikiPage wikiPage = getWikiPage(title);
+
+        wikiPageValidator.validateRename(contributorId, versionToken, wikiPage, newTitle);
+        wikiPage.rename(contributorId, newTitle, comment);
+        wikiPageEventPublisher.renamed(wikiPage, title);
+    }
+
     private WikiPage getWikiPage(WikiPageTitle title) {
         return wikiPageRepository.findByTitleAndNamespace(title.title(), title.namespace())
                 .orElseThrow(NoSuchWikiPageException::new);

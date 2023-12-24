@@ -1,7 +1,9 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageRenameException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import java.util.UUID;
 import static dev.prvt.yawiki.fixture.Fixture.randString;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class WikiPageTest {
 
@@ -142,7 +145,7 @@ class WikiPageTest {
         Revision givenRevision = givenWikiPage.getCurrentRevision();
 
         // when
-        givenWikiPage.delete(givenContributorId, givenComment);
+        givenWikiPage.deactivate(givenContributorId, givenComment);
 
         // then
         assertThat(givenWikiPage.isActive())
@@ -274,4 +277,51 @@ class WikiPageTest {
                 .describedAs("이미 생성된 상태였으므로 false")
                 .isFalse();
     }
+
+    @Test
+    void rename() {
+        // given
+        UUID givenContributorId = UUID.randomUUID();
+        String givenNewTitle = randString();
+        String givenComment = randString();
+        LocalDateTime lastModifiedAt = givenWikiPage.getLastModifiedAt();
+        setWikiPageActive(givenWikiPage, true);
+
+
+        // when
+        givenWikiPage.rename(givenContributorId, givenNewTitle, givenComment);
+
+        // then
+        assertThat(givenWikiPage.getTitle())
+                .describedAs("제목이 수정되어야함.")
+                .isEqualTo(givenNewTitle);
+
+        assertThat(givenWikiPage.getLastModifiedBy())
+                .describedAs("제목 변경자가 기록되어야함.")
+                .isEqualTo(givenContributorId);
+
+        assertThat(givenWikiPage.getLastModifiedAt())
+                .describedAs("마지막 수정 시간이 업데이트되어야함.")
+                .isAfter(lastModifiedAt);
+    }
+
+    @Test
+    @DisplayName("활성 상태가 아닌 문서의 제목을 변경할 수 없음.")
+    void rename_should_fail_when_WikiPage_is_not_active() {
+        // given
+        UUID givenContributorId = UUID.randomUUID();
+        String givenNewTitle = randString();
+        String givenComment = randString();
+        assertThat(givenWikiPage.isActive())
+                .describedAs("테스트 선제 조건")
+                .isFalse();
+
+        // when then
+        assertThatThrownBy(() -> givenWikiPage.rename(givenContributorId, givenNewTitle, givenComment))
+                .isInstanceOf(WikiPageRenameException.class)
+        ;
+
+    }
+
+
 }

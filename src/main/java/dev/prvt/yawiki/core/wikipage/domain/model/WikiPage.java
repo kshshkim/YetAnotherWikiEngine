@@ -1,5 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageRenameException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,7 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
  * <p>적절하게 InnerReference 업데이트가 이루어질 수 있도록, 모든 업데이트 작업은 도메인 서비스를 통해 이루어져야함.</p>
  * <p><b>엔티티 내부의 필드를 변경하는 모든 작업은 내부적으로 update 메소드를 활용하여 새로운 Revision을 생성해야함.</b></p>
  * <p>
- *     <h3>동시성 처리</h3>
+ * <h3>동시성 처리</h3>
  * <p>
  * 트랜잭션 시점의 동시성 처리
  * <ul>
@@ -39,7 +40,6 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
  *
  * </p>
  *
- * @see dev.prvt.yawiki.core.wikipage.domain.WikiPageDomainService
  * @see Revision
  */
 
@@ -88,6 +88,7 @@ public class WikiPage {
 
     /**
      * 네임스페이스
+     *
      * @see Namespace
      */
     @Column(name = "namespace", columnDefinition = "INTEGER")
@@ -157,19 +158,75 @@ public class WikiPage {
     public void update(UUID contributorId, String comment, String content) {
         Revision newRev = buildNewRevision(contributorId, comment, content);
         update(newRev);
+        activate();
         modified(contributorId);
     }
+
+// validator, eventPublisher 호출 책임이 WikiPage 로 내재화되는 경우 사용될 코드
+//    public void update(
+//            UUID contributorId,
+//            String comment,
+//            String content,
+//            Set<WikiPageTitle> referencedTitles,
+//            String versionToken,
+//            WikiPageValidator validator,
+//            WikiPageEventPublisher eventPublisher
+//    ) {
+//        validator.validateUpdate(contributorId, versionToken, this);
+//        this.update(contributorId, comment, content);
+//        eventPublisher.updateCommitted(this, referencedTitles);
+//        if (this.isActivated()) {
+//            eventPublisher.activated(this);
+//        }
+//    }
 
 
     /**
      * <p>빈 리비전을 생성하고, 문서의 상태를 삭제됨으로 변경.</p>
      */
-    public void delete(UUID contributorId, String comment) {
-        update(contributorId, comment, "");
+    public void deactivate(UUID contributorId, String comment) {
+        Revision newRev = buildNewRevision(contributorId, comment, "");
+        update(newRev);
         deactivate();
         modified(contributorId);
     }
 
+// validator, eventPublisher 호출 책임이 WikiPage 로 내재화되는 경우 사용될 코드
+//    public void deactivate(UUID contributorId, String comment, String versionToken, WikiPageValidator validator, WikiPageEventPublisher eventPublisher) {
+//        this.deactivate(contributorId, comment);
+//        validator.validateDelete(contributorId, versionToken, this);
+//        eventPublisher.deactivated(this);
+//    }
+
+    /**
+     * 문서의 제목을 변경함.
+     * <p>변경 후 기존 제목에 대해 리다이렉트를 설정하는 기능은 이 클래스의 책임이 아님.</p>
+     *
+     * @param contributorId 기여자 ID
+     * @param newTitle      새 제목
+     * @param comment       수정 코멘트
+     */
+    public void rename(UUID contributorId, String newTitle, String comment) {
+        renameRequireActive();
+        renameTitle(newTitle);
+
+        Revision newRev = buildNewRevision(contributorId, comment, getContent());
+        update(newRev);
+        modified(contributorId);
+    }
+
+    /**
+     * 제목 변경은 활성화된 문서(존재하는 문서)에 대해서만 수행할 수 있음.
+     */
+    private void renameRequireActive() {
+        if (!isActive()) {
+            throw WikiPageRenameException.notActive(this);
+        }
+    }
+
+    private void renameTitle(String newTitle) {
+        this.title = newTitle;
+    }
 
     /**
      * 편집 성공시 버전 토큰을 재생성함.
@@ -178,7 +235,7 @@ public class WikiPage {
         this.versionToken = UUID.randomUUID().toString();
     }
 
-    private void activate() {
+    void activate() {
         if (!isActive()) {
             this.active = true;
             this.activated = true;
@@ -203,15 +260,11 @@ public class WikiPage {
     private void update(Revision newRevision) {
         replaceCurrentRevisionWith(newRevision);
         updateVersionToken();
-        activate();
-    }
-
-    private void modified() {
-        modified(null);
     }
 
     /**
      * 엔티티의 값을 수정하는 메서드가 실행된 경우 함께 호출되어야함.
+     * 테스트 편의를 위해 직접 구현하였으나, AuditingEntityListener 로 구현하는 것이 보다 간단할 것으로 보이며, 유지보수에 유리할 것으로 보임.
      */
     private void modified(UUID contributorId) {
         modified(contributorId, LocalDateTime.now());

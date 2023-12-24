@@ -25,4 +25,14 @@ public class WikiPageEventFactory {
         return new WikiPageUpdateCommittedEvent(wikiPage.getLastModifiedBy(), wikiPage.getId(), wikiPage.getWikiPageTitle(), referencedTitles);
     }
 
+    public WikiPageRenamedEvent wikiPageRenamedEvent(WikiPage wikiPage, WikiPageTitle beforeTitle) {
+        return new WikiPageRenamedEvent(
+                wikiPage.getLastModifiedBy(),
+                wikiPage.getId(),
+                beforeTitle,
+                wikiPage.getWikiPageTitle(),
+                wikiPage.getLastModifiedAt()
+        );
+    }
+
 }

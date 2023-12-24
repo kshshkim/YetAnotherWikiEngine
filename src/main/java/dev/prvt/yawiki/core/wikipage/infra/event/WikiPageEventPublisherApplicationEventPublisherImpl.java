@@ -38,4 +38,9 @@ public class WikiPageEventPublisherApplicationEventPublisherImpl implements Wiki
             this.activated(wikiPage);
         }
     }
+
+    @Override
+    public void renamed(WikiPage wikiPage, WikiPageTitle beforeTitle) {
+        eventPublisher.publishEvent(eventFactory.wikiPageRenamedEvent(wikiPage, beforeTitle));
+    }
 }

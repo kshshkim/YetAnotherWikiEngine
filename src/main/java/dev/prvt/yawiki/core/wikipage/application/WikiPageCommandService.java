@@ -28,7 +28,29 @@ public interface WikiPageCommandService {
      */
     WikiPageDataForUpdate proclaimUpdate(UUID contributorId, WikiPageTitle title);
 
+    /**
+     * 문서를 생성함. 문서의 DB 엔티티가 생성되는 것으로, 엔티티가 생성되어도 첫번째 편집이 있기 전까지는 존재하는 문서로 취급되지 않음.
+     * @param contributorId 기여자 ID
+     * @param title 제목
+     */
     void create(UUID contributorId, WikiPageTitle title);
 
+    /**
+     * 위키 문서를 제거함. 단, DB 상에서 제거되는 것이 아닌, 비활성화 상태로 변하며, 기존 Revision 내역을 조회할 수 있음.
+     * @param contributorId 기여자 ID
+     * @param title 제거할 문서 제목
+     * @param comment 편집 코멘트
+     * @param versionToken 편집 버전 토큰
+     */
     void delete(UUID contributorId, WikiPageTitle title, String comment, String versionToken);
+
+    /**
+     * 위키 문서의 제목을 변경
+     * @param contributorId 기여자 ID
+     * @param title 변경할 위키 문서의 제목
+     * @param comment 수정 코멘트
+     * @param versionToken 편집 버전 토큰
+     * @param newTitle 새 제목
+     */
+    void rename(UUID contributorId, WikiPageTitle title, String comment, String versionToken, String newTitle);
 }
