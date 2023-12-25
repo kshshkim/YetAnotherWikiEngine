@@ -28,7 +28,7 @@ public interface WikiReferenceRepository {
      * @param pageable pageable
      * @return wikiPageTitle 을 참조하고 있는 문서들의 title
      */
-    Page<WikiPageTitle> findBackReferencesByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable);
+    Page<WikiPageTitle> findBacklinksByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable);
 
     /**
      * @param refererId refererId 가 일치하는 InnerReference 중에서

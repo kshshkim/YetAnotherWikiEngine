@@ -91,7 +91,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
      * <p>지정된 페이지 크기보다 BackReference 의 숫자가 적다면, 페이징을 위한 추가 count 쿼리가 나가지 않아야함.</p>
      */
     @Override
-    public Page<WikiPageTitle> findBackReferencesByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable) {
+    public Page<WikiPageTitle> findBacklinksByWikiPageTitle(String wikiPageTitle, Namespace namespace, Pageable pageable) {
         List<WikiPageTitle> content = queryFactory
                 .select(new QWikiPageTitle(wikiPage.title, wikiPage.namespace))
                 .from(wikiPage)

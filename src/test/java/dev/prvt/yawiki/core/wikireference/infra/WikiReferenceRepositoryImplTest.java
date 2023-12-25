@@ -277,7 +277,7 @@ class WikiReferenceRepositoryImplTest {
 
         // when
         Pageable pageable = Pageable.ofSize(givenWikiPages.size() + 10);
-        Page<WikiPageTitle> result = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable);
+        Page<WikiPageTitle> result = wikiReferenceRepository.findBacklinksByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable);
 
         // then
         assertThat(result.getTotalPages())
@@ -320,8 +320,8 @@ class WikiReferenceRepositoryImplTest {
         Pageable pageable1 = Pageable.ofSize(pageSize);  // 첫번째 페이지
         Pageable pageable2 = Pageable.ofSize(pageSize).withPage(1);  // 두번째 페이지
 
-        Page<WikiPageTitle> result1 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable1);
-        Page<WikiPageTitle> result2 = wikiReferenceRepository.findBackReferencesByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable2);
+        Page<WikiPageTitle> result1 = wikiReferenceRepository.findBacklinksByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable1);
+        Page<WikiPageTitle> result2 = wikiReferenceRepository.findBacklinksByWikiPageTitle(givenWikiPage.getTitle(), givenWikiPage.getNamespace(), pageable2);
 
         // then
         // 첫번째 페이지 테스트

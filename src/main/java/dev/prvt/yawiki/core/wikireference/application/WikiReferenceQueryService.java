@@ -6,8 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 @RequiredArgsConstructor
 public class WikiReferenceQueryService {
     private final WikiReferenceRepository wikiReferenceRepository;
@@ -18,7 +21,7 @@ public class WikiReferenceQueryService {
      * @param pageable pageable
      * @return Page 로 래핑된 WikiPageTitle 반환
      */
-    public Page<WikiPageTitle> getBackReferences(WikiPageTitle wikiPageTitle, Pageable pageable) {
-        return wikiReferenceRepository.findBackReferencesByWikiPageTitle(wikiPageTitle.title(), wikiPageTitle.namespace(), pageable);
+    public Page<WikiPageTitle> getBacklinks(WikiPageTitle wikiPageTitle, Pageable pageable) {
+        return wikiReferenceRepository.findBacklinksByWikiPageTitle(wikiPageTitle.title(), wikiPageTitle.namespace(), pageable);
     }
 }

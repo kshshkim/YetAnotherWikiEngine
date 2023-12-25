@@ -29,10 +29,10 @@ class WikiReferenceQueryServiceTest {
         Pageable givenPageable = Pageable.ofSize(10).withPage(20);
 
         // when
-        wikiReferenceQueryService.getBackReferences(givenWikiPageTitle, givenPageable);
+        wikiReferenceQueryService.getBacklinks(givenWikiPageTitle, givenPageable);
 
         // then
         verify(wikiReferenceRepository)
-                .findBackReferencesByWikiPageTitle(givenWikiPageTitle.title(), givenWikiPageTitle.namespace(), givenPageable);
+                .findBacklinksByWikiPageTitle(givenWikiPageTitle.title(), givenWikiPageTitle.namespace(), givenPageable);
     }
 }
