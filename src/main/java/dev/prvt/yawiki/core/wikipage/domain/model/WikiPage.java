@@ -133,11 +133,16 @@ public class WikiPage {
     @Column(name = "last_modified_by", columnDefinition = "BINARY(16)")
     private UUID lastModifiedBy;
 
+    @Transient
+    @Getter(AccessLevel.NONE)
+    private WikiPageTitle wikiPageTitle;
+
     /**
      * <p>객체 그래프를 타고 현재 content 를 반환함.</p>
      *
      * @return 렌더링 되지 않은 본문
      */
+    @Transient
     public String getContent() {
         return this.currentRevision == null ? "" : this.currentRevision
                 .getContent();
@@ -145,7 +150,10 @@ public class WikiPage {
 
     @Transient
     public WikiPageTitle getWikiPageTitle() {  // todo test
-        return new WikiPageTitle(title, namespace);
+        if (this.wikiPageTitle == null) {
+            this.wikiPageTitle = new WikiPageTitle(this.title, this.namespace);
+        }
+        return this.wikiPageTitle;
     }
 
     /**
@@ -226,6 +234,7 @@ public class WikiPage {
 
     private void renameTitle(String newTitle) {
         this.title = newTitle;
+        this.wikiPageTitle = new WikiPageTitle(newTitle, this.namespace);
     }
 
     /**

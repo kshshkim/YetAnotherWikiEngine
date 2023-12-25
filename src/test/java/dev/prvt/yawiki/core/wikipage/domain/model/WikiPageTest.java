@@ -5,6 +5,8 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,6 +30,40 @@ class WikiPageTest {
         givenComment = "comment " + randString();
         givenContent = "content " + randString();
         givenContributorId = UUID.randomUUID();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Namespace.class)
+    void getWikiPageTitle(Namespace namespace) {
+        // given
+        givenWikiPage = WikiPage.builder()
+                .title(randString())
+                .namespace(namespace)
+                .build();
+
+        // when
+        WikiPageTitle wikiPageTitle = givenWikiPage.getWikiPageTitle();
+
+        // then
+        assertThat(wikiPageTitle.title())
+                .describedAs("title 적절히 설정되어야함")
+                .isEqualTo(givenWikiPage.getTitle());
+        assertThat(wikiPageTitle.namespace())
+                .describedAs("namespace 적절히 설정되어야함")
+                .isEqualTo(givenWikiPage.getNamespace());
+    }
+
+    @Test
+    @DisplayName("WikiPageTitle 은 한 번만 생성되어야함.")
+    void getWikiPageTitle_should_be_generated_once_per_instance() {
+        WikiPageTitle firstCall = givenWikiPage.getWikiPageTitle();
+        WikiPageTitle secondCall = givenWikiPage.getWikiPageTitle();
+
+        assertThat(firstCall)
+                .describedAs("null 값을 반환해서는 안 됨.")
+                .isNotNull()
+                .describedAs("여러번 호출해도 한 번만 생성되어야함.")
+                .isSameAs(secondCall);
     }
 
     @Test
@@ -320,8 +356,28 @@ class WikiPageTest {
         assertThatThrownBy(() -> givenWikiPage.rename(givenContributorId, givenNewTitle, givenComment))
                 .isInstanceOf(WikiPageRenameException.class)
         ;
-
     }
 
+    @Test
+    @DisplayName("제목 변경시, transient 필드 wikiPageTitle 역시 업데이트 되어야함.")
+    void rename_should_update_wikiPageTitle_field() {
+        // given
+        updateWikiPageRandomly(givenWikiPage);
+        WikiPageTitle oldWikiPageTitle = givenWikiPage.getWikiPageTitle();
+        String newTitle = randString();
+
+
+        // when
+        givenWikiPage.rename(UUID.randomUUID(), newTitle, randString());
+
+        // then
+        WikiPageTitle newWikiPageTitle = givenWikiPage.getWikiPageTitle();
+        assertThat(givenWikiPage.getTitle())
+                .describedAs("제목이 적절히 변경되어야함")
+                .isEqualTo(newTitle);
+        assertThat(newWikiPageTitle)
+                .describedAs("제목이 변경되었기 때문에 oldWikiPageTitle 역시 변경되어야함")
+                .isNotEqualTo(oldWikiPageTitle);
+    }
 
 }
