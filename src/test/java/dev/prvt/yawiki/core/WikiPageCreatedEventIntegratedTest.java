@@ -51,7 +51,7 @@ public class WikiPageCreatedEventIntegratedTest {
 
         // then
 
-        Optional<WikiPage> wikiPageFound = wikiPageRepository.findByTitleWithRevisionAndRawContent(wikiPageTitle.title(), wikiPageTitle.namespace());
+        Optional<WikiPage> wikiPageFound = wikiPageRepository.findByTitleAndNamespace(wikiPageTitle.title(), wikiPageTitle.namespace());
         assertThat(wikiPageFound)
                 .describedAs("생성된 WikiPage를 찾아와야함.")
                 .isPresent();

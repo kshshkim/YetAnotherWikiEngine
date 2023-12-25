@@ -10,7 +10,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.QWikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageReferenceRepository;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ import static dev.prvt.yawiki.core.wikireference.domain.QWikiReference.wikiRefer
 @Repository
 @Slf4j
 @Transactional(readOnly = true)
-public class WikiReferenceRepositoryImpl implements WikiReferenceRepository, WikiPageReferenceRepository {
+public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     private final JPAQueryFactory queryFactory;
     private final WikiReferenceJpaRepository wikiReferenceJpaRepository;
     private final JdbcTemplate jdbcTemplate;

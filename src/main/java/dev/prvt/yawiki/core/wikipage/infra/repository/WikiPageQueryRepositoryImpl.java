@@ -2,7 +2,7 @@ package dev.prvt.yawiki.core.wikipage.infra.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import dev.prvt.yawiki.core.contributor.domain.ContributorRepository;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageQueryRepository;
@@ -22,34 +22,27 @@ import static dev.prvt.yawiki.core.wikipage.domain.model.QWikiPage.wikiPage;
 @Repository
 public class WikiPageQueryRepositoryImpl implements WikiPageQueryRepository {
     private final JPAQueryFactory queryFactory;
-    private final ContributorRepository contributorRepository;
-    public WikiPageQueryRepositoryImpl(EntityManager em, ContributorRepository contributorRepository) {
+
+    public WikiPageQueryRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
-        this.contributorRepository = contributorRepository;
     }
 
-    /**
-     * @param title Revision.wikiPage.title
-     * @return count 쿼리 특성상 null 값을 반환하지 않음.
-     */
-    private long countRevisionByWikiPageId(UUID wikiPageId) {
-        //noinspection DataFlowIssue
-        return queryFactory
-                .select(revision.count())
-                .from(revision)
-                .where(revision.wikiPage.id.eq(wikiPageId))
-                .fetchOne();
-    }
-
-    /**
-     * <p>한 번의 쿼리로 바로 가져와도 되지만, 지금 상황엔 DTO 에 포함될 정보가 변경될 가능성이 높은 관계로 편의를 위해 도메인 객체를 불러옴.</p>
-     * <p>추후 최적화할것</p>
-     * @param title Revision.wikiPage 의 title 값
-     * @param pageable Spring Framework
-     * @return
-     */
     @Override
-    public Page<Revision> findRevisionsByWikiPageId(UUID wikiPageId, Pageable pageable) {  // todo diff, contributorName
+    public Page<Revision> findRevisionsByWikiPageTitle(WikiPageTitle wikiPageTitle, Pageable pageable) {
+        List<Revision> content = queryFactory
+                .selectFrom(revision)
+                    .join(wikiPage).on(revision.wikiPage.eq(wikiPage)).fetchJoin()
+                .where(wikiPageTitleMatches(wikiPageTitle))
+                .orderBy(revision.revVersion.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return PageableExecutionUtils.getPage(content, pageable, () -> countRevision(content));
+    }
+
+    @Override
+    public Page<Revision> findRevisionsByWikiPageId(UUID wikiPageId, Pageable pageable) {
 
         List<Revision> content = queryFactory
                 .selectFrom(revision)
@@ -59,26 +52,56 @@ public class WikiPageQueryRepositoryImpl implements WikiPageQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, () -> countRevisionByWikiPageId(wikiPageId));
+        return PageableExecutionUtils.getPage(content, pageable, () -> countRevision(wikiPageId));
     }
 
     @Override
-    public Optional<Revision> findRevisionByWikiPageTitleWithRawContent(WikiPageTitle wikiPageTitle, int version) {
-        return Optional.ofNullable(
-                    queryFactory
-                        .selectFrom(revision)
-                            .join(wikiPage).on(revision.wikiPage.eq(wikiPage)).fetchJoin()
-                            .join(revision.rawContent).fetchJoin()
-                        .where(
-                                titleAndNamespaceMatches(wikiPageTitle),
-                                revision.revVersion.eq(version)
-                        )
-                        .fetchOne()
-        );
+    public Optional<Revision> findRevisionByWikiPageTitle(WikiPageTitle wikiPageTitle, int version) {
+        return queryFactory
+                .selectFrom(revision)
+                    .join(wikiPage).on(revision.wikiPage.eq(wikiPage)).fetchJoin()
+                    .join(revision.rawContent).fetchJoin()
+                .where(
+                        wikiPageTitleMatches(wikiPageTitle),
+                        revision.revVersion.eq(version)
+                )
+                .fetch()
+                .stream()
+                .findAny();
     }
 
-    private static BooleanExpression titleAndNamespaceMatches(WikiPageTitle wikiPageTitle) {
-        return wikiPage.title.eq(wikiPageTitle.title())
-                .and(wikiPage.namespace.eq(wikiPageTitle.namespace()));
+    /**
+     * Page 반환을 위해 사용되는 count 쿼리
+     * @param wikiPageId WikiPage.id
+     * @return count 쿼리 특성상 null 값을 반환하지 않음.
+     */
+    private long countRevision(UUID wikiPageId) {
+        //noinspection DataFlowIssue
+        return queryFactory
+                .select(revision.count())
+                .from(revision)
+                .where(revision.wikiPage.id.eq(wikiPageId))
+                .fetchOne();
+    }
+
+    private long countRevision(List<Revision> content) {
+        return countRevision(getWikiPageIdFromRevisionList(content));
+    }
+
+    private static UUID getWikiPageIdFromRevisionList(List<Revision> revisionList) {
+        return revisionList.get(0).getWikiPage().getId();
+    }
+
+    private static BooleanExpression wikiPageTitleMatches(WikiPageTitle wikiPageTitle) {
+        return titleMatches(wikiPageTitle.title())
+                .and(namespaceMatches(wikiPageTitle.namespace()));
+    }
+
+    private static BooleanExpression titleMatches(String title) {
+        return wikiPage.title.eq(title);
+    }
+
+    private static BooleanExpression namespaceMatches(Namespace namespace) {
+        return wikiPage.namespace.eq(namespace);
     }
 }

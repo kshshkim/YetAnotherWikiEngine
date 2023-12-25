@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import dev.prvt.yawiki.core.wikipage.application.WikiPageMapper;
 import dev.prvt.yawiki.web.config.MarkdownParserConfig;
 import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
 import dev.prvt.yawiki.core.wikipage.application.WikiPageCommandService;
@@ -111,6 +112,8 @@ class WikiControllerTest {
     private Converter<String, WikiPageTitle> converter;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    private final WikiPageMapper wikiPageMapper = new WikiPageMapper();
 
     // security
     @TestConfiguration
@@ -230,7 +233,7 @@ class WikiControllerTest {
         // given
         String nonExistTitle = UUID.randomUUID().toString() + "notexist";
         WikiPageTitle nonExistWikiPageTitle = new WikiPageTitle(nonExistTitle, Namespace.NORMAL);
-        given(wikiPageQueryService.getWikiPage(nonExistWikiPageTitle))
+        given(wikiPageQueryService.getWikiPageDataForRead(nonExistWikiPageTitle))
                 .willThrow(new NoSuchWikiPageException());
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + nonExistTitle))
@@ -249,7 +252,7 @@ class WikiControllerTest {
     @Test
     void getWikiPage_ok() {
         // given
-        given(wikiPageQueryService.getWikiPage(givenTitle))
+        given(wikiPageQueryService.getWikiPageDataForRead(givenTitle))
                 .willReturn(new WikiPageDataForRead(givenTitle, givenContent));
 
         // when then
@@ -269,7 +272,7 @@ class WikiControllerTest {
     void getWikiPage_with_revVersion() {
         // given
         int givenVersion = 22;
-        given(wikiPageQueryService.getWikiPage(givenTitle, givenVersion))
+        given(wikiPageQueryService.getWikiPageDataForRead(givenTitle, givenVersion))
                 .willReturn(new WikiPageDataForRead(givenTitle, givenContent));
 
         // when then
@@ -307,7 +310,7 @@ class WikiControllerTest {
     void getWikiHistory_ok_default_() {
         Random r = new Random();
         List<RevisionData> revs = IntStream.range(1, 10)
-                .mapToObj(i -> new RevisionData(i, r.nextInt(10), randString(), randString()))
+                .mapToObj(i -> new RevisionData(i, r.nextInt(10), UUID.randomUUID(), randString()))
                 .toList();
         Pageable givenPageable = Pageable.ofSize(30).withPage(0);
         given(wikiPageQueryService.getRevisionHistory(eq(givenTitle), any()))
@@ -325,17 +328,21 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void proclaimEdit() {
+        // given
+        WikiPageDataForUpdate wikiPageDataForUpdate = new WikiPageDataForUpdate(givenTitle.title(), givenTitle.namespace(), givenContent, givenVersionToken);
         given(wikiPageCommandService.proclaimUpdate(eq(givenContributorId), eq(givenTitle)))
-                .willReturn(new WikiPageDataForUpdate(givenTitle.title(), givenTitle.namespace(), givenContent, givenVersionToken));  // todo dto 리팩터
+                .willReturn(wikiPageDataForUpdate);  // todo dto 리팩터
 
-        // when then
+        // when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
-        WikiPageDataForUpdate wikiPageDataForUpdate = objectMapper.readValue(contentAsString, WikiPageDataForUpdate.class);
-        assertThat(tuple(wikiPageDataForUpdate.title(), wikiPageDataForUpdate.content(), wikiPageDataForUpdate.versionToken()))
+        WikiPageDataForUpdate result = objectMapper.readValue(contentAsString, WikiPageDataForUpdate.class);
+
+        // then
+        assertThat(tuple(result.title(), result.content(), result.versionToken()))
                 .isEqualTo(tuple(givenTitle.title(), givenContent, givenVersionToken));
     }
 
@@ -343,17 +350,20 @@ class WikiControllerTest {
     @Test
     @WithAnonymousUser
     void proclaimEdit_permission_evaluation_exception() {
+        // given
         given(wikiPageCommandService.proclaimUpdate(givenContributorId, givenTitle))
                 .willThrow(new PermissionEvaluationException(givenMessage));
-
-        // when then
         String requestUri = "/api/v1/wiki/" + givenTitle.toUnparsedString() + "/edit";
+
+        // when
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(requestUri))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String contentAsString = mvcResult.getResponse().getContentAsString();
         ErrorMessage errorMessage = objectMapper.readValue(contentAsString, ErrorMessage.class);
+
+        // then
         assertThat(tuple(errorMessage.getStatus(), errorMessage.getMessage(), errorMessage.getPath()))
                 .isEqualTo(tuple(HttpStatus.FORBIDDEN.value(), givenMessage, requestUri));
     }

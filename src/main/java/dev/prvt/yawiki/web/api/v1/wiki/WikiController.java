@@ -31,8 +31,8 @@ public class WikiController {
             @PathVariable WikiPageTitle title,
             @RequestParam(required = false) Integer rev
     ) {
-        return rev == null ? wikiPageQueryService.getWikiPage(title):
-                wikiPageQueryService.getWikiPage(title, rev);
+        return rev == null ? wikiPageQueryService.getWikiPageDataForRead(title):
+                wikiPageQueryService.getWikiPageDataForRead(title, rev);
     }
 
     @GetMapping("/{title}/history")
@@ -85,7 +85,7 @@ public class WikiController {
                 commitEditRequest.content(),
                 referencedTitleExtractor.extractReferencedTitles(commitEditRequest.content())
         );
-        return wikiPageQueryService.getWikiPage(title);
+        return wikiPageQueryService.getWikiPageDataForRead(title);
     }
 
     public record DeleteRequest(

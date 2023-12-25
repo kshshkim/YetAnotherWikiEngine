@@ -33,9 +33,4 @@ public class WikiPageRepositoryImpl implements WikiPageRepository {
     public Optional<WikiPage> findByTitleAndNamespace(String title, Namespace namespace) {
         return wikiPageJpaRepository.findByTitleWithRevisionAndRawContent(title, namespace);
     }
-
-    @Override
-    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title, Namespace namespace) {
-        return wikiPageJpaRepository.findByTitleWithRevisionAndRawContent(title, namespace);
-    }
 }

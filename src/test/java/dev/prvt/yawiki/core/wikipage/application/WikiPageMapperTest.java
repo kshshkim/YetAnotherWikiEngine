@@ -1,89 +1,53 @@
 package dev.prvt.yawiki.core.wikipage.application;
 
-import dev.prvt.yawiki.core.contributor.domain.Contributor;
-import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
-import dev.prvt.yawiki.core.wikipage.application.dto.RevisionData;
 import dev.prvt.yawiki.core.wikipage.application.dto.WikiPageDataForUpdate;
-import dev.prvt.yawiki.core.wikipage.domain.model.Revision;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
-import dev.prvt.yawiki.fixture.WikiPageFixture;
-import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static dev.prvt.yawiki.fixture.WikiPageFixture.aNormalWikiPage;
+import static dev.prvt.yawiki.fixture.WikiPageFixture.updateWikiPageRandomly;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 class WikiPageMapperTest {
     private final WikiPageMapper wikiPageMapper = new WikiPageMapper();
 
-    @NotNull
-    private WikiPage createWikiPage() {
-        return aNormalWikiPage();
-    }
-
     @Test
-    void mapFrom_WikiPage_new_WikiPage() {
-        WikiPage wikiPage = createWikiPage();
-        WikiPageDataForUpdate mapped = wikiPageMapper.mapFrom(wikiPage);
+    @DisplayName("mapForUpdate - 비활성 위키 페이지 매핑 테스트")
+    void mapForUpdate_inactive_wiki_page() {
+        // given
+        WikiPage wikiPage = aNormalWikiPage();  // 생성 직후이기 때문에 활성 상태가 아님.
 
-        assertThat(tuple(mapped.title(), mapped.content(), mapped.versionToken()))
-                .isEqualTo(tuple(wikiPage.getTitle(), wikiPage.getContent(), wikiPage.getVersionToken()));
+        // when
+        WikiPageDataForUpdate mapped = wikiPageMapper.mapForUpdate(wikiPage);
 
-        assertThat(List.of(mapped.title(), mapped.content(), mapped.versionToken()))
-                .doesNotContainNull();
-
-        assertThat(List.of(mapped.title(), mapped.versionToken()))
-                .doesNotContain("");
-    }
-
-    @Test
-    void mapFrom_WikiPage_existing_WikiPage() {
-        WikiPage wikiPage = createWikiPage();
-        WikiPageFixture.updateWikiPageRandomly(wikiPage);
-        WikiPageDataForUpdate mapped = wikiPageMapper.mapFrom(wikiPage);
-
-        assertThat(tuple(mapped.title(), mapped.content(), mapped.versionToken()))
-                .isEqualTo(tuple(wikiPage.getTitle(), wikiPage.getContent(), wikiPage.getVersionToken()));
-
-        assertThat(List.of(mapped.title(), mapped.content(), mapped.versionToken()))
+        // then
+        assertThat(List.of(mapped.title(), mapped.namespace(), mapped.content(), mapped.versionToken()))
+                .describedAs("필드에 null 값이 포함되면 안 됨.")
                 .doesNotContainNull()
-                .doesNotContain("");
+                .describedAs("제목, 네임스페이스, 본문, 버전 토큰이 제대로 매핑됨.")
+                .containsExactlyElementsOf(List.of(wikiPage.getTitle(), wikiPage.getNamespace(), wikiPage.getContent(), wikiPage.getVersionToken()));
+
     }
 
     @Test
-    void mapFrom_Revision_Map_Contributor_null() {
-        Revision givenRev = WikiPageFixture.aRevision().build();
-        Map<UUID, Contributor> contributorMap = new HashMap<>();
+    @DisplayName("mapForUpdate - 활성 위키 페이지 매핑 테스트")
+    void mapForUpdate_WikiPage_existing_WikiPage() {
+        // given
+        WikiPage wikiPage = aNormalWikiPage();
+        updateWikiPageRandomly(wikiPage);
 
         // when
-        RevisionData revisionData = wikiPageMapper.mapFrom(givenRev, contributorMap);
+        WikiPageDataForUpdate mapped = wikiPageMapper.mapForUpdate(wikiPage);
 
         // then
-        assertThat(revisionData.contributorName())
-                .isEqualTo("NULL");
+        assertThat(List.of(mapped.title(), mapped.namespace(), mapped.content(), mapped.versionToken()))
+                .describedAs("필드에 null 값이 포함되면 안 됨.")
+                .doesNotContainNull()
+                .describedAs("제목, 네임스페이스, 본문, 버전 토큰이 제대로 매핑됨.")
+                .containsExactlyElementsOf(List.of(wikiPage.getTitle(), wikiPage.getNamespace(), wikiPage.getContent(), wikiPage.getVersionToken()));
     }
 
-    @Test
-    void mapFrom_Revision_Map_Contributor_redacted() {
-        Revision givenRev = WikiPageFixture.aRevision().build();
-        MemberContributor givenContributor = WikiPageFixture.aMemberContributor()
-                .id(givenRev.getContributorId())
-                .build();
-
-        Map<UUID, Contributor> contributorMap = new HashMap<>();
-        contributorMap.put(givenRev.getContributorId(), givenContributor);
-
-        // when
-        RevisionData revisionData = wikiPageMapper.mapFrom(givenRev, contributorMap);
-
-        // then
-        assertThat(revisionData.contributorName())
-                .isEqualTo(givenContributor.getName());
-    }
 }

@@ -6,11 +6,12 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
 import lombok.SneakyThrows;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static dev.prvt.yawiki.fixture.WikiPageFixture.setWikiPageId;
 
 public class WikiPageMemoryRepository implements WikiPageRepository {
     static private final ConcurrentMap<WikiPageTitle, WikiPage> titleStore = new ConcurrentHashMap<>();
@@ -28,10 +29,7 @@ public class WikiPageMemoryRepository implements WikiPageRepository {
             throw new IllegalStateException("제목이 중복됨.");
         }
 
-        Class<? extends WikiPage> aClass = entity.getClass();
-        Field id = aClass.getDeclaredField("id");
-        id.setAccessible(true);
-        id.set(entity, UUID.randomUUID());  // 리플렉션으로 ID 설정
+        setWikiPageId(entity, UUID.randomUUID());
 
         titleStore.put(entity.getWikiPageTitle(), entity);
         idStore.put(entity.getId(), entity);
@@ -40,11 +38,6 @@ public class WikiPageMemoryRepository implements WikiPageRepository {
 
     @Override
     public Optional<WikiPage> findByTitleAndNamespace(String title, Namespace namespace) {
-        return Optional.ofNullable(titleStore.get(new WikiPageTitle(title, namespace)));
-    }
-
-    @Override
-    public Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title, Namespace namespace) {
         return Optional.ofNullable(titleStore.get(new WikiPageTitle(title, namespace)));
     }
 

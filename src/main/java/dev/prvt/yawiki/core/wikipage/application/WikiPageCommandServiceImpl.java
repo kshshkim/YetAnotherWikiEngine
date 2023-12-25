@@ -48,7 +48,7 @@ public class WikiPageCommandServiceImpl implements WikiPageCommandService {
         WikiPage wikiPage = getWikiPage(title);
         wikiPageValidator.validateProclaim(contributorId, wikiPage);
 
-        return wikiPageMapper.mapFrom(wikiPage);
+        return wikiPageMapper.mapForUpdate(wikiPage);
     }
 
     @Override

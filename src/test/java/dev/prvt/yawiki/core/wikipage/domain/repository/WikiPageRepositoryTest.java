@@ -77,7 +77,7 @@ class WikiPageRepositoryTest {
         em.flush();
         em.clear();
         // when
-        Optional<WikiPage> found = wikiPageRepository.findByTitleWithRevisionAndRawContent(givenWikiPage.getTitle(), givenWikiPage.getNamespace());
+        Optional<WikiPage> found = wikiPageRepository.findByTitleAndNamespace(givenWikiPage.getTitle(), givenWikiPage.getNamespace());
 
         // then
         assertThat(found).isPresent();

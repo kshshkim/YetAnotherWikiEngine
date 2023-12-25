@@ -13,6 +13,4 @@ public interface WikiPageRepository {
     WikiPage save(WikiPage entity);
 
     Optional<WikiPage> findByTitleAndNamespace(String title, Namespace namespace);
-
-    Optional<WikiPage> findByTitleWithRevisionAndRawContent(String title, Namespace namespace);
 }

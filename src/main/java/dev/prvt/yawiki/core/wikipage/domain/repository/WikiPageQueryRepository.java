@@ -11,5 +11,6 @@ import java.util.UUID;
 
 public interface WikiPageQueryRepository {
     Page<Revision> findRevisionsByWikiPageId(UUID wikiPageId, Pageable pageable);
-    Optional<Revision> findRevisionByWikiPageTitleWithRawContent(WikiPageTitle wikiPageTitle, int version);
+    Page<Revision> findRevisionsByWikiPageTitle(WikiPageTitle wikiPageTitle, Pageable pageable);
+    Optional<Revision> findRevisionByWikiPageTitle(WikiPageTitle wikiPageTitle, int version);
 }
