@@ -6,15 +6,10 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceUpdater;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -25,20 +20,8 @@ import java.util.stream.Stream;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.aWikiPageTitle;
 import static org.mockito.Mockito.verify;
 
-@Configuration
-class TestConf {
-    @Autowired
-    WikiReferenceUpdater wikiReferenceUpdater;
 
-    @Bean
-    public WikiPageUpdatedEventListener wikiPageUpdatedEventListener() {
-        return new WikiPageUpdatedEventListener(wikiReferenceUpdater);
-    }
-}
-
-@ExtendWith(MockitoExtension.class)
 @SpringBootTest
-@ContextConfiguration(classes = TestConf.class)
 class WikiPageUpdatedEventListenerTest {
 
     @MockBean
