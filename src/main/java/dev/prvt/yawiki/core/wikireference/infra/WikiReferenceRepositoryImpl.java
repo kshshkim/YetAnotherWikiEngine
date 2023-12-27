@@ -112,6 +112,9 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     @Override
     @Transactional
     public long delete(UUID refererId, Collection<WikiPageTitle> titlesToDelete) {
+        if (titlesToDelete.isEmpty()) {
+            return 0L;
+        }
         return queryFactory
                 .delete(wikiReference)
                     .where(
