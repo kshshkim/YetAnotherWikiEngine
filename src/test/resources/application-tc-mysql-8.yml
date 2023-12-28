@@ -1,0 +1,5 @@
+# run tests with testcontainers mysql-8
+spring:
+  datasource:
+    url: jdbc:tc:mysql:8://mysql8tc/wiki_dev  #?rewriteBatchedStatements=true
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
