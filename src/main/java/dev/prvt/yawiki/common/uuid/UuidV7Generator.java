@@ -9,7 +9,7 @@ import org.hibernate.internal.CoreLogging;
 import org.hibernate.internal.CoreMessageLogger;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
-import org.hibernate.type.descriptor.java.UUIDTypeDescriptor;
+import org.hibernate.type.descriptor.java.UUIDJavaType;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -23,7 +23,7 @@ public class UuidV7Generator implements IdentifierGenerator {
     private static final CoreMessageLogger LOG = CoreLogging.messageLogger( org.hibernate.id.UUIDGenerator.class );
 
     private UUIDGenerationStrategy strategy;
-    private UUIDTypeDescriptor.ValueTransformer valueTransformer;
+    private UUIDJavaType.ValueTransformer valueTransformer;
 
 //    public static UuidV7Generator buildSessionFactoryUniqueIdentifierGenerator() {
 //        final UuidV7Generator generator = new UuidV7Generator();
@@ -36,13 +36,13 @@ public class UuidV7Generator implements IdentifierGenerator {
     public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) throws MappingException {
         strategy = UuidV7GenerationStrategy.INSTANCE;
         if ( UUID.class.isAssignableFrom( type.getReturnedClass() ) ) {
-            valueTransformer = UUIDTypeDescriptor.PassThroughTransformer.INSTANCE;
+            valueTransformer = UUIDJavaType.PassThroughTransformer.INSTANCE;
         }
         else if ( String.class.isAssignableFrom( type.getReturnedClass() ) ) {
-            valueTransformer = UUIDTypeDescriptor.ToStringTransformer.INSTANCE;
+            valueTransformer = UUIDJavaType.ToStringTransformer.INSTANCE;
         }
         else if ( byte[].class.isAssignableFrom( type.getReturnedClass() ) ) {
-            valueTransformer = UUIDTypeDescriptor.ToBytesTransformer.INSTANCE;
+            valueTransformer = UUIDJavaType.ToBytesTransformer.INSTANCE;
         }
         else {
             throw new HibernateException( "Unanticipated return type [" + type.getReturnedClass().getName() + "] for UUID conversion" );

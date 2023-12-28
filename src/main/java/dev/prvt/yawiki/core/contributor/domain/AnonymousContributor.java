@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.net.InetAddress;
 import java.util.UUID;
 

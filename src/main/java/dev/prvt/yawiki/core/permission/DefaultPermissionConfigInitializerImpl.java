@@ -8,7 +8,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.stream.Stream;
 
 import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.*;

@@ -2,8 +2,8 @@ package dev.prvt.yawiki.core.permission.infra;
 
 import dev.prvt.yawiki.core.permission.domain.model.PermissionLevel;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.util.Arrays;
 
 @Converter(autoApply = true)

@@ -3,7 +3,7 @@ package dev.prvt.yawiki.web.config;
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.util.Collections;
@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-@ConstructorBinding
 @ConfigurationProperties(prefix = "yawiki.web.title-identifier")
 public class WikiPageTitleProperties {
     private final Map<String, Namespace> identifierMap;
 
+    @ConstructorBinding
     public WikiPageTitleProperties(
             @DefaultValue({"틀", "Template"}) List<String> template,
             @DefaultValue({"파일", "File"}) List<String> file,

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * <p>Permission 세부 정보만 따로 분리하여 캐싱할 수 있음. 캐싱 편의를 위해 immutable 하게 설정함.</p>

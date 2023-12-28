@@ -8,7 +8,7 @@ import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangesRep
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 

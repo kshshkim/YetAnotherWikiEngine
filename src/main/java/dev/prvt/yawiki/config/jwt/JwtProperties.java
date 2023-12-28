@@ -3,11 +3,10 @@ package dev.prvt.yawiki.config.jwt;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Getter
-@ConstructorBinding
 @ConfigurationProperties(prefix = "yawiki.jwt")
 public class JwtProperties {
     private final int lifespan;
@@ -16,6 +15,7 @@ public class JwtProperties {
     private final String subject;
 
     @Builder
+    @ConstructorBinding
     public JwtProperties(
             @DefaultValue("1800") int lifespan,
             @DefaultValue("180000") int refreshTokenLifespan,

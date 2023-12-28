@@ -2,7 +2,7 @@ package dev.prvt.yawiki.auth.member.domain;
 
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.UUID;
 
 @Getter

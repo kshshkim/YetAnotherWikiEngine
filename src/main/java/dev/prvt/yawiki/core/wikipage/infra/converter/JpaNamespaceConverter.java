@@ -2,8 +2,8 @@ package dev.prvt.yawiki.core.wikipage.infra.converter;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.util.Arrays;
 
 /**

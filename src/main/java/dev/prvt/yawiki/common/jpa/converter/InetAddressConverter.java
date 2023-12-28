@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.common.jpa.converter;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 

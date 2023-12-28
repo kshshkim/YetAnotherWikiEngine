@@ -6,7 +6,7 @@ import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.InitialCacheDataReader;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
