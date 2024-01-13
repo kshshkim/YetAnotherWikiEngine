@@ -117,22 +117,4 @@ class WikiPageRepositoryTest {
         assertThat(givenRawContent.getId())
                 .isNotNull();
     }
-
-    @Test
-    void version_should_be_updated() {
-        // given
-        WikiPage givenWikiPage = wikiPageRepository.findById(testWikiPage.getId())
-                .orElseThrow();
-        WikiPageFixture.updateWikiPageRandomly(givenWikiPage);
-
-        // when
-        em.flush();
-
-        int oldVersion = testWikiPage.getVersion();
-        int updatedVersion = givenWikiPage.getVersion();
-
-        // then
-        assertThat(updatedVersion)
-                .isGreaterThan(oldVersion);
-    }
 }

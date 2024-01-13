@@ -24,9 +24,8 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
  * <p>
  * 트랜잭션 시점의 동시성 처리
  * <ul>
- * <li>트랜잭션 시점의 동시성 처리는 일반적으로 Revision 엔티티에 걸린 유니크 제약조건으로 확보 가능함. (낙관적 락과 유사하게 작동함)</li>
- * <li>엔티티 내부의 필드에 변화가 생기는 모든 작업은 Revision 엔티티를 새로 생성하여야함.</li>
- * <li>규칙이 지켜진다면 낙관적 락은 제거되어도 무방하지만(H2, MySQL), 만일을 위해 남겨둠.</li>
+ * <li>트랜잭션 시점의 동시성 처리는 일반적으로 Revision 엔티티에 걸린 유일성 제약조건으로 확보 가능함.(편집 충돌시, 유일성 제약조건으로 인해 insert 쿼리 실패)</li>
+ * <li>모든 update 작업은 Revision 엔티티를 새로 생성하여야함.</li>
  * </ul>
  * </p>
  * <p>
@@ -63,21 +62,9 @@ public class WikiPage {
     private UUID id;
 
     /**
-     * <p>JPA 에서 관리하는 낙관락에 사용되는 필드</p>
-     * <p>update 작업시 충돌이 일어날 경우, 보통 Revision 엔티티에 걸린 unique 제약조건(wiki_page_id, rev_version)으로 인해 트랜잭션이 실패함.</p>
-     * <p>이 엔티티 내부의 모든 변경 작업은 update 메소드를 이용해서 새로운 Revision 을 생성하도록 작동해야함. 이 규칙이 잘 지켜질 경우 낙관락은 없어도 무방하나 만일을 위해 남겨둠.</p>
-     * <p>편집 시작 시점에서의 충돌에 대해서 별개의 토큰을 사용하는 이유는 다음과 같음.</p>
-     * <p>(1) 편집 충돌에서 우위를 점하기 위해 예측 가능한 값을 악용할 수 있고,
-     * (2) JPA 에서 관리하는 값으로, 직접 수정할 수 없기 때문에 별도의 토큰을 사용하여야함.</p>
-     */
-    @Version
-    private int version;
-
-    /**
      * <p>위키의 특성상 편집 충돌 판정 시점은 트랜잭션이 시작하기 이전, 편집자가 수정을 시작한 시점이어야함.</p>
      * <p>수정 충돌 방지를 위해서 무작위 생성 토큰을 사용함. 업데이트시마다 검증해야하며, 업데이트가 성공적으로 이루어지면 값을 재생성해야함.</p>
      * <p>sequential 한 버전 정보를 사용하지 않는 이유는 악의적인 사용자가 충돌 방지책을 우회하는데 이용할 수 있기 때문임.</p>
-     * <p>구조적 유연성을 위해 편집 시작 시점에서의 충돌 판정 로직은 도메인 객체 바깥에서 구현하도록 함.</p>
      */
     private String versionToken;
 
@@ -149,7 +136,7 @@ public class WikiPage {
     }
 
     @Transient
-    public WikiPageTitle getWikiPageTitle() {  // todo test
+    public WikiPageTitle getWikiPageTitle() {
         if (this.wikiPageTitle == null) {
             this.wikiPageTitle = new WikiPageTitle(this.title, this.namespace);
         }
@@ -170,25 +157,6 @@ public class WikiPage {
         modified(contributorId);
     }
 
-// validator, eventPublisher 호출 책임이 WikiPage 로 내재화되는 경우 사용될 코드
-//    public void update(
-//            UUID contributorId,
-//            String comment,
-//            String content,
-//            Set<WikiPageTitle> referencedTitles,
-//            String versionToken,
-//            WikiPageValidator validator,
-//            WikiPageEventPublisher eventPublisher
-//    ) {
-//        validator.validateUpdate(contributorId, versionToken, this);
-//        this.update(contributorId, comment, content);
-//        eventPublisher.updateCommitted(this, referencedTitles);
-//        if (this.isActivated()) {
-//            eventPublisher.activated(this);
-//        }
-//    }
-
-
     /**
      * <p>빈 리비전을 생성하고, 문서의 상태를 삭제됨으로 변경.</p>
      */
@@ -198,13 +166,6 @@ public class WikiPage {
         deactivate();
         modified(contributorId);
     }
-
-// validator, eventPublisher 호출 책임이 WikiPage 로 내재화되는 경우 사용될 코드
-//    public void deactivate(UUID contributorId, String comment, String versionToken, WikiPageValidator validator, WikiPageEventPublisher eventPublisher) {
-//        this.deactivate(contributorId, comment);
-//        validator.validateDelete(contributorId, versionToken, this);
-//        eventPublisher.deactivated(this);
-//    }
 
     /**
      * 문서의 제목을 변경함.
@@ -297,7 +258,6 @@ public class WikiPage {
     @Builder(access = AccessLevel.PROTECTED)
     protected WikiPage(
             UUID id,
-            int version,
             String versionToken,
             String title,
             Namespace namespace,
@@ -308,7 +268,6 @@ public class WikiPage {
             UUID lastModifiedBy
     ) {
         this.id = id;
-        this.version = version;
         this.versionToken = versionToken;
         this.title = title;
         this.namespace = namespace;
