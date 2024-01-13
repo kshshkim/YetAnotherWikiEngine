@@ -11,15 +11,22 @@ import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import dev.prvt.yawiki.web.converter.WikiPageTitleConverter;
 import dev.prvt.yawiki.web.markdown.FlexMarkReferenceExtractor;
+import dev.prvt.yawiki.web.markdown.HttpLinkFilter;
 import dev.prvt.yawiki.web.markdown.ReferencedTitleExtractor;
+import dev.prvt.yawiki.web.markdown.WikiReferenceFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 
 @Configuration
+@RequiredArgsConstructor
 public class MarkdownParserConfig {
+
+    private final WikiPageTitleConverter wikiPageTitleConverter;
     @Bean
     public Parser flexmarkParser() {
         MutableDataSet options = new MutableDataSet();
@@ -46,7 +53,12 @@ public class MarkdownParserConfig {
     }
 
     @Bean
+    public WikiReferenceFilter wikiReferenceFilter() {
+        return new HttpLinkFilter();
+    }
+
+    @Bean
     public ReferencedTitleExtractor documentReferenceExtractor() {
-        return new FlexMarkReferenceExtractor(flexmarkParser());
+        return new FlexMarkReferenceExtractor(flexmarkParser(), wikiReferenceFilter(), wikiPageTitleConverter);
     }
 }

@@ -1,29 +1,41 @@
 package dev.prvt.yawiki.web.markdown;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.vladsch.flexmark.parser.Parser;
+import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.web.config.MarkdownParserConfig;
+import dev.prvt.yawiki.web.converter.NamespaceParser;
+import dev.prvt.yawiki.web.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.web.converter.WikiPageTitleConverterImpl;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Slf4j
 class FlexMarkReferenceExtractorTest {
-    MarkdownParserConfig conf = new MarkdownParserConfig();
+
+    Map<String, Namespace> namespaceMap = Map.of(
+        "틀", Namespace.TEMPLATE,
+        "파일", Namespace.FILE,
+        "분류", Namespace.CATEGORY
+    );
+    WikiPageTitleConverter wikiPageTitleConverter = new WikiPageTitleConverterImpl(new NamespaceParser(namespaceMap));
+    MarkdownParserConfig conf = new MarkdownParserConfig(wikiPageTitleConverter);
     Parser parser = conf.flexmarkParser();
-    FlexMarkReferenceExtractor extractor = new FlexMarkReferenceExtractor(parser);
+    WikiReferenceFilter filter = new HttpLinkFilter();
+    FlexMarkReferenceExtractor extractor = new FlexMarkReferenceExtractor(parser, filter, wikiPageTitleConverter);
 
     @Test
     void extractReferencedTitles() {
         // given
-        String sample = "[공식 사이트](https://daringfireball.net/projects/markdown/) \n" +
+        String sample = "[[https://daringfireball.net/projects/markdown/|공식 사이트]] \n" +
                         "마크다운 (Markdown)은 [[마크업 언어]]의 일종으로, 존 그루버(John Gruber)와 아론 스워츠(Aaron Swartz)가 만들었다. " +
                         "온갖 태그로 범벅된 [[HTML]] 문서 등과 달리, 읽기도 쓰기도 쉬운 문서 양식을 지향한다. " +
                         "그루버는 [[마크다운|MarkDown]]으로 작성한 문서를 [[HTML]]로 변환하는 [[Perl|펄]] 스크립트도 만들었다. " +
