@@ -75,7 +75,7 @@ class TitleControllerTest {
                 .limit(titleCount)
                 .toList();
 
-        given(wikiPageTitleExistenceChecker.filterExistingTitles(anyCollection()))
+        given(wikiPageTitleExistenceChecker.filterExistentTitles(anyCollection()))
                 .willReturn(nonExistentTitles);
 
 
@@ -93,7 +93,7 @@ class TitleControllerTest {
         TitleListResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), TitleListResponse.class);
 
         // then
-        verify(wikiPageTitleExistenceChecker).filterExistingTitles(wikiPageTitlesCaptor.capture());
+        verify(wikiPageTitleExistenceChecker).filterExistentTitles(wikiPageTitlesCaptor.capture());
         Collection<WikiPageTitle> captured = wikiPageTitlesCaptor.getValue();
 
         // assert captured

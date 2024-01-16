@@ -65,6 +65,13 @@ public class LocalCacheStorageConcurrentHashMapImpl implements LocalCacheStorage
     }
 
     @Override
+    public Collection<WikiPageTitle> filterExistentTitles(Collection<WikiPageTitle> titles) {
+        return titles.stream()
+                   .filter(title -> !this.exists(title))
+                   .toList();
+    }
+
+    @Override
     public LocalDateTime getLastUpdatedAt() {
         return lastUpdatedAt;
     }

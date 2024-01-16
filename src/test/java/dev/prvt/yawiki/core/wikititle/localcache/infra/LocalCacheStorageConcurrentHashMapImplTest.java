@@ -3,6 +3,8 @@ package dev.prvt.yawiki.core.wikititle.localcache.infra;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -102,6 +104,27 @@ class LocalCacheStorageConcurrentHashMapImplTest {
         assertThat(storage.exists(givenElement))
                 .describedAs("지워졌기 때문에 존재하지 않음.")
                 .isFalse();
+    }
+
+    @Test
+    void filterExistentTitles() {
+        // given
+        storage.addAll(givenElements);
+        List<WikiPageTitle> nonExistentTitles = Stream.generate(WikiPageFixture::aWikiPageTitle)
+                                       .limit(10)
+                                       .toList();
+        List<WikiPageTitle> argument = new ArrayList<>(nonExistentTitles);
+        argument.addAll(givenElements);  // 존재하지 않는 제목과 존재하는 제목 모두 포함
+
+        // when
+        Collection<WikiPageTitle> result = storage.filterExistentTitles(argument);
+
+
+        // then
+        assertThat(result)
+            .describedAs("존재하지 않는 제목만 포함되어야함.")
+            .containsExactlyInAnyOrderElementsOf(nonExistentTitles);
+
     }
 
     @Test
