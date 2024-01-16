@@ -3,9 +3,9 @@ package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.updater.LocalCacheWriterImpl;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.LocalCacheStorageConcurrentHashMapImpl;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.localcache.infra.updater.CacheWriterLocalCacheImpl;
+import dev.prvt.yawiki.core.wikititle.localcache.infra.CacheStorageConcurrentHashMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,23 +16,23 @@ import java.util.stream.Stream;
 import static dev.prvt.yawiki.fixture.WikiPageFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LocalCacheWriterTest {
-    LocalCacheStorage localCacheStorage;
-    LocalCacheWriter localCacheWriter;
+class CacheWriterTest {
+    CacheStorage cacheStorage;
+    CacheWriter cacheWriter;
 
     LocalDateTime now;
 
     @BeforeEach
     void init() {
         now = LocalDateTime.now();
-        localCacheStorage = new LocalCacheStorageConcurrentHashMapImpl();
+        cacheStorage = new CacheStorageConcurrentHashMapImpl();
 
-        localCacheStorage.init(new InitialCacheData<>(
+        cacheStorage.init(new InitialCacheData<>(
                 Stream.empty(),
                 0,
                 now.minusDays(10)
         ));
-        localCacheWriter = new LocalCacheWriterImpl(localCacheStorage);
+        cacheWriter = new CacheWriterLocalCacheImpl(cacheStorage);
     }
 
 
@@ -60,10 +60,10 @@ class LocalCacheWriterTest {
         List<RemoteChangeLog> givenLogs = List.of(remoteChangeLogA, remoteChangeLogB, remoteChangeLogC);
 
         // when
-        localCacheWriter.write(givenLogs);
+        cacheWriter.write(givenLogs);
 
         // then
-        assertThat(localCacheStorage.getLastUpdatedAt())
+        assertThat(cacheStorage.getLastUpdatedAt())
                 .describedAs("마지막으로 가져온 로그를 기준으로 lastUpdatedAt 설정.")
                 .isEqualTo(remoteChangeLogC.timestamp());
     }
@@ -85,10 +85,10 @@ class LocalCacheWriterTest {
         List<RemoteChangeLog> givenLogs = List.of(remoteChangeLogA, remoteChangeLogB);
 
         // when
-        localCacheWriter.write(givenLogs);
+        cacheWriter.write(givenLogs);
 
         // then
-        assertThat(localCacheStorage.exists(givenTitle))
+        assertThat(cacheStorage.exists(givenTitle))
                 .describedAs("생성 제거 순으로 반영되어 결과적으로 존재하지 않는 상태여야함.")
                 .isFalse();
     }
@@ -110,10 +110,10 @@ class LocalCacheWriterTest {
         List<RemoteChangeLog> givenLogs = List.of(remoteChangeLogA, remoteChangeLogB);
 
         // when
-        localCacheWriter.write(givenLogs);
+        cacheWriter.write(givenLogs);
 
         // then
-        assertThat(localCacheStorage.exists(givenTitle))
+        assertThat(cacheStorage.exists(givenTitle))
                 .describedAs("제거 생성 순으로 반영되어 결과적으로 존재하는 상태여야함.")
                 .isTrue();
     }

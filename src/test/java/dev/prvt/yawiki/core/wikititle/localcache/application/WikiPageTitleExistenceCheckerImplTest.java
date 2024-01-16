@@ -2,8 +2,8 @@ package dev.prvt.yawiki.core.wikititle.localcache.application;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.LocalCacheStorageConcurrentHashMapImpl;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.localcache.infra.CacheStorageConcurrentHashMapImpl;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,19 +16,19 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WikiPageTitleExistenceCheckerLocalCacheImplTest {
+class WikiPageTitleExistenceCheckerImplTest {
 
-    LocalCacheStorage localCacheStorage;
+    CacheStorage cacheStorage;
 
-    WikiPageTitleExistenceCheckerLocalCacheImpl titleExistenceChecker;
+    WikiPageTitleExistenceCheckerImpl titleExistenceChecker;
 
     List<WikiPageTitle> given = Stream.generate(WikiPageFixture::aWikiPageTitle).limit(20).toList();
 
     @BeforeEach
     void init() {
-        localCacheStorage = new LocalCacheStorageConcurrentHashMapImpl();
-        localCacheStorage.init(new InitialCacheData<>(given.stream(), given.size(), LocalDateTime.now()));
-        titleExistenceChecker = new WikiPageTitleExistenceCheckerLocalCacheImpl(localCacheStorage);
+        cacheStorage = new CacheStorageConcurrentHashMapImpl();
+        cacheStorage.init(new InitialCacheData<>(given.stream(), given.size(), LocalDateTime.now()));
+        titleExistenceChecker = new WikiPageTitleExistenceCheckerImpl(cacheStorage);
     }
 
     @Test

@@ -16,9 +16,9 @@ import static dev.prvt.yawiki.fixture.WikiPageFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-class LocalCacheStorageConcurrentHashMapImplTest {
+class CacheStorageConcurrentHashMapImplTest {
 
-    LocalCacheStorageConcurrentHashMapImpl storage;
+    CacheStorageConcurrentHashMapImpl storage;
 
     WikiPageTitle givenElement;
 
@@ -27,7 +27,7 @@ class LocalCacheStorageConcurrentHashMapImplTest {
 
     @BeforeEach
     void test_before_each() {
-        storage = new LocalCacheStorageConcurrentHashMapImpl();
+        storage = new CacheStorageConcurrentHashMapImpl();
         InitialCacheData<WikiPageTitle> givenInitialData = new InitialCacheData<>(Stream.empty(), 0, LocalDateTime.MIN);
         storage.init(givenInitialData);
         givenElement = aWikiPageTitle();
