@@ -1,24 +1,31 @@
 package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
 
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteReadCursorProvider.ReadCursor;
 import java.util.List;
 
-@Component
 public class RemoteChangesReader {
+
+    private final RemoteReadCursorProvider remoteReadCursorProvider;
+
     private final RemoteChangesRepository remoteChangesRepository;
 
-    public RemoteChangesReader(RemoteChangesRepository remoteChangesRepository) {
+
+    public RemoteChangesReader(
+        RemoteReadCursorProvider remoteReadCursorProvider,
+        RemoteChangesRepository remoteChangesRepository
+    ) {
+        this.remoteReadCursorProvider = remoteReadCursorProvider;
         this.remoteChangesRepository = remoteChangesRepository;
     }
 
     /**
-     * @param after 이 시점 이후의 변동 내역을 읽어옴. (exclusive)
-     * @param before 이 시점 이전의 변동 내역을 읽어옴. (exclusive)
-     * @return 제목 변동 내역 Slice
+     * @return 제목 변동 내역
      */
-    public List<RemoteChangeLog> readUpdated(LocalDateTime after, LocalDateTime before) {
-        return remoteChangesRepository.findRemoteChangesByCursor(after, before);
+    public List<RemoteChangeLog> readUpdated() {
+        ReadCursor readCursor = remoteReadCursorProvider.getReadCursor();
+        return remoteChangesRepository.findRemoteChangesByCursor(
+            readCursor.after(),
+            readCursor.before()
+        );
     }
 }

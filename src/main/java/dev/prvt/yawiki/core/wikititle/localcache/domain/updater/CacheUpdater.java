@@ -1,50 +1,32 @@
 package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Slf4j
-public class LocalCacheUpdater {
-    private final LocalCacheStorage localStore;
+public class CacheUpdater {
     private final RemoteChangesReader remoteChangesReader;
-    private final LocalCacheWriter localCacheWriter;
-    private final long readMarginInSeconds;
+    private final CacheWriter cacheWriter;
 
     /**
-     * @param localStore          로컬 캐시 객체
      * @param remoteChangesReader 원격 변동 내역 Reader
-     * @param localCacheWriter    로컬 캐시 Writer
-     * @param readMarginInSeconds 트랜잭션이 늦게 완료되어 조회되지 않는 레코드가 존재할 수 있음. 이를 방지하기 위해서 조회시 마진 값을 줌. 트랜잭션 time out 을 고려하여 설정할 것
+     * @param cacheWriter    로컬 캐시 Writer
      */
-    public LocalCacheUpdater(
-            LocalCacheStorage localStore,
+    public CacheUpdater(
             RemoteChangesReader remoteChangesReader,
-            LocalCacheWriter localCacheWriter,
-            long readMarginInSeconds  // 트랜잭션 time out 을 고려하여 설정할 것
+            CacheWriter cacheWriter
     ) {
-        this.localStore = localStore;
         this.remoteChangesReader = remoteChangesReader;
-        this.localCacheWriter = localCacheWriter;
-        this.readMarginInSeconds = readMarginInSeconds;
+        this.cacheWriter = cacheWriter;
     }
 
     public void update() {
-        checkInitialized();
         write(readChanges());
-    }
-
-    private void checkInitialized() {
-        if (this.localStore.getLastUpdatedAt() == null) {
-            throw new IllegalStateException("local cache data has not been initialized");
-        }
     }
 
     private void write(List<RemoteChangeLog> readerResult) {
         log.debug("readerResultSize={}, readerResultLastElement={}", readerResult.size(), readerResult.isEmpty() ? null : readerResult.get(readerResult.size() - 1));
-        localCacheWriter.write(readerResult);
+        cacheWriter.write(readerResult);
     }
 
     /**
@@ -56,9 +38,6 @@ public class LocalCacheUpdater {
      * </p>
      */
     private List<RemoteChangeLog> readChanges() {
-        return remoteChangesReader.readUpdated(
-                localStore.getLastUpdatedAt().minusSeconds(readMarginInSeconds),
-                LocalDateTime.now()
-        );
+        return remoteChangesReader.readUpdated();
     }
 }

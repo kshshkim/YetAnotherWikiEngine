@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.core.wikititle.localcache.application;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.LocalCacheInitializer;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.LocalCacheUpdater;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.CacheInitializer;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 @RequiredArgsConstructor
 public class TitleCacheMaintenanceService {
-    private final LocalCacheInitializer localCacheInitializer;
-    private final LocalCacheUpdater localCacheUpdater;
+    private final CacheInitializer cacheInitializer;
+    private final CacheUpdater cacheUpdater;
 
     /**
      * 이전 업데이트 작업이 완료되고 3초가 지나면 다시 시도함.
@@ -25,7 +25,7 @@ public class TitleCacheMaintenanceService {
     @Scheduled(fixedDelayString = "${yawiki.local-cache.fixed-delay:3000}")
     public void updateCache() {
         try {
-            localCacheUpdater.update();
+            cacheUpdater.update();
             log.debug("local cache updated");
         } catch (IllegalStateException e) {
             log.debug(e.getMessage());
@@ -35,7 +35,7 @@ public class TitleCacheMaintenanceService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initCache() {
-        localCacheInitializer.initialize();
+        cacheInitializer.initialize();
         log.debug("local cache initialized");
     }
 }

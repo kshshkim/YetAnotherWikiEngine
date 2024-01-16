@@ -1,9 +1,10 @@
 package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.LocalCacheWriter;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheWriter;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.localcache.exception.CacheNotInitializedException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -18,12 +19,15 @@ import java.util.function.Consumer;
  */
 @Component
 @RequiredArgsConstructor
-public class LocalCacheWriterImpl implements LocalCacheWriter {
-    private final LocalCacheStorage localCacheStorage;
+public class CacheWriterLocalCacheImpl implements CacheWriter {
+    private final CacheStorage cacheStorage;
 
     public void write(List<RemoteChangeLog> logs) {
         if (logs.isEmpty()) {
             return;
+        }
+        if (!cacheStorage.isInitialized()) {
+            throw new CacheNotInitializedException("local cache not initialized");
         }
         writeTitles(logs);
         updateLastUpdatedAt(logs);
@@ -36,7 +40,7 @@ public class LocalCacheWriterImpl implements LocalCacheWriter {
     }
 
     private void updateLastUpdatedAt(List<RemoteChangeLog> logs) {
-        localCacheStorage.setLastUpdatedAt(
+        cacheStorage.setLastUpdatedAt(
                 getLastElement(logs).timestamp()
         );
     }
@@ -54,8 +58,8 @@ public class LocalCacheWriterImpl implements LocalCacheWriter {
         return updateLog -> {
             WikiPageTitle wikiPageTitle = updateLog.title();
             switch (updateLog.changeType()) {
-                case DELETED -> localCacheStorage.remove(wikiPageTitle);
-                case CREATED -> localCacheStorage.add(wikiPageTitle);
+                case DELETED -> cacheStorage.remove(wikiPageTitle);
+                case CREATED -> cacheStorage.add(wikiPageTitle);
             }
         };
     }

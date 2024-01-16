@@ -11,6 +11,6 @@ import java.util.List;
  *     </li>
  * </ul>
  */
-public interface LocalCacheWriter {
+public interface CacheWriter {
     void write(List<RemoteChangeLog> logs);
 }

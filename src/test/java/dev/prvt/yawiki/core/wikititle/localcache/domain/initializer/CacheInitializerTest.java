@@ -3,7 +3,7 @@ package dev.prvt.yawiki.core.wikititle.localcache.domain.initializer;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,16 +20,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class LocalCacheInitializerTest {
+class CacheInitializerTest {
     private final WikiPageFactory wikiPageFactory = new WikiPageFactory();
     @Autowired
     EntityManager em;
 
     @Autowired
-    LocalCacheInitializer localCacheInitializer;
+    CacheInitializer cacheInitializer;
 
     @Autowired
-    LocalCacheStorage localCacheStorage;
+    CacheStorage cacheStorage;
 
     int TOTAL_TITLES = 30;
 
@@ -56,11 +56,11 @@ class LocalCacheInitializerTest {
     @Test
     void test() {
         // when
-        localCacheInitializer.initialize();
+        cacheInitializer.initialize();
 
         // then
         assertThat(givenTitles)
-                .allMatch(localCacheStorage::exists);
+                .allMatch(cacheStorage::exists);
     }
 
 }

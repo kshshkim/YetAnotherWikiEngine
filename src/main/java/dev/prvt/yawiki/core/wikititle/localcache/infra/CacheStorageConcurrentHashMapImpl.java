@@ -2,7 +2,7 @@ package dev.prvt.yawiki.core.wikititle.localcache.infra;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
+import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  */
 @Component
-public class LocalCacheStorageConcurrentHashMapImpl implements LocalCacheStorage {
+public class CacheStorageConcurrentHashMapImpl implements CacheStorage {
     /**
      * 마지막으로 캐시가 갱신된 시점.
      */
@@ -62,6 +62,11 @@ public class LocalCacheStorageConcurrentHashMapImpl implements LocalCacheStorage
     @Override
     public boolean exists(WikiPageTitle title) {
         return titleSet.contains(title);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return getLastUpdatedAt() != null;
     }
 
     @Override
