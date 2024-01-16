@@ -1,7 +1,7 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain.initializer;
+package dev.prvt.yawiki.core.wikititle.cache.domain.initializer;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
 
 /**
  * <p>캐시 초기화시 필요한 전체 위키 제목 목록 Reader</p>

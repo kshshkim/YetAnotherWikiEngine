@@ -1,5 +1,9 @@
 package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
 
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheUpdater;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheWriter;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesReader;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

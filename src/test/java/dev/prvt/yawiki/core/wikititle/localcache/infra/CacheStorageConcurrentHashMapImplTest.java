@@ -1,7 +1,8 @@
 package dev.prvt.yawiki.core.wikititle.localcache.infra;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.infra.CacheStorageConcurrentHashMapImpl;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import java.util.ArrayList;
 import java.util.Collection;

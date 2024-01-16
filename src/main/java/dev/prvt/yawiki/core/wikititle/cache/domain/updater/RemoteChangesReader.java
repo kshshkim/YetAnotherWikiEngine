@@ -1,6 +1,6 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
+package dev.prvt.yawiki.core.wikititle.cache.domain.updater;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteReadCursorProvider.ReadCursor;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider.ReadCursor;
 import java.util.List;
 
 public class RemoteChangesReader {

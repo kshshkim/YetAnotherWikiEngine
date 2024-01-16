@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
+package dev.prvt.yawiki.core.wikititle.cache.domain.updater;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

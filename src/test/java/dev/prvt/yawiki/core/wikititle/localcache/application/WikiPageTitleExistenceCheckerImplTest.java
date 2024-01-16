@@ -1,9 +1,10 @@
 package dev.prvt.yawiki.core.wikititle.localcache.application;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.CacheStorageConcurrentHashMapImpl;
+import dev.prvt.yawiki.core.wikititle.cache.application.WikiPageTitleExistenceCheckerImpl;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.infra.CacheStorageConcurrentHashMapImpl;
 import dev.prvt.yawiki.fixture.WikiPageFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

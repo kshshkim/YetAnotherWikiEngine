@@ -1,10 +1,10 @@
-package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
+package dev.prvt.yawiki.core.wikititle.cache.infra.updater;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheWriter;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangeLog;
-import dev.prvt.yawiki.core.wikititle.localcache.exception.CacheNotInitializedException;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheWriter;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.exception.CacheNotInitializedException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

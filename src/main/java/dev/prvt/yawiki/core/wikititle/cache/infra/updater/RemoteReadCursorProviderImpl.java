@@ -1,9 +1,9 @@
-package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
+package dev.prvt.yawiki.core.wikititle.cache.infra.updater;
 
 
-import dev.prvt.yawiki.core.wikititle.localcache.exception.CacheNotInitializedException;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteReadCursorProvider;
+import dev.prvt.yawiki.core.wikititle.cache.exception.CacheNotInitializedException;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider;
 import java.time.LocalDateTime;
 
 /**

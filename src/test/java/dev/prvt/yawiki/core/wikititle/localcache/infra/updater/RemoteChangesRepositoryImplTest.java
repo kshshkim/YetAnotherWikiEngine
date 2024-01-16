@@ -1,10 +1,11 @@
 package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikititle.cache.infra.updater.RemoteChangesRepositoryImpl;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleHistory;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangeLog;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangesRepository;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

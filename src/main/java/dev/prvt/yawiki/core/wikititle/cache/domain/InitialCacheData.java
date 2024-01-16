@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain;
+package dev.prvt.yawiki.core.wikititle.cache.domain;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
