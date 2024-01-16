@@ -1,7 +1,7 @@
-package dev.prvt.yawiki.core.wikititle.localcache.application;
+package dev.prvt.yawiki.core.wikititle.cache.application;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.CacheInitializer;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheUpdater;
+import dev.prvt.yawiki.core.wikititle.cache.domain.initializer.CacheInitializer;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

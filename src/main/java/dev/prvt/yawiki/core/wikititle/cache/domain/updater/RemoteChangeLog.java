@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
+package dev.prvt.yawiki.core.wikititle.cache.domain.updater;
 
 import com.querydsl.core.annotations.QueryProjection;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;

@@ -1,10 +1,10 @@
-package dev.prvt.yawiki.core.wikititle.localcache.infra.initializer;
+package dev.prvt.yawiki.core.wikititle.cache.infra.initializer;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.QWikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.InitialCacheDataReader;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.domain.initializer.InitialCacheDataReader;
 
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;

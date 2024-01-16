@@ -1,15 +1,15 @@
-package dev.prvt.yawiki.core.wikititle.localcache.config;
+package dev.prvt.yawiki.core.wikititle.cache.config;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.*;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.CacheInitializer;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.initializer.InitialCacheDataReader;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheUpdater;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.CacheWriter;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangesReader;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangesRepository;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteReadCursorProvider;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.initializer.InitialCacheDataReaderImpl;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.updater.RemoteReadCursorProviderImpl;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.initializer.CacheInitializer;
+import dev.prvt.yawiki.core.wikititle.cache.domain.initializer.InitialCacheDataReader;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheUpdater;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheWriter;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesReader;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider;
+import dev.prvt.yawiki.core.wikititle.cache.infra.initializer.InitialCacheDataReaderImpl;
+import dev.prvt.yawiki.core.wikititle.cache.infra.updater.RemoteReadCursorProviderImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

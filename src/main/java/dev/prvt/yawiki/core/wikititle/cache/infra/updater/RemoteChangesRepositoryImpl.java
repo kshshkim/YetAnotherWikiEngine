@@ -1,10 +1,10 @@
-package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
+package dev.prvt.yawiki.core.wikititle.cache.infra.updater;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.core.wikipage.domain.model.QWikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.QRemoteChangeLog;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangeLog;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteChangesRepository;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.QRemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 

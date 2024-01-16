@@ -7,8 +7,12 @@ import static org.mockito.BDDMockito.given;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesReader;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.updater.RemoteReadCursorProvider.ReadCursor;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider.ReadCursor;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

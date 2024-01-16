@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain;
+package dev.prvt.yawiki.core.wikititle.cache.domain;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 

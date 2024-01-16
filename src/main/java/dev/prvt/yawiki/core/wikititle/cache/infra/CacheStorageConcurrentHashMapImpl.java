@@ -1,8 +1,8 @@
-package dev.prvt.yawiki.core.wikititle.localcache.infra;
+package dev.prvt.yawiki.core.wikititle.cache.infra;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

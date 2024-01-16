@@ -1,11 +1,13 @@
 package dev.prvt.yawiki.core.wikititle.localcache.domain.updater;
 
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheWriter;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
 import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.InitialCacheData;
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.updater.CacheWriterLocalCacheImpl;
-import dev.prvt.yawiki.core.wikititle.localcache.infra.CacheStorageConcurrentHashMapImpl;
+import dev.prvt.yawiki.core.wikititle.cache.domain.InitialCacheData;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.infra.updater.CacheWriterLocalCacheImpl;
+import dev.prvt.yawiki.core.wikititle.cache.infra.CacheStorageConcurrentHashMapImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

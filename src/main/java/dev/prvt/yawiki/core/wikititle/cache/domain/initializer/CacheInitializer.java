@@ -1,6 +1,6 @@
-package dev.prvt.yawiki.core.wikititle.localcache.domain.initializer;
+package dev.prvt.yawiki.core.wikititle.cache.domain.initializer;
 
-import dev.prvt.yawiki.core.wikititle.localcache.domain.CacheStorage;
+import dev.prvt.yawiki.core.wikititle.cache.domain.CacheStorage;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
