@@ -3,7 +3,6 @@ package dev.prvt.yawiki.core.wikititle.existence;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 
 /**
  * <p>위키 페이지의 제목이 존재하는지 여부를 체크하는 인터페이스.</p>
@@ -16,11 +15,6 @@ public interface WikiPageTitleExistenceChecker {
      * @param toFilter 필터링할 위키 페이지 제목
      * @return 존재하지 않는 위키 페이지 제목
      */
-    Collection<WikiPageTitle> filterExistingTitles(Collection<WikiPageTitle> toFilter);
+    Collection<WikiPageTitle> filterExistentTitles(Collection<WikiPageTitle> toFilter);
 
-    /**
-     * @param toFilter 필터링할 위키 문서 제목들
-     * @return 입력값으로 들어온 Stream 에서 존재하는 제목을 필터링하여 그대로 반환
-     */
-    Stream<WikiPageTitle> filterExistingTitles(Stream<WikiPageTitle> toFilter);
 }

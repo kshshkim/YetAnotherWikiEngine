@@ -28,7 +28,7 @@ public class TitleController {
             @RequestParam("t") Collection<WikiPageTitle> titles  // 요청 url 이 과도하게 길어지는 것을 방지하기 위해 t 한 글자로 받음.
     ) {
         return TitleListResponse.from(
-                titleExistenceChecker.filterExistingTitles(titles)
+                titleExistenceChecker.filterExistentTitles(titles)
         );
     }
 

@@ -1,13 +1,11 @@
 package dev.prvt.yawiki.core.wikititle.localcache.application;
 
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikititle.existence.WikiPageTitleExistenceChecker;
 import dev.prvt.yawiki.core.wikititle.localcache.domain.LocalCacheStorage;
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -15,14 +13,8 @@ public class WikiPageTitleExistenceCheckerLocalCacheImpl implements WikiPageTitl
     private final LocalCacheStorage localCacheStorage;
 
     @Override
-    public Collection<WikiPageTitle> filterExistingTitles(Collection<WikiPageTitle> toFilter) {
-        return filterExistingTitles(toFilter.stream())
-                .toList();
+    public Collection<WikiPageTitle> filterExistentTitles(Collection<WikiPageTitle> toFilter) {
+        return localCacheStorage.filterExistentTitles(toFilter);
     }
 
-    @Override
-    public Stream<WikiPageTitle> filterExistingTitles(Stream<WikiPageTitle> toFilter) {
-        return toFilter
-                .filter(title -> !localCacheStorage.exists(title));
-    }
 }

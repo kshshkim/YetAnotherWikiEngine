@@ -21,6 +21,12 @@ public interface LocalCacheStorage {
 
     boolean exists(WikiPageTitle title);
 
+    /**
+     * @param titles titles to filter
+     * @return 파라미터에 포함된 제목 중, 존재하지 않는 제목만 반환
+     */
+    Collection<WikiPageTitle> filterExistentTitles(Collection<WikiPageTitle> titles);
+
     LocalDateTime getLastUpdatedAt();
 
     void setLastUpdatedAt(LocalDateTime lastUpdatedAt);
