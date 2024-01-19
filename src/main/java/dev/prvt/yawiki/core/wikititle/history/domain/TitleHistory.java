@@ -33,8 +33,11 @@ public class TitleHistory {
     @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
     @Column(name = "page_title_log_id", columnDefinition = "BINARY(16)")
     private UUID id;
+    @Column(name = "page_title")
     private String pageTitle;
+    @Column(name = "namespace")
     private Namespace namespace;
+    @Column(name = "title_update_type")
     @Enumerated(EnumType.STRING)
     private TitleUpdateType titleUpdateType;
     @Column(name = "created_at")
