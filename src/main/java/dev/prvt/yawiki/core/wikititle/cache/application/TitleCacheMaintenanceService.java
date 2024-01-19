@@ -1,7 +1,9 @@
 package dev.prvt.yawiki.core.wikititle.cache.application;
 
+import dev.prvt.yawiki.common.util.CurrentTimeProvider;
 import dev.prvt.yawiki.core.wikititle.cache.domain.initializer.CacheInitializer;
 import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheUpdater;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 @RequiredArgsConstructor
 public class TitleCacheMaintenanceService {
+
     private final CacheInitializer cacheInitializer;
     private final CacheUpdater cacheUpdater;
+    private final CurrentTimeProvider currentTimeProvider;
 
     /**
      * 이전 업데이트 작업이 완료되고 3초가 지나면 다시 시도함.
@@ -26,7 +30,7 @@ public class TitleCacheMaintenanceService {
     public void updateCache() {
         try {
             cacheUpdater.update();
-            log.debug("local cache updated");
+            log.debug("cache updated");
         } catch (IllegalStateException e) {
             log.debug(e.getMessage());
         }
@@ -35,7 +39,9 @@ public class TitleCacheMaintenanceService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initCache() {
-        cacheInitializer.initialize();
-        log.debug("local cache initialized");
+        LocalDateTime cacheInitializingStarted = currentTimeProvider.getCurrentLocalDateTime();
+        log.debug("cache initialization started at {}", cacheInitializingStarted);
+        cacheInitializer.initialize(cacheInitializingStarted);
+        log.debug("cache initialization finished at {}", currentTimeProvider.getCurrentLocalDateTime());
     }
 }
