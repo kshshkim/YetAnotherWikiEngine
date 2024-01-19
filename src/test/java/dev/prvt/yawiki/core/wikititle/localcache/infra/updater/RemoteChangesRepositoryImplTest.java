@@ -1,39 +1,64 @@
 package dev.prvt.yawiki.core.wikititle.localcache.infra.updater;
 
-import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
-import dev.prvt.yawiki.core.wikititle.cache.infra.updater.RemoteChangesRepositoryImpl;
-import dev.prvt.yawiki.core.wikititle.history.domain.TitleHistory;
-import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
-import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
-import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import jakarta.persistence.EntityManager;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-
 import static dev.prvt.yawiki.fixture.WikiPageFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.uuid.impl.UUIDUtil;
+import dev.prvt.yawiki.core.wikipage.domain.model.WikiPageTitle;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangeLog;
+import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
+import dev.prvt.yawiki.core.wikititle.cache.infra.updater.RemoteChangesRepositoryImpl;
+import dev.prvt.yawiki.core.wikititle.history.domain.TitleUpdateType;
+import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 class RemoteChangesRepositoryImplTest {
 
     @Autowired
     EntityManager em;
 
+    @Autowired
+    NamedParameterJdbcTemplate jdbcTemplate;
     RemoteChangesRepository remoteChangesRepository;
 
     LocalDateTime now;
 
+    void insert(UUID id, WikiPageTitle wikiPageTitle, LocalDateTime createdAt,
+        TitleUpdateType titleUpdateType) {
+        String sql = "insert into page_title_log(page_title_log_id, page_title, namespace, title_update_type, created_at) values(:page_title_log_id, :page_title, :namespace, :title_update_type, :created_at)";
+
+        jdbcTemplate.update(
+            sql,
+            Map.of(
+                "page_title_log_id", UUIDUtil.asByteArray(id),
+                "page_title", wikiPageTitle.title(),
+                "namespace", wikiPageTitle.namespace().getIntValue(),
+                "title_update_type", titleUpdateType.name(),
+                "created_at", createdAt
+            )
+        );
+    }
+
+    /**
+     * 1분, 2분, 3분 전에 생성된 내역들이 존재하는 상황을 가정. 커서는 exclusive 범위로 작동함.
+     */
     @BeforeEach
     void init() {
-        remoteChangesRepository = new RemoteChangesRepositoryImpl(em);
-
+        remoteChangesRepository = new RemoteChangesRepositoryImpl(jdbcTemplate);
         now = LocalDateTime.now();
         LocalDateTime oneMinuteAgo = now.minusMinutes(1);
         LocalDateTime twoMinutesAgo = now.minusMinutes(2);
@@ -42,82 +67,64 @@ class RemoteChangesRepositoryImplTest {
         WikiPageTitle titleTwo = aWikiPageTitle();
         WikiPageTitle titleThree = aWikiPageTitle();
 
-
-        TitleHistory first = TitleHistory.builder()
-                .pageTitle(titleOne.title())
-                .namespace(titleOne.namespace())
-                .createdAt(threeMinutesAgo)
-                .titleUpdateType(TitleUpdateType.CREATED)
-                .build();
-
-        TitleHistory second = TitleHistory.builder()
-                .pageTitle(titleTwo.title())
-                .namespace(titleTwo.namespace())
-                .createdAt(twoMinutesAgo)
-                .titleUpdateType(TitleUpdateType.CREATED)
-                .build();
-
-        TitleHistory third = TitleHistory.builder()
-                .pageTitle(titleThree.title())
-                .namespace(titleThree.namespace())
-                .createdAt(oneMinuteAgo)
-                .titleUpdateType(TitleUpdateType.CREATED)
-                .build();
-
-        em.persist(first);
-        em.persist(second);
-        em.persist(third);
-        em.flush();
-        em.clear();
+        insert(UUID.randomUUID(), titleOne, threeMinutesAgo, TitleUpdateType.CREATED);
+        insert(UUID.randomUUID(), titleTwo, twoMinutesAgo, TitleUpdateType.CREATED);
+        insert(UUID.randomUUID(), titleThree, oneMinuteAgo, TitleUpdateType.CREATED);
     }
 
     @Test
+    @DisplayName("커서 테스트 (after < 찾아올 시점 < before)")
     void findRemoteChangesByCursor() {
-        List<RemoteChangeLog> all = remoteChangesRepository.findRemoteChangesByCursor(now.minusMinutes(4), now);
+        List<RemoteChangeLog> all = remoteChangesRepository.findRemoteChangesByCursor(
+            now.minusMinutes(4), now);
 
         assertThat(all)
-                .describedAs("모두 찾아옴")
-                .hasSize(3);
+            .describedAs("(4분 전 < 찾아올 시점 < 현재), 모두 찾아와야함")
+            .hasSize(3);
 
-        List<RemoteChangeLog> two = remoteChangesRepository.findRemoteChangesByCursor(now.minusMinutes(3), now);
+        List<RemoteChangeLog> two = remoteChangesRepository.findRemoteChangesByCursor(
+            now.minusMinutes(3), now);
 
         assertThat(two)
-                .describedAs("exclusive 조건이기 때문에 2개만 찾아와야함.")
-                .hasSize(2);
+            .describedAs("(3분 전 < 찾아올 시점 < 현재), 2개만 찾아와야함")
+            .hasSize(2);
 
-        List<RemoteChangeLog> none = remoteChangesRepository.findRemoteChangesByCursor(now.plusMinutes(3), LocalDateTime.MAX);
+        List<RemoteChangeLog> one = remoteChangesRepository.findRemoteChangesByCursor(
+            now.minusMinutes(10),
+            now.minusMinutes(2)
+        );
+
+        assertThat(one)
+            .describedAs("(10분 전 < 찾아올 시점 < 2분 전), 1개만 찾아와야함")
+            .hasSize(1);
+
+        List<RemoteChangeLog> none = remoteChangesRepository.findRemoteChangesByCursor(
+            now.minusMinutes(1),
+            now
+        );
 
         assertThat(none)
-                .describedAs("결과가 없어야함.")
-                .isEmpty();
+            .describedAs("(1분 전 < 찾아올 시점 < 현재), 아무것도 찾아와선 안 됨.")
+            .isEmpty();
     }
-    @Test
-    void findRemoteChangesByCursor_projection() {
-        List<RemoteChangeLog> all = remoteChangesRepository.findRemoteChangesByCursor(now.minusMinutes(4), now);
 
-        assertThat(all)
-                .describedAs("모두 찾아옴")
-                .hasSize(3);
-
-        for (RemoteChangeLog remoteChangeLog : all) {
-            assertThat(remoteChangeLog.title()).isNotNull();
-            assertThat(remoteChangeLog.changeType()).isNotNull();
-            assertThat(remoteChangeLog.timestamp()).isNotNull();
-        }
-    }
     @Test
+    @DisplayName("정렬 테스트")
     void findRemoteChangesByCursor_order_by() {
-        List<RemoteChangeLog> actual = remoteChangesRepository.findRemoteChangesByCursor(now.minusMinutes(4), now);
+        List<RemoteChangeLog> actual = remoteChangesRepository.findRemoteChangesByCursor(
+            now.minusMinutes(4), now);
 
         assertThat(actual)
-                .describedAs("모두 찾아옴")
-                .hasSize(3);
+            .describedAs("모두 찾아와야함.")
+            .hasSize(3);
 
-        List<RemoteChangeLog> expected = actual.stream()
-                .sorted(Comparator.comparing(RemoteChangeLog::timestamp))
-                .toList();
+        List<RemoteChangeLog> sortedByTimestamp = actual.stream()
+                                             .sorted(
+                                                 Comparator.comparing(RemoteChangeLog::timestamp))
+                                             .toList();
 
         assertThat(actual)
-                .containsExactlyElementsOf(actual);
+            .describedAs("시간 순서대로 정렬된 결과를 불러왔기 때문에, 정렬 후에도 순서가 같음.")
+            .containsExactlyElementsOf(sortedByTimestamp);
     }
 }
