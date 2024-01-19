@@ -8,15 +8,14 @@ import dev.prvt.yawiki.core.wikititle.cache.domain.updater.CacheWriter;
 import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesReader;
 import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteChangesRepository;
 import dev.prvt.yawiki.core.wikititle.cache.domain.updater.RemoteReadCursorProvider;
-import dev.prvt.yawiki.core.wikititle.cache.infra.initializer.InitialCacheDataReaderImpl;
+import dev.prvt.yawiki.core.wikititle.cache.infra.initializer.InitialCacheDataReaderJdbcImpl;
 import dev.prvt.yawiki.core.wikititle.cache.infra.updater.RemoteReadCursorProviderImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import jakarta.persistence.EntityManager;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ import jakarta.persistence.EntityManager;
 public class CacheConfig {
     private final CacheStorage cacheStorage;
     private final CacheWriter cacheWriter;
-    private final EntityManager entityManager;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final RemoteChangesRepository remoteChangesRepository;
 
     @Value("${yawiki.localCache.readMarginInSeconds:30}")
@@ -32,7 +31,7 @@ public class CacheConfig {
 
     @Bean
     public InitialCacheDataReader initialCacheDataReader() {
-        return new InitialCacheDataReaderImpl(entityManager, readMarginInSeconds);
+        return new InitialCacheDataReaderJdbcImpl(namedParameterJdbcTemplate, readMarginInSeconds);
     }
 
     @Bean
