@@ -33,8 +33,8 @@ class WikiPageTitleExistenceCheckerImplTest {
     }
 
     @Test
-    @DisplayName("존재하는 제목과 존재하지 않는 제목을 이 포함된 파라미터를 넘기는 경우, 존재하지 않는 제목만 반환해야함.")
-    void filterExistingTitles_collection() {
+    @DisplayName("존재하는 제목과 존재하지 않는 제목이 같이 포함된 파라미터를 넘기는 경우, 존재하지 않는 제목만 반환해야함.")
+    void getNonExistentTitles_collection() {
         // when
         List<WikiPageTitle> nonExistTitles = Stream.generate(CommonFixture::aWikiPageTitle).limit(20).toList();
         List<WikiPageTitle> argument = new ArrayList<>();
@@ -42,7 +42,25 @@ class WikiPageTitleExistenceCheckerImplTest {
         argument.addAll(nonExistTitles);
         argument.addAll(given);
 
-        Collection<WikiPageTitle> result = titleExistenceChecker.filterExistentTitles(argument);
+        Collection<WikiPageTitle> result = titleExistenceChecker.getNonExistentTitles(argument);
+
+        // then
+        assertThat(result)
+                .describedAs("존재하지 않는 제목만 반환.")
+                .containsExactlyInAnyOrderElementsOf(nonExistTitles);
+    }
+
+    @Test
+    @DisplayName("존재하는 제목과 존재하지 않는 제목이 같이 포함된 스트림 파라미터를 넘기는 경우, 존재하지 않는 제목만 반환해야함.")
+    void getNonExistentTitles_stream() {
+        // when
+        List<WikiPageTitle> nonExistTitles = Stream.generate(CommonFixture::aWikiPageTitle).limit(20).toList();
+        List<WikiPageTitle> argument = new ArrayList<>();
+
+        argument.addAll(nonExistTitles);
+        argument.addAll(given);
+
+        Collection<WikiPageTitle> result = titleExistenceChecker.getNonExistentTitles(argument.stream());
 
         // then
         assertThat(result)

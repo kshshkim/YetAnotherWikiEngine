@@ -128,6 +128,27 @@ class CacheStorageConcurrentHashMapImplTest {
     }
 
     @Test
+    void filterExistentTitles_Stream_param() {
+        // given
+        storage.addAll(givenElements);
+        List<WikiPageTitle> nonExistentTitles = Stream.generate(CommonFixture::aWikiPageTitle)
+                                       .limit(10)
+                                       .toList();
+        List<WikiPageTitle> argument = new ArrayList<>(nonExistentTitles);
+        argument.addAll(givenElements);  // 존재하지 않는 제목과 존재하는 제목 모두 포함
+
+        // when
+        Collection<WikiPageTitle> result = storage.filterExistentTitles(argument.stream());
+
+
+        // then
+        assertThat(result)
+            .describedAs("존재하지 않는 제목만 포함되어야함.")
+            .containsExactlyInAnyOrderElementsOf(nonExistentTitles);
+
+    }
+
+    @Test
     void removeAll() {
         // given
         List<WikiPageTitle> given = Stream.generate(CommonFixture::aWikiPageTitle)

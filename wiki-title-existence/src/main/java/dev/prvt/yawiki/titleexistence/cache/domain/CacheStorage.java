@@ -4,6 +4,7 @@ import dev.prvt.yawiki.common.model.WikiPageTitle;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 /**
  * <p>존재하는 제목의 정보를 가지고 있는 스토리지 인터페이스.</p>
@@ -28,6 +29,11 @@ public interface CacheStorage {
      * @return 파라미터에 포함된 제목 중, 존재하지 않는 제목만 반환
      */
     Collection<WikiPageTitle> filterExistentTitles(Collection<WikiPageTitle> titles);
+    /**
+     * @param titles titles to filter
+     * @return 파라미터에 포함된 제목 중, 존재하지 않는 제목만 반환
+     */
+    Collection<WikiPageTitle> filterExistentTitles(Stream<WikiPageTitle> titles);
 
     LocalDateTime getLastUpdatedAt();
 

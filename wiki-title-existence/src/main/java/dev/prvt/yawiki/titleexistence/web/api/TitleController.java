@@ -27,12 +27,11 @@ public class TitleController {
     ) {
     }
 
-    private List<WikiPageTitle> convertToWikiPageList(
+    private Stream<WikiPageTitle> convertToWikiPageStream(
         TitleExistenceRequest titleExistenceRequest
     ) {
         return titleExistenceRequest.titles().stream()
-                   .map(wikiPageTitleConverter::convert)
-                   .toList();
+                   .map(wikiPageTitleConverter::convert);
     }
 
     /**
@@ -49,8 +48,8 @@ public class TitleController {
         @RequestBody TitleExistenceRequest request
     ) {
         return TitleListResponse.from(
-            filter.filterExistentTitles(
-                convertToWikiPage(request)
+            filter.getNonExistentTitles(
+                convertToWikiPageStream(request)
             )
         );
     }
@@ -68,8 +67,8 @@ public class TitleController {
         @RequestBody TitleExistenceRequest request
     ) {
         return TitleListResponse.from(
-            filter.filterExistentTitles(
-                convertToWikiPage(request)
+            filter.getNonExistentTitles(
+                convertToWikiPageStream(request)
             )
         );
     }

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -64,6 +65,11 @@ public class CacheStorageConcurrentHashMapImpl implements CacheStorage {
         return titles.stream()
                    .filter(title -> !this.exists(title))
                    .toList();
+    }
+
+    @Override
+    public Collection<WikiPageTitle> filterExistentTitles(Stream<WikiPageTitle> titles) {
+        return titles.filter(title -> !this.exists(title)).toList();
     }
 
     @Override
