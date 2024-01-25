@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    # datasource configuration example.
+    # It may also work with RDBMSs other than MySQL, but not tested.
+    url: jdbc:mysql://localhost:3306/wiki_dev  #?rewriteBatchedStatements=true
+    username: root
+    password: test1234
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jdbc:
+    batch_size: 100
+    show-sql: true
+  jpa:
+    open-in-view: false
+    hibernate:
+#      ddl-auto: create
+      jdbc:
+        show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+yawiki:
+  default-permission:
+#    doInitialize: true # 기본값 false, permission 관련 설정값을 초기화하려면 true
+  jwt:
+    lifespan: 1800
+
+logging:
+  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.springframework.jdbc: DEBUG
+    dev.prvt: DEBUG

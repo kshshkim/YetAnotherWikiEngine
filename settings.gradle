@@ -1,1 +1,8 @@
 rootProject.name = 'YetAnotherWikiEngine'
+include 'wiki-title-existence'
+include 'wiki-main'
+include 'common'
+include 'common:web-util'
+include 'common:test-util'
+include 'common:plain'
+

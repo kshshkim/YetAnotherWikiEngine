@@ -5,95 +5,89 @@ plugins {
     id 'jacoco'
 }
 
-group = 'dev.prvt'
-version = '0.0.1-SNAPSHOT'
+repositories {
+    mavenCentral()
+}
+
+bootJar.enabled = false
+
+subprojects {
+    group = 'dev.prvt'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '17'
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    bootJar.enabled=false
+
+    dependencies {
+
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
+    }
+
+    jacocoTestReport {
+        dependsOn test // tests are required to run before generating the report
+        reports {
+//        xml.required = true
+//        csv.required = true
+        }
+
+        def excludeDirectories = [
+                "**/*Exception.class", // 예외 클래스 제외
+                "dev/prvt/yawiki/common/uuid/UuidV7GenerationStrategy.class", // org.hibernate.id 에서 가져온 코드 제외
+                "dev/prvt/yawiki/common/uuid/UuidV7Generator.class", // org.hibernate.id 에서 가져온 코드 제외
+                "dev/prvt/yawiki/common/uuid/Const.class", // JPA ID 관련 annotation 용 Const 제외
+        ]
+
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: excludeDirectories)
+            }))
+        }
+
+        finalizedBy 'jacocoTestCoverageVerification'
+    }
+
+
+    tasks.named('test') {
+        useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
+    }
+
+
+}
 
 java {
     sourceCompatibility = '17'
 }
 
-jacoco {
-    version '0.8.9'
-}
+//jacoco {
+//    version '0.8.9'
+//}
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
 
-repositories {
-    mavenCentral()
-}
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
 
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-
-    //Querydsl 추가
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-    // https://mvnrepository.com/artifact/com.fasterxml.uuid/java-uuid-generator
-    implementation 'com.fasterxml.uuid:java-uuid-generator:4.2.0'
-    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
-
-    testImplementation 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-
-    // BCRYPT
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
-    // mockito
-    testImplementation 'org.mockito:mockito-core:4.8.0'
-
-    // testcontainers
-    testImplementation "org.springframework.boot:spring-boot-testcontainers"
-    testImplementation "org.testcontainers:mysql:1.19.3"
-}
-
-compileJava {
-    // QClass 에 붙는 @Generated 어노테이션의 Retention 을 Class 로 설정함. 테스트 커버리지 계산을 위해 사용.
-    options.compilerArgs << '-Aquerydsl.generatedAnnotationClass=com.querydsl.core.annotations.Generated'
-}
-
-jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
-    reports {
-//        xml.required = true
-//        csv.required = true
-    }
-
-    def excludeDirectories = [
-            "**/*Exception.class", // 예외 클래스 제외
-            "dev/prvt/yawiki/common/uuid/UuidV7GenerationStrategy.class", // org.hibernate.id 에서 가져온 코드 제외
-            "dev/prvt/yawiki/common/uuid/UuidV7Generator.class", // org.hibernate.id 에서 가져온 코드 제외
-            "dev/prvt/yawiki/common/uuid/Const.class", // JPA ID 관련 annotation 용 Const 제외
-    ]
-
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: excludeDirectories)
-        }))
-    }
-
-    finalizedBy 'jacocoTestCoverageVerification'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
-}

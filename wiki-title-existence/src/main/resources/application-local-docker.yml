@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # datasource configuration example.
+    # It may also work with RDBMSs other than MySQL, but not tested.
+    url: ${WTE_DATASOURCE_URL:jdbc:mysql://mysql-container:3306/title_test}  #?rewriteBatchedStatements=true
+    username: ${WTE_DATASOURCE_USERNAME:root}
+    password: ${WTE_DATASOURCE_PASSWORD:test1234}
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jdbc:
+    batch_size: 100
+    show-sql: true
+
+logging:
+  level:
+    #    org.hibernate.SQL: DEBUG
+    #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    #    org.springframework.jdbc: DEBUG
+    dev.prvt: DEBUG

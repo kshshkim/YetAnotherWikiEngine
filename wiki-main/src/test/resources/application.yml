@@ -1,0 +1,35 @@
+spring:
+  profiles:
+    active: tc-mysql-8
+  datasource:
+    hikari:
+      data-source-properties:
+        rewriteBatchedStatements: true  # highly recommended due to performance reasons
+  jdbc:
+    batch_size: 100
+    show-sql: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
+        show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+yawiki:
+  default-permission:
+    do-initialize: true
+  jwt:
+    lifespan: 1800
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc: DEBUG
