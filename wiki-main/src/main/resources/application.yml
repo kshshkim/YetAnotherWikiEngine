@@ -1,0 +1,21 @@
+spring:
+  profiles:
+    active: local
+  datasource:
+    hikari:
+      data-source-properties:
+        rewriteBatchedStatements: true  # highly recommended due to performance reasons
+  jdbc:
+    batch_size: 100
+    show-sql: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100

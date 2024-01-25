@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.prvt.yawiki.common'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common:plain')
+    implementation 'net.bytebuddy:byte-buddy:1.14.10'
+}
+
+test {
+    useJUnitPlatform()
+}

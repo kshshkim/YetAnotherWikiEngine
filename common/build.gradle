@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.prvt.yawiki.common'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+test {
+    useJUnitPlatform()
+}

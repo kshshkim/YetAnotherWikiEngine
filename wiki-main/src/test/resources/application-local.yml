@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    # datasource configuration example.
+    url: jdbc:mysql://192.168.100.10:3306/wiki_dev  #?rewriteBatchedStatements=true
+    username: root
+    password: test1234
+    driverClassName: com.mysql.cj.jdbc.Driver
