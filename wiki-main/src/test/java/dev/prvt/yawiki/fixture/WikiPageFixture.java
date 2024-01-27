@@ -5,14 +5,14 @@ import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
 import dev.prvt.yawiki.core.contributor.domain.MemberContributor;
 import dev.prvt.yawiki.core.wikipage.domain.model.*;
-import dev.prvt.yawiki.common.testutil.CommonFixture;
-import dev.prvt.yawiki.common.testutil.Fixture;
+import dev.prvt.yawiki.common.util.test.CommonFixture;
+import dev.prvt.yawiki.common.util.test.Fixture;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

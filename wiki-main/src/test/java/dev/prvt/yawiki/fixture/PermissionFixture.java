@@ -5,7 +5,7 @@ import dev.prvt.yawiki.core.permission.domain.model.NamespacePermission;
 import dev.prvt.yawiki.core.permission.domain.model.Permission;
 
 import static dev.prvt.yawiki.core.permission.domain.model.PermissionLevel.*;
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 
 public class PermissionFixture {
     static public GrantedPermission.GrantedPermissionBuilder aGrantedPermission() {

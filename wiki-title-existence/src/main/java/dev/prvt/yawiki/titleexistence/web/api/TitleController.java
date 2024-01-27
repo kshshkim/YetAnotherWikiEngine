@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.titleexistence.web.api;
 
 import dev.prvt.yawiki.common.model.WikiPageTitle;
-import dev.prvt.yawiki.common.webutil.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverter;
 import dev.prvt.yawiki.titleexistence.cache.application.WikiPageTitleExistenceFilter;
 import dev.prvt.yawiki.titleexistence.web.api.response.TitleListResponse;
 import java.util.List;

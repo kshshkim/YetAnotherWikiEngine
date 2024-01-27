@@ -2,7 +2,7 @@ package dev.prvt.yawiki.core.wikititle.history.domain;
 
 import static java.util.Objects.requireNonNull;
 
-import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import dev.prvt.yawiki.common.util.jpa.uuid.UuidV7Generator;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.TitleUpdateType;
 import dev.prvt.yawiki.common.model.WikiPageTitle;

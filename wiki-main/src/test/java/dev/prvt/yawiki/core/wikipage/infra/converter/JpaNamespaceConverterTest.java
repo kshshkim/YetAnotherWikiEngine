@@ -1,6 +1,7 @@
 package dev.prvt.yawiki.core.wikipage.infra.converter;
 
 import dev.prvt.yawiki.common.model.Namespace;
+import dev.prvt.yawiki.common.util.jpa.converter.JpaNamespaceConverter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

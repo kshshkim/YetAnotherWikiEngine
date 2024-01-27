@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 import static org.assertj.core.api.Assertions.*;
 
 class MemberTest {

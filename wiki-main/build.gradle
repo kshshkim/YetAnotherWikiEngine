@@ -13,8 +13,9 @@ bootJar.enabled=true
 
 dependencies {
     implementation project(':common:plain')
-    implementation project(':common:web-util')
-    testImplementation project(':common:test-util')
+    implementation project(':common:util-web')
+    implementation project(':common:util-jpa')
+    testImplementation project(':common:util-test')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'

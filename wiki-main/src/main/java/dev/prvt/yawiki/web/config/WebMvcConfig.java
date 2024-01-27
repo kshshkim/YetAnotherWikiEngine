@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.web.config;
 
-import dev.prvt.yawiki.common.webutil.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverter;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

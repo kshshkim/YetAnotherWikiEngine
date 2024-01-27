@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.net.InetAddress;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.aInetV4Address;
+import static dev.prvt.yawiki.common.util.test.Fixture.aInetV4Address;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AnonymousContributorTest {

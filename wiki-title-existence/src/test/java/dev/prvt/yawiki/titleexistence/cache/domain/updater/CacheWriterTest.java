@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.common.testutil.CommonFixture.aWikiPageTitle;
+import static dev.prvt.yawiki.common.util.test.CommonFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CacheWriterTest {

@@ -7,7 +7,7 @@ import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.titleexistence.cache.domain.InitialCacheData;
 import dev.prvt.yawiki.titleexistence.cache.domain.initializer.InitialCacheDataReader;
-import dev.prvt.yawiki.common.testutil.CommonFixture;
+import dev.prvt.yawiki.common.util.test.CommonFixture;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,7 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
-import dev.prvt.yawiki.common.webutil.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverter;
 import java.util.Set;
 import java.util.stream.Collectors;
 

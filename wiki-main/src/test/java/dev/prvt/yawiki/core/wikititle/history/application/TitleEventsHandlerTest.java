@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 

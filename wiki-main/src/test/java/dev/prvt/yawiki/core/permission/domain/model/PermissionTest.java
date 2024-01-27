@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static dev.prvt.yawiki.core.permission.domain.model.ActionType.*;
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
-import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import dev.prvt.yawiki.common.util.jpa.uuid.UuidV7Generator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

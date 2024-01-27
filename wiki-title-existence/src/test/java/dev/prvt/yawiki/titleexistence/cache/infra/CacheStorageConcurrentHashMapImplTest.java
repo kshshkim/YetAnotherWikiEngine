@@ -2,7 +2,7 @@ package dev.prvt.yawiki.titleexistence.cache.infra;
 
 import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.titleexistence.cache.domain.InitialCacheData;
-import dev.prvt.yawiki.common.testutil.CommonFixture;
+import dev.prvt.yawiki.common.util.test.CommonFixture;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.common.testutil.CommonFixture.aWikiPageTitle;
+import static dev.prvt.yawiki.common.util.test.CommonFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 

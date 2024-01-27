@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
-import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import dev.prvt.yawiki.common.util.jpa.uuid.UuidV7Generator;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageRenameException;

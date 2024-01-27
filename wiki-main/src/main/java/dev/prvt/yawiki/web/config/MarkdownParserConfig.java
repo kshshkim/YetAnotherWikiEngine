@@ -11,7 +11,7 @@ import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import dev.prvt.yawiki.common.webutil.converter.WikiPageTitleConverter;
+import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverter;
 import dev.prvt.yawiki.web.markdown.FlexMarkReferenceExtractor;
 import dev.prvt.yawiki.web.markdown.HttpLinkFilter;
 import dev.prvt.yawiki.web.markdown.ReferencedTitleExtractor;

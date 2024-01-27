@@ -8,7 +8,7 @@ import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.core.wikipage.domain.model.WikiPage;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.repository.WikiPageRepository;
-import dev.prvt.yawiki.common.testutil.Fixture;
+import dev.prvt.yawiki.common.util.test.Fixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

@@ -4,7 +4,7 @@ import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.titleexistence.cache.domain.CacheStorage;
 import dev.prvt.yawiki.titleexistence.cache.domain.InitialCacheData;
 import dev.prvt.yawiki.titleexistence.cache.infra.CacheStorageConcurrentHashMapImpl;
-import dev.prvt.yawiki.common.testutil.CommonFixture;
+import dev.prvt.yawiki.common.util.test.CommonFixture;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

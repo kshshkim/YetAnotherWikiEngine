@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.*;
+import static dev.prvt.yawiki.common.util.test.Fixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 

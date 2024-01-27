@@ -1,6 +1,6 @@
 package dev.prvt.yawiki.titleexistence.cache.infra.updater;
 
-import static dev.prvt.yawiki.common.testutil.CommonFixture.aWikiPageTitle;
+import static dev.prvt.yawiki.common.util.test.CommonFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.uuid.impl.UUIDUtil;

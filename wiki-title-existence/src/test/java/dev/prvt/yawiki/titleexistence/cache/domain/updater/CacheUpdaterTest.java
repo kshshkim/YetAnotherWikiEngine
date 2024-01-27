@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static dev.prvt.yawiki.common.testutil.CommonFixture.aWikiPageTitle;
+import static dev.prvt.yawiki.common.util.test.CommonFixture.aWikiPageTitle;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;

@@ -1,7 +1,7 @@
 package dev.prvt.yawiki.fixture;
 
 import dev.prvt.yawiki.config.jwt.JwtProperties;
-import dev.prvt.yawiki.common.testutil.Fixture;
+import dev.prvt.yawiki.common.util.test.Fixture;
 import lombok.SneakyThrows;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static dev.prvt.yawiki.common.testutil.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 
 public class SecurityFixture {
 
