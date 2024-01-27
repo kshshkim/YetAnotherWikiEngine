@@ -1,19 +1,28 @@
 package dev.prvt.yawiki.auth.member.application;
 
-import com.fasterxml.uuid.Generators;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.Mockito.when;
+
 import dev.prvt.yawiki.auth.jwt.application.JwtIssuer;
 import dev.prvt.yawiki.auth.jwt.domain.AuthToken;
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenExpirationException;
-import dev.prvt.yawiki.auth.member.domain.*;
+import dev.prvt.yawiki.auth.member.domain.Member;
+import dev.prvt.yawiki.auth.member.domain.MemberMemoryRepository;
+import dev.prvt.yawiki.auth.member.domain.MemberRepository;
+import dev.prvt.yawiki.auth.member.domain.PasswordHasher;
 import dev.prvt.yawiki.auth.member.dto.MemberJoinDto;
 import dev.prvt.yawiki.auth.member.dto.MemberPasswordAuthDto;
 import dev.prvt.yawiki.auth.member.dto.MemberTokenAuthDto;
 import dev.prvt.yawiki.auth.member.exception.MemberNotFoundException;
 import dev.prvt.yawiki.auth.member.exception.PasswordMismatchException;
 import dev.prvt.yawiki.auth.member.infra.PasswordHasherImpl;
-import dev.prvt.yawiki.common.uuid.FasterXmlNoArgGeneratorAdapter;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.common.uuid.UuidGenerators;
 import dev.prvt.yawiki.core.event.MemberJoinEvent;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,17 +31,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.util.test.Fixture.randString;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class MemberServiceImplTest {
     private MemberRepository memberRepository = new MemberMemoryRepository();
     private PasswordHasher passwordHasher = new PasswordHasherImpl(new BCryptPasswordEncoder());
-    private UuidGenerator uuidGenerator = new FasterXmlNoArgGeneratorAdapter(Generators.timeBasedEpochGenerator());
+    private UuidGenerator uuidGenerator = UuidGenerators.UUID_V7_INSTANCE;
 
     private Object applicationEventPublisherCalledEvent;
 

@@ -1,24 +1,22 @@
 package dev.prvt.yawiki.core.contributor.infra;
 
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
+import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.core.contributor.domain.AnonymousContributor;
 import dev.prvt.yawiki.core.contributor.domain.Contributor;
 import dev.prvt.yawiki.core.contributor.domain.ContributorRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
 public class ContributorRepositoryImpl implements ContributorRepository {
     private final ContributorJpaRepository contributorJpaRepository;
-    private final TimeBasedEpochGenerator uuidGenerator = Generators.timeBasedEpochGenerator();
+    private final UuidGenerator uuidGenerator;
     @Override
     public Stream<Contributor> findContributorsByIds(Collection<UUID> ids) {
         return contributorJpaRepository.findContributorsByIds(ids);

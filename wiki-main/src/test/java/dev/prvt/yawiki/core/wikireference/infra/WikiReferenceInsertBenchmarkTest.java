@@ -1,10 +1,16 @@
 package dev.prvt.yawiki.core.wikireference.infra;
 
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
-import com.fasterxml.uuid.impl.UUIDUtil;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
+
 import dev.prvt.yawiki.common.model.Namespace;
+import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.common.uuid.UuidGenerators;
+import dev.prvt.yawiki.common.uuid.UuidUtil;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
@@ -13,13 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.IntStream;
-
-import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 
 /**
  * <p>Bulk Insert 시, rewriteBatchedStatements 옵션이 사용되는 경우 Jdbc 쿼리가 10배 가량 빠름.</p>
@@ -51,10 +50,10 @@ public class WikiReferenceInsertBenchmarkTest {
     @Commit
     void jdbcBulkInsert() {
         List<String> titles = generateTitles(TITLE_COUNT);
-        TimeBasedEpochGenerator generator = Generators.timeBasedEpochGenerator();
+        UuidGenerator uuidGenerator = UuidGenerators.uuidV7Generator();
 
         UUID documentId = UUID.randomUUID();
-        byte[] refererId = UUIDUtil.asByteArray(documentId);
+        byte[] refererId = UuidUtil.asByteArray(documentId);
 
         String sql = "insert into wiki_reference (referer_id, referred_title, referred_namespace) values (?, ?, ?)";
 

@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'dev.prvt.yawiki.core'
+group = 'dev.prvt.yawiki'
 version = '0.0.1-SNAPSHOT'
 
 repositories {
@@ -13,6 +13,7 @@ bootJar.enabled=true
 
 dependencies {
     implementation project(':common:plain')
+    implementation project(':common:uuid')
     implementation project(':common:util-web')
     implementation project(':common:util-jpa')
     testImplementation project(':common:util-test')
@@ -32,8 +33,6 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
     testImplementation "org.testcontainers:mysql:1.19.3"
 
-    // uuid v7
-    implementation 'com.fasterxml.uuid:java-uuid-generator:4.2.0'
     // markdown parser
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
 

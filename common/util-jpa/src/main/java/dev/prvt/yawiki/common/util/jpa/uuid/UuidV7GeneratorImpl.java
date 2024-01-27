@@ -2,8 +2,8 @@ package dev.prvt.yawiki.common.util.jpa.uuid;
 
 import static org.hibernate.generator.EventTypeSets.INSERT_ONLY;
 
-import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.impl.TimeBasedEpochGenerator;
+import dev.prvt.yawiki.common.uuid.UuidGenerator;
+import dev.prvt.yawiki.common.uuid.UuidGenerators;
 import java.util.EnumSet;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.generator.BeforeExecutionGenerator;
@@ -13,16 +13,17 @@ import org.hibernate.type.descriptor.java.UUIDJavaType.ValueTransformer;
 
 
 /**
- * <p>UUIDv7을 생성하는 커스텀 JPA UuidGenerator 구현체. 원본({@link org.hibernate.id.uuid.UuidGenerator})과 달리, 자바 {@link java.util.UUID}만 지원함.</p>
+ * <p>UUIDv7을 생성하는 커스텀 JPA UuidGenerator 구현체. 원본({@link org.hibernate.id.uuid.UuidGenerator})과 달리, 변환 타입으로 {@link java.util.UUID}만 지원함.</p>
  * @see org.hibernate.id.uuid.UuidGenerator
  */
-public class FasterXmlUuidV7Generator implements BeforeExecutionGenerator {
+public class UuidV7GeneratorImpl implements BeforeExecutionGenerator {
 
-    private static final TimeBasedEpochGenerator valueGenerator = Generators.timeBasedEpochGenerator();
+    private final UuidGenerator uuidGenerator;
     private final ValueTransformer valueTransformer;
 
-    public FasterXmlUuidV7Generator(
+    public UuidV7GeneratorImpl(
     ) {
+        uuidGenerator = UuidGenerators.uuidV7Generator();
         valueTransformer = UUIDJavaType.PassThroughTransformer.INSTANCE;
     }
 
@@ -33,7 +34,7 @@ public class FasterXmlUuidV7Generator implements BeforeExecutionGenerator {
         Object currentValue,
         EventType eventType
     ) {
-        return valueTransformer.transform(valueGenerator.generate());
+        return valueTransformer.transform(uuidGenerator.generate());
     }
 
     @Override

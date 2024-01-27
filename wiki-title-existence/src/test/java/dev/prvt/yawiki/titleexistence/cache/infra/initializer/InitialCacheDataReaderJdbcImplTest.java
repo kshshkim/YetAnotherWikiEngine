@@ -2,9 +2,9 @@ package dev.prvt.yawiki.titleexistence.cache.infra.initializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.uuid.impl.UUIDUtil;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
+import dev.prvt.yawiki.common.uuid.UuidUtil;
 import dev.prvt.yawiki.titleexistence.cache.domain.InitialCacheData;
 import dev.prvt.yawiki.titleexistence.cache.domain.initializer.InitialCacheDataReader;
 import dev.prvt.yawiki.common.util.test.CommonFixture;
@@ -94,7 +94,7 @@ class InitialCacheDataReaderJdbcImplTest {
                                                           .map(
                                                               wp -> {
                                                                   MapSqlParameterSource param = new MapSqlParameterSource();
-                                                                  param.addValue("id", UUIDUtil.asByteArray(wp.id()));
+                                                                  param.addValue("id", UuidUtil.asByteArray(wp.id()));
                                                                   param.addValue("title",
                                                                       wp.title());
                                                                   param.addValue("namespace",

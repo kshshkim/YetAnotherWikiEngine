@@ -13,12 +13,12 @@ bootJar.enabled=true
 
 dependencies {
     implementation project(':common:plain')
+    implementation project(':common:uuid')
     implementation project(':common:util-web')
     testImplementation project(':common:util-test')
 
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-//    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     runtimeOnly 'com.h2database:h2'
@@ -27,8 +27,6 @@ dependencies {
     // testcontainers
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
     testImplementation "org.testcontainers:mysql:1.19.3"
-
-    testImplementation 'com.fasterxml.uuid:java-uuid-generator:4.2.0'
 }
 
 test {

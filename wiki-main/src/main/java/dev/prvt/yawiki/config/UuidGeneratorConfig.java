@@ -1,8 +1,7 @@
 package dev.prvt.yawiki.config;
 
-import com.fasterxml.uuid.Generators;
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
-import dev.prvt.yawiki.common.uuid.FasterXmlNoArgGeneratorAdapter;
+import dev.prvt.yawiki.common.uuid.UuidGenerators;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,7 +15,7 @@ public class UuidGeneratorConfig {
      */
     @Bean
     public UuidGenerator uuidGenerator() {
-        return new FasterXmlNoArgGeneratorAdapter(Generators.timeBasedEpochGenerator());
+        return UuidGenerators.UUID_V7_INSTANCE;
     }
 
 }

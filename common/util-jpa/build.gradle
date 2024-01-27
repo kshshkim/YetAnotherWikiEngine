@@ -11,11 +11,11 @@ repositories {
 
 dependencies {
     implementation project(':common:plain')
+    implementation project(':common:uuid')
+    testImplementation project(':common:util-test')
 
     implementation 'org.hibernate.orm:hibernate-core'
 
-    // uuid v7
-    implementation 'com.fasterxml.uuid:java-uuid-generator:4.2.0'
 }
 
 test {

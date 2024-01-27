@@ -3,8 +3,8 @@ package dev.prvt.yawiki.titleexistence.cache.infra.updater;
 import static dev.prvt.yawiki.common.util.test.CommonFixture.aWikiPageTitle;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.uuid.impl.UUIDUtil;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
+import dev.prvt.yawiki.common.uuid.UuidUtil;
 import dev.prvt.yawiki.titleexistence.cache.domain.updater.RemoteChangeLog;
 import dev.prvt.yawiki.titleexistence.cache.domain.updater.RemoteChangesRepository;
 import dev.prvt.yawiki.common.model.TitleUpdateType;
@@ -41,7 +41,7 @@ class RemoteChangesRepositoryImplTest {
         jdbcTemplate.update(
             sql,
             Map.of(
-                "page_title_log_id", UUIDUtil.asByteArray(id),
+                "page_title_log_id", UuidUtil.asByteArray(id),
                 "page_title", wikiPageTitle.title(),
                 "namespace", wikiPageTitle.namespace().getIntValue(),
                 "title_update_type", titleUpdateType.name(),

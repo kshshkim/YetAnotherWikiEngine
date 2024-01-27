@@ -1,6 +1,5 @@
 package dev.prvt.yawiki.core.wikireference.infra;
 
-import com.fasterxml.uuid.impl.UUIDUtil;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -9,6 +8,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
+import dev.prvt.yawiki.common.uuid.UuidUtil;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReference;
 import dev.prvt.yawiki.core.wikireference.domain.WikiReferenceRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +150,7 @@ public class WikiReferenceRepositoryImpl implements WikiReferenceRepository {
     @Transactional
     public void bulkInsert(UUID refererId, List<WikiPageTitle> titles) {
         String sql = "INSERT INTO wiki_reference (referer_id, referred_title, referred_namespace) VALUES (?, ?, ?)";
-        byte[] byteRefererId = UUIDUtil.asByteArray(refererId);
+        byte[] byteRefererId = UuidUtil.asByteArray(refererId);
         jdbcTemplate.batchUpdate(sql,
                 titles,
                 titles.size(),

@@ -6,4 +6,5 @@ include 'common:plain'
 include 'common:util-web'
 include 'common:util-test'
 include 'common:util-jpa'
+include 'common:uuid'
 

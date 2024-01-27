@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 import org.hibernate.annotations.IdGeneratorType;
 import org.hibernate.annotations.ValueGenerationType;
 
-@IdGeneratorType(FasterXmlUuidV7Generator.class)
-@ValueGenerationType(generatedBy = FasterXmlUuidV7Generator.class)
+@IdGeneratorType(UuidV7GeneratorImpl.class)
+@ValueGenerationType(generatedBy = UuidV7GeneratorImpl.class)
 @Retention(RUNTIME)
 @Target({ FIELD, METHOD })
 public @interface UuidV7Generator {
