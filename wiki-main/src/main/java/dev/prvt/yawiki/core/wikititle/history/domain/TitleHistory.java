@@ -1,20 +1,25 @@
 package dev.prvt.yawiki.core.wikititle.history.domain;
 
+import static java.util.Objects.requireNonNull;
+
+import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.TitleUpdateType;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
-import static java.util.Objects.requireNonNull;
 
 @Entity
 @Table(
@@ -30,8 +35,7 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TitleHistory {
     @Id
-    @GeneratedValue(generator = "uuid-v7")
-    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @UuidV7Generator
     @Column(name = "page_title_log_id", columnDefinition = "BINARY(16)")
     private UUID id;
     @Column(name = "page_title")

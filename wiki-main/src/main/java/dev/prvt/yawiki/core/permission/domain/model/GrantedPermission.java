@@ -1,16 +1,23 @@
 package dev.prvt.yawiki.core.permission.domain.model;
 
+import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 @Entity
 @Getter
@@ -30,8 +37,7 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 )
 public class GrantedPermission {
     @Id
-    @GeneratedValue(generator = "uuid-v7")
-    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @UuidV7Generator
     @Column(name = "granted_permission_id", columnDefinition = "BINARY(16)")
     private UUID id;
 

@@ -1,19 +1,25 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
 import dev.prvt.yawiki.common.model.Namespace;
 import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.core.wikipage.domain.exception.WikiPageRenameException;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 /**
  * <h2>WikiPage</h2>
@@ -58,8 +64,7 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 @Getter
 public class WikiPage {
     @Id
-    @GeneratedValue(generator = "uuid-v7")
-    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @UuidV7Generator
     @Column(name = "page_id", columnDefinition = "BINARY(16)")
     private UUID id;
 

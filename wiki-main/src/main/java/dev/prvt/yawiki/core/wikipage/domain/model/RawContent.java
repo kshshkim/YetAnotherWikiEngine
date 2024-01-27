@@ -1,16 +1,15 @@
 package dev.prvt.yawiki.core.wikipage.domain.model;
 
+import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
-
-import jakarta.persistence.*;
-
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 @Entity
 @Getter
@@ -18,8 +17,7 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RawContent {
     @Id
-    @GeneratedValue(generator = "uuid-v7")
-    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @UuidV7Generator
     @Column(name = "raw_id", columnDefinition = "BINARY(16)")
     private UUID id;
     @Column(updatable = false, columnDefinition = "LONGTEXT")

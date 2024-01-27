@@ -1,17 +1,18 @@
 package dev.prvt.yawiki.auth.jwt.infra.jpaimpl;
 
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenExpirationException;
+import dev.prvt.yawiki.common.jpa.uuid.UuidV7Generator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 
 /**
  * id 는 지속되는 고유 값. 회원은 여러개의 RefreshToken 을 가질 수 있음. <br>
@@ -23,8 +24,7 @@ import static dev.prvt.yawiki.common.uuid.Const.UUID_V7;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshToken {
     @Id
-    @GeneratedValue(generator = "uuid-v7")
-    @GenericGenerator(name = "uuid-v7", strategy = UUID_V7)
+    @UuidV7Generator
     @Column(name = "refresh_token_id", columnDefinition = "BINARY(16)")
     private UUID id;
     @Column(name = "token", columnDefinition = "BINARY(16)")
