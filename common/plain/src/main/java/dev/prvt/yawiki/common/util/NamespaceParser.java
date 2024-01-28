@@ -4,6 +4,7 @@ import dev.prvt.yawiki.common.model.Namespace;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -19,7 +20,12 @@ public class NamespaceParser {
     private final Map<String, Namespace> identifierMap;
 
     /**
-     * 구분자 기본값으로 Namespace.name() 사용.
+     * 네임스페이스와 제목을 나누는 정규식 패턴. ex) "틀:대한민국"일 때 ":"을 기준으로 제목과 네임스페이스를 나눔. Pattern.compile(":")
+     */
+    private final Pattern separator = Pattern.compile(":");
+
+    /**
+     * 구분자 기본값으로 Namespace.name() 사용. separator 기본값으로 Pattern.compile(":") 사용.
      */
     public NamespaceParser() {
         this.identifierMap = Arrays
@@ -54,7 +60,7 @@ public class NamespaceParser {
      * @return Namespace
      */
     public Namespace getNamespace(String title) {
-        String[] split = title.split(":");
+        String[] split = separator.split(title, 2);
 
         if (split.length == 1) {  // 구분자를 포함하지 않는 경우
             return Namespace.NORMAL;
