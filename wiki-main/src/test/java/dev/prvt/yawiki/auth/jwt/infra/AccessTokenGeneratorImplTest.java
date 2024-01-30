@@ -1,6 +1,14 @@
 package dev.prvt.yawiki.auth.jwt.infra;
 
-import dev.prvt.yawiki.config.jwt.JwtProperties;
+import static dev.prvt.yawiki.common.util.test.Fixture.randString;
+import static dev.prvt.yawiki.common.util.test.Fixture.random;
+import static dev.prvt.yawiki.fixture.JwtFixture.getJwtDecoder;
+import static dev.prvt.yawiki.fixture.JwtFixture.getJwtEncoder;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import dev.prvt.yawiki.auth.jwt.domain.AccessTokenGenerator;
+import java.util.Map;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,68 +16,67 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-
-import static dev.prvt.yawiki.common.util.test.Fixture.randString;
-import static dev.prvt.yawiki.fixture.JwtFixture.getJwtDecoder;
-import static dev.prvt.yawiki.fixture.JwtFixture.getJwtEncoder;
-import static org.assertj.core.api.Assertions.assertThat;
-
 class AccessTokenGeneratorImplTest {
+
+    AccessTokenGenerator accessTokenGenerator;
+
+    String jwtIssuer = randString();
+    int jwtLifespan = random().nextInt(180, 1800);
+
     JwtEncoder jwtEncoder;
     JwtDecoder jwtDecoder;
-    JwtProperties jwtProperties;
 
-    AccessTokenGeneratorImpl accessTokenGenerator;
-
-    UUID givenId;
-    String givenName;
-
-    @SneakyThrows
     @BeforeEach
+    @SneakyThrows
     void init() {
-        Random random = new Random();
+        jwtIssuer = randString();
+        jwtLifespan = random().nextInt(180, 1800);
 
         jwtEncoder = getJwtEncoder();
         jwtDecoder = getJwtDecoder();
-        jwtProperties = JwtProperties.builder()
-                .issuer(randString())
-                .subject(randString())
-                .lifespan(random.nextInt(180, 1800))
-                .build();
-        accessTokenGenerator = new AccessTokenGeneratorImpl(jwtProperties, jwtEncoder);
-        givenId = UUID.randomUUID();
-        givenName = randString();
+        accessTokenGenerator = new AccessTokenGeneratorImpl(jwtEncoder, jwtLifespan, jwtIssuer);
     }
 
     @Test
+    @SneakyThrows
     void generate() {
+        // given
+        UUID givenId = UUID.randomUUID();  // 임의 ID
+        String givenName = randString();  // 임의 name
+
         // when
-        String s = accessTokenGenerator.generate(givenId, givenName);
+        String generated = accessTokenGenerator.generate(givenId, givenName);  // 토큰 생성
 
         // then
-        Jwt decoded = jwtDecoder.decode(s);
+
+        // 토큰 decode
+        Jwt decoded = jwtDecoder.decode(generated);
         Map<String, Object> claims = decoded.getClaims();
         String contributorId = (String) claims.get("contributorId");
         String name = (String) claims.get("name");
         String issuer = (String) claims.get("iss");
         String subject = decoded.getSubject();
 
-        // yawiki authentication
+        // 값 검증
         assertThat(contributorId)
-                .isEqualTo(givenId.toString());
-        assertThat(name)
-                .isEqualTo(givenName);
+            .describedAs("contributorId 필드가 적절히 입력되어야함")
+            .isEqualTo(givenId.toString());
 
-        // properties
-        assertThat(decoded.getExpiresAt().minusSeconds(jwtProperties.getLifespan()))
-                .isNotNull()
-                .isEqualTo(decoded.getIssuedAt());
+        assertThat(name)
+            .describedAs("name 필드가 적절히 입력되어야함")
+            .isEqualTo(givenName);
+
+        assertThat(decoded.getExpiresAt().minusSeconds(jwtLifespan))
+            .describedAs("lifespan 적절히 설정되어야함")
+            .isNotNull()
+            .isEqualTo(decoded.getIssuedAt());
+
         assertThat(issuer)
-                .isEqualTo(jwtProperties.getIssuer());
+            .describedAs("issuer 필드가 적절히 설정되어야함")
+            .isEqualTo(jwtIssuer);
+
         assertThat(subject)
-                .isEqualTo(jwtProperties.getSubject());
+            .describedAs("subject 필드가 적절히 설정되어야함")
+            .isEqualTo(givenId.toString());
     }
 }

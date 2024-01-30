@@ -1,6 +1,5 @@
 package dev.prvt.yawiki.fixture;
 
-import dev.prvt.yawiki.config.jwt.JwtProperties;
 import dev.prvt.yawiki.common.util.test.Fixture;
 import lombok.SneakyThrows;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -51,10 +50,6 @@ public class SecurityFixture {
         return jwtEncoder.encode(JwtEncoderParameters.from(claims));
     }
 
-    static public Jwt aYawikiJwt() {
-        return aYawikiJwt(UUID.randomUUID(), randString());
-    }
-
     static public JwtAuthenticationToken aJwtAuthenticationToken(UUID contributorId, String name) {
         JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(aYawikiJwt(contributorId, name));
         authenticationToken.setDetails(anWebAuthenticationDetails());
@@ -65,11 +60,4 @@ public class SecurityFixture {
         return aJwtAuthenticationToken(UUID.randomUUID(), randString());
     }
 
-    static public JwtProperties.JwtPropertiesBuilder aJwtProperties() {
-        return JwtProperties.builder()
-                .lifespan(1800)
-                .refreshTokenLifespan(180000)
-                .issuer("self")
-                .subject("yawiki");
-    }
 }

@@ -2,7 +2,6 @@ package dev.prvt.yawiki.auth.jwt.infra.jpaimpl;
 
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenExpirationException;
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenRecord;
-import dev.prvt.yawiki.fixture.SecurityFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +24,6 @@ class JpaRefreshTokenManagerTest {
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
     private JpaRefreshTokenManager jpaRefreshTokenManager;
-    private UUID givenRefreshToken;
 
     private UUID givenId;
     private String givenName;
@@ -34,7 +32,8 @@ class JpaRefreshTokenManagerTest {
 
     @BeforeEach
     void init() {
-        jpaRefreshTokenManager = new JpaRefreshTokenManager(refreshTokenRepository, SecurityFixture.aJwtProperties().build());
+        int refreshTokenLifespan = 18000;
+        jpaRefreshTokenManager = new JpaRefreshTokenManager(refreshTokenRepository, refreshTokenLifespan);
         givenId = UUID.randomUUID();
         givenName = randString();
         refreshTokenBuilder = RefreshToken.builder()
@@ -50,9 +49,6 @@ class JpaRefreshTokenManagerTest {
 
     @Test
     void issue() {
-//        refreshTokenRepository = mock(RefreshTokenRepository.class);
-//        ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-//        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
         when(refreshTokenRepository.save(any()))
                 .thenAnswer(
                         invocation -> invocation.getArgument(0)
