@@ -7,4 +7,7 @@ include 'common:util-web'
 include 'common:util-test'
 include 'common:util-jpa'
 include 'common:uuid'
+include 'wiki-member'
+include 'wiki-member:wiki-member-core'
+include 'wiki-member:wiki-member-api'
 
