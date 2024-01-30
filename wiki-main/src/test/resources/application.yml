@@ -26,7 +26,17 @@ yawiki:
   default-permission:
     do-initialize: true
   jwt:
-    lifespan: 1800
+    auth:
+      jwk:
+        source: file-path # file-path | url default: file-path
+        url: ${AUTH_SERVER_JWK_URL:http://192.168.100.10:8888/private_key.jwk} # http(s) url
+        file-path: ${AUTH_SERVER_JWK_FILE_PATH:classpath:test_private_key.json} # classpath, file, 혹은 일반 경로명 모두 사용 가능. default: classpath:test_private_key.json
+    resource:
+      jwk:
+        source: file-path # file-path | url
+        url: ${RESOURCE_SERVER_JWK_URL:http://192.168.100.10:8888/public_key.jwk} # http(s) url
+        file-path: ${RESOURCE_SERVER_JWK_FILE_PATH:classpath:test_public_key.json} # classpath, file, 혹은 일반 경로 모두 사용 가능. default: classpath:test_public_key.json
+        key-id: ${RESOURCE_SERVER_KEY_ID:test-key} # file-path 에서 읽어올 때에만 필요한 값. ID와 일치하는 키가 없는 경우 맨 첫번째 키를 불러옴. default: test-key
 
 logging:
   level:
