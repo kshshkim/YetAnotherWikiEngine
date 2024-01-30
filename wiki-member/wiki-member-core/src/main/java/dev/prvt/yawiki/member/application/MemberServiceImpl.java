@@ -4,7 +4,7 @@ import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.member.domain.Member;
 import dev.prvt.yawiki.member.domain.MemberRepository;
 import dev.prvt.yawiki.member.domain.PasswordHasher;
-import dev.prvt.yawiki.member.dto.MemberJoinDto;
+import dev.prvt.yawiki.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,15 +17,33 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordHasher passwordHasher;
     private final UuidGenerator uuidGenerator;
+    private final MemberMapper memberMapper;
 
     @Override
-    public Member join(MemberJoinDto memberJoinDto) {
+    public MemberData join(MemberJoinData data) {
         Member joined = memberRepository.save(Member.create(
-                uuidGenerator.generate(),
-                memberJoinDto.username(),
-                memberJoinDto.password(),
-                passwordHasher)
+            uuidGenerator.generate(),
+            data.username(),
+            data.password(),
+            passwordHasher)
         );
-        return joined;
+        return memberMapper.memberToMemberData(joined);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void verifyPassword(MemberPasswordVerificationData data) {
+        Member found = memberRepository.findByUsername(data.username())
+                            .orElseThrow(MemberNotFoundException::new);
+
+        found.verifyPassword(data.password(), passwordHasher);
+    }
+
+    @Override
+    public void updatePassword(MemberPasswordUpdateData data) {
+        Member found = memberRepository.findByUsername(data.username())
+                            .orElseThrow(MemberNotFoundException::new);
+        found.updatePassword(data.oldPassword(), data.newPassword(), passwordHasher);
+    }
+
 }

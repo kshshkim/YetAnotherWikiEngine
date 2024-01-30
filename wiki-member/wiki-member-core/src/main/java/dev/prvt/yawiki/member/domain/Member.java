@@ -17,11 +17,20 @@ public class Member extends BaseMember {
     private String username;
     private String password;
 
-    public void updatePassword(String raw, PasswordHasher hasher) {
+    private void updatePassword(String raw, PasswordHasher hasher) {
         this.password = hasher.hash(raw);
     }
 
-    public void validatePassword(String raw, PasswordHasher hasher) {
+    public void updatePassword(
+        String oldPassword,
+        String newPassword,
+        PasswordHasher hasher
+    ) {
+        verifyPassword(oldPassword, hasher);
+        updatePassword(newPassword, hasher);
+    }
+
+    public void verifyPassword(String raw, PasswordHasher hasher) {
         if (!hasher.matches(raw, password)) {
             throw new PasswordMismatchException();
         }
