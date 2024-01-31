@@ -22,7 +22,7 @@ import dev.prvt.yawiki.common.model.WikiPageTitle;
 import dev.prvt.yawiki.common.util.NamespaceParser;
 import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverter;
 import dev.prvt.yawiki.common.util.web.converter.WikiPageTitleConverterImpl;
-import dev.prvt.yawiki.web.api.v1.ErrorMessage;
+import dev.prvt.yawiki.web.rest.schema.ErrorMessage;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArg;
 import dev.prvt.yawiki.web.contributorresolver.ContributorInfoArgumentResolver;
 import dev.prvt.yawiki.web.contributorresolver.converters.AnonymousAuthenticationTokenContributorInfoConverter;

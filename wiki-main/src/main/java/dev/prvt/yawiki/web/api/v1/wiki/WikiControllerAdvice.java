@@ -3,7 +3,7 @@ package dev.prvt.yawiki.web.api.v1.wiki;
 import dev.prvt.yawiki.core.permission.domain.exception.PermissionEvaluationException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.NoSuchWikiPageException;
 import dev.prvt.yawiki.core.wikipage.domain.exception.VersionCollisionException;
-import dev.prvt.yawiki.web.api.v1.ErrorMessage;
+import dev.prvt.yawiki.web.rest.schema.ErrorMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.web.api.v1;
+package dev.prvt.yawiki.web.rest.schema;
 
 
 import lombok.Getter;

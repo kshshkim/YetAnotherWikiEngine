@@ -16,6 +16,7 @@ dependencies {
     implementation project(':common:uuid')
     implementation project(':common:util-web')
     implementation project(':common:util-jpa')
+    implementation project(':common:api-schema')
     testImplementation project(':common:util-test')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
