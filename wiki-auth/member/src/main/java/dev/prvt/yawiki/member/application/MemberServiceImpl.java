@@ -4,7 +4,8 @@ import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.member.domain.Member;
 import dev.prvt.yawiki.member.domain.MemberRepository;
 import dev.prvt.yawiki.member.domain.PasswordHasher;
-import dev.prvt.yawiki.member.exception.MemberNotFoundException;
+import dev.prvt.yawiki.member.exception.NoSuchMemberException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,17 +33,18 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional(readOnly = true)
-    public void verifyPassword(MemberPasswordVerificationData data) {
+    public UUID verifyPassword(MemberPasswordVerificationData data) {
         Member found = memberRepository.findByUsername(data.username())
-                            .orElseThrow(MemberNotFoundException::new);
+                            .orElseThrow(NoSuchMemberException::new);
 
         found.verifyPassword(data.password(), passwordHasher);
+        return found.getId();
     }
 
     @Override
     public void updatePassword(MemberPasswordUpdateData data) {
         Member found = memberRepository.findByUsername(data.username())
-                            .orElseThrow(MemberNotFoundException::new);
+                            .orElseThrow(NoSuchMemberException::new);
         found.updatePassword(data.oldPassword(), data.newPassword(), passwordHasher);
     }
 

@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import dev.prvt.yawiki.member.domain.Member;
 import dev.prvt.yawiki.member.domain.MemberRepository;
 import dev.prvt.yawiki.member.domain.PasswordHasher;
-import dev.prvt.yawiki.member.exception.MemberNotFoundException;
+import dev.prvt.yawiki.member.exception.NoSuchMemberException;
 import dev.prvt.yawiki.member.exception.PasswordMismatchException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -74,7 +74,7 @@ class MemberServiceTest {
 
         assertThatThrownBy(() -> memberService.verifyPassword(new MemberPasswordVerificationData(wrongUsername, givenPassword)))
             .describedAs("없는 회원이기 때문에 예외를 반환해야함.")
-            .isInstanceOf(MemberNotFoundException.class);
+            .isInstanceOf(NoSuchMemberException.class);
 
         String wrongPassword = "not" + givenPassword;
 
