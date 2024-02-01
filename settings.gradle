@@ -8,7 +8,9 @@ include 'common:util-web'
 include 'common:util-test'
 include 'common:util-jpa'
 include 'common:uuid'
-include 'wiki-member'
-include 'wiki-member:wiki-member-core'
-include 'wiki-member:wiki-member-api'
+include 'wiki-auth'
+include 'wiki-auth:api-external'
+include 'wiki-auth:auth-processor'
+include 'wiki-auth:member'
+
 

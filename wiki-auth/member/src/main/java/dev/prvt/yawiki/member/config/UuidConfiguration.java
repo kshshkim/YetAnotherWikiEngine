@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.member.configuration;
+package dev.prvt.yawiki.member.config;
 
 import dev.prvt.yawiki.common.uuid.UuidGenerator;
 import dev.prvt.yawiki.common.uuid.UuidGenerators;

@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.jwt;
+package dev.prvt.yawiki.auth.jwt.config;
 
 import dev.prvt.yawiki.auth.jwt.domain.AccessTokenGenerator;
 import dev.prvt.yawiki.auth.jwt.domain.RefreshTokenManager;

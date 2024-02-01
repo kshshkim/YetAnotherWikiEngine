@@ -1,4 +1,5 @@
-package dev.prvt.yawiki.fixture;
+package dev.prvt.yawiki.auth.jwt;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;

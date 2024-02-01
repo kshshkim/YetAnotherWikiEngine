@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.jwt;
+package dev.prvt.yawiki.auth.jwt.config;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -17,10 +17,10 @@ import org.springframework.util.ResourceUtils;
 
 @Slf4j
 @Configuration
-public class AuthServerJWKSourceConfig {
+public class JwtEncoderJWKSourceConfig {
 
     @SneakyThrows
-    @Bean("authServerJWKSource")
+    @Bean("jwtEncoderJWKSource")
     @ConditionalOnProperty(
         value = "yawiki.jwt.auth.jwk.source",
         havingValue = "url"
@@ -35,7 +35,7 @@ public class AuthServerJWKSourceConfig {
         return new RemoteJWKSet<>(new URL(jwkUrl));
     }
 
-    @Bean("authServerJWKSource")
+    @Bean("jwtEncoderJWKSource")
     @ConditionalOnProperty(
         value = "yawiki.jwt.auth.jwk.source",
         havingValue = "file-path",

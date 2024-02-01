@@ -2,8 +2,8 @@ package dev.prvt.yawiki.auth.jwt.infra;
 
 import static dev.prvt.yawiki.common.util.test.Fixture.randString;
 import static dev.prvt.yawiki.common.util.test.Fixture.random;
-import static dev.prvt.yawiki.fixture.JwtFixture.getJwtDecoder;
-import static dev.prvt.yawiki.fixture.JwtFixture.getJwtEncoder;
+import static dev.prvt.yawiki.auth.jwt.JwtFixture.getJwtDecoder;
+import static dev.prvt.yawiki.auth.jwt.JwtFixture.getJwtEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.prvt.yawiki.auth.jwt.domain.AccessTokenGenerator;

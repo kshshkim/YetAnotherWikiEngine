@@ -1,4 +1,4 @@
-package dev.prvt.yawiki.config.jwt;
+package dev.prvt.yawiki.auth.jwt.config;
 
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -9,11 +9,11 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 @Configuration
-public class AuthServerConfig {
+public class JwtEncoderConfig {
 
     @Bean
     public JwtEncoder jwtEncoder(
-        @Qualifier("authServerJWKSource") JWKSource<SecurityContext> jwkSource
+        @Qualifier("jwtEncoderJWKSource") JWKSource<SecurityContext> jwkSource
     ) {
         return new NimbusJwtEncoder(jwkSource);
     }
