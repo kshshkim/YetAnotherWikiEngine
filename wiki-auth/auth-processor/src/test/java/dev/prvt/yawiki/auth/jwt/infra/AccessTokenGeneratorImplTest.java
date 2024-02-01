@@ -7,6 +7,10 @@ import static dev.prvt.yawiki.auth.jwt.JwtFixture.getJwtEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.prvt.yawiki.auth.jwt.domain.AccessTokenGenerator;
+import dev.prvt.yawiki.auth.jwt.domain.TokenPayload;
+import dev.prvt.yawiki.auth.jwt.domain.TokenPayload.CustomClaim;
+import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -20,63 +24,72 @@ class AccessTokenGeneratorImplTest {
 
     AccessTokenGenerator accessTokenGenerator;
 
-    String jwtIssuer = randString();
-    int jwtLifespan = random().nextInt(180, 1800);
-
     JwtEncoder jwtEncoder;
     JwtDecoder jwtDecoder;
 
     @BeforeEach
     @SneakyThrows
     void init() {
-        jwtIssuer = randString();
-        jwtLifespan = random().nextInt(180, 1800);
-
         jwtEncoder = getJwtEncoder();
         jwtDecoder = getJwtDecoder();
-        accessTokenGenerator = new AccessTokenGeneratorImpl(jwtEncoder, jwtLifespan, jwtIssuer);
+        accessTokenGenerator = new AccessTokenGeneratorImpl(jwtEncoder);
     }
 
     @Test
     @SneakyThrows
     void generate() {
         // given
-        UUID givenId = UUID.randomUUID();  // 임의 ID
-        String givenName = randString();  // 임의 name
+        UUID givenSubjectId = UUID.randomUUID();  // 임의 ID
+        String givenIssuer = randString();
+
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusSeconds(1000);
+
+        CustomClaim customClaim1 = new CustomClaim("claim-key-1", "claim-value-1");
+        CustomClaim customClaim2 = new CustomClaim(randString(), randString());
+        CustomClaim shouldBeOverwritten = new CustomClaim("iss", "not the issuer");
+
+        TokenPayload givenPayload = new TokenPayload(
+            givenIssuer,
+            givenSubjectId.toString(),
+            issuedAt,
+            expiresAt,
+            List.of(customClaim1, customClaim2, shouldBeOverwritten)
+        );
 
         // when
-        String generated = accessTokenGenerator.generate(givenId, givenName);  // 토큰 생성
+        String generated = accessTokenGenerator.generate(givenPayload);  // 토큰 생성
 
         // then
-
         // 토큰 decode
         Jwt decoded = jwtDecoder.decode(generated);
         Map<String, Object> claims = decoded.getClaims();
-        String contributorId = (String) claims.get("contributorId");
-        String name = (String) claims.get("name");
-        String issuer = (String) claims.get("iss");
-        String subject = decoded.getSubject();
 
         // 값 검증
-        assertThat(contributorId)
-            .describedAs("contributorId 필드가 적절히 입력되어야함")
-            .isEqualTo(givenId.toString());
+        assertThat(decoded.getIssuedAt().getEpochSecond())
+            .describedAs("발급일자가 적절히 설정되어야함")
+            .isEqualTo(issuedAt.getEpochSecond());
 
-        assertThat(name)
-            .describedAs("name 필드가 적절히 입력되어야함")
-            .isEqualTo(givenName);
+        assertThat(decoded.getExpiresAt().getEpochSecond())
+            .describedAs("만료일자가 적절히 설정되어야함")
+            .isEqualTo(expiresAt.getEpochSecond());
 
-        assertThat(decoded.getExpiresAt().minusSeconds(jwtLifespan))
-            .describedAs("lifespan 적절히 설정되어야함")
-            .isNotNull()
-            .isEqualTo(decoded.getIssuedAt());
+        assertThat(claims.get(customClaim1.key()))
+            .describedAs("claim 1 필드가 적절히 설정되어야함")
+            .isEqualTo(customClaim1.value());
 
-        assertThat(issuer)
+        assertThat(claims.get(customClaim2.key()))
+            .describedAs("claim 2 필드가 적절히 설정되어야함")
+            .isEqualTo(customClaim2.value());
+
+        assertThat(claims.get("iss"))
+            .describedAs("커스텀 페이로드에 iss를 키로 가지는 값이 있는 경우, 반영되어서는 안 됨.")
+            .isNotEqualTo(shouldBeOverwritten.value())
             .describedAs("issuer 필드가 적절히 설정되어야함")
-            .isEqualTo(jwtIssuer);
+            .isEqualTo(givenPayload.issuer());
 
-        assertThat(subject)
+        assertThat(decoded.getSubject())
             .describedAs("subject 필드가 적절히 설정되어야함")
-            .isEqualTo(givenId.toString());
+            .isEqualTo(givenPayload.subject());
     }
 }

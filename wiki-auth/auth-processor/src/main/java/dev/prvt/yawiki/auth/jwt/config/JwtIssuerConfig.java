@@ -15,11 +15,9 @@ public class JwtIssuerConfig {
 
     @Bean
     public AccessTokenGenerator accessTokenGenerator(
-        JwtEncoder jwtEncoder,
-        @Value("${yawiki.jwt.auth.access-token.lifespan}") int lifespan,
-        @Value("${yawiki.jwt.auth.access-token.issuer}") String issuer
+        JwtEncoder jwtEncoder
     ) {
-        return new AccessTokenGeneratorImpl(jwtEncoder, lifespan, issuer);
+        return new AccessTokenGeneratorImpl(jwtEncoder);
     }
 
     @Bean
