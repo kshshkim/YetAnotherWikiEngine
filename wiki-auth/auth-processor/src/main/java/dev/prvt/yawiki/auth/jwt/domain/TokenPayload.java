@@ -50,4 +50,12 @@ public record TokenPayload(
         );
     }
 
+    public String getCustomClaim(String key) {
+        return customClaims.stream()
+                   .filter(cc -> cc.key().equals(key))
+                   .map(CustomClaim::value)
+                   .findAny()
+                   .orElse(null);
+    }
+
 }
