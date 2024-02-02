@@ -1,0 +1,34 @@
+spring:
+  profiles:
+    active: local
+  datasource:
+    hikari:
+      data-source-properties:
+        rewriteBatchedStatements: true  # highly recommended due to performance reasons
+  jdbc:
+    batch_size: 100
+    show-sql: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+yawiki:
+  jwt:
+    auth:
+      jwk:
+        source: file-path # file-path | url default: file-path
+        url: ${AUTH_SERVER_JWK_URL:http://192.168.100.10:8888/private_key.jwk} # http(s) url
+        file-path: ${AUTH_SERVER_JWK_FILE_PATH:classpath:test_private_key.json} # classpath, file, 혹은 일반 경로명 모두 사용 가능. default: classpath:test_private_key.json
+      access-token:
+        lifespan: ${AUTH_SERVER_ACCESS_TOKEN_LIFESPAN:1800} # access token 수명. 기본 1800초 (30분)
+        issuer: ${AUTH_SERVER_ACCESS_TOKEN_ISSUER:self} # access token 발급자. 기본 self
+      refresh-token:
+        lifespan: ${AUTH_SERVER_REFRESH_TOKEN_LIFESPAN:1800000} # refresh token 수명. 기본 1800000초 (30000분)
