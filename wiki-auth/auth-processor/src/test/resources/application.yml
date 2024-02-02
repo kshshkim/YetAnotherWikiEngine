@@ -1,0 +1,50 @@
+spring:
+  profiles:
+    active: local
+  datasource:
+    hikari:
+      data-source-properties:
+        rewriteBatchedStatements: true  # highly recommended due to performance reasons
+  jdbc:
+    batch_size: 100
+    show-sql: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
+        show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+yawiki:
+  default-permission:
+    do-initialize: true
+  jwt:
+    auth:
+      jwk:
+        source: file-path # file-path | url / default: file-path
+        url: ${AUTH_SERVER_JWK_URL:http://192.168.100.10:8888/private_key.jwk} # http(s) url
+        file-path: ${AUTH_SERVER_JWK_FILE_PATH:classpath:test_private_key.json} # classpath, file, 혹은 일반 경로명 모두 사용 가능. default: classpath:test_private_key.json
+      access-token:
+        lifespan: ${AUTH_SERVER_ACCESS_TOKEN_LIFESPAN:1800} # access token 수명. 기본 1800초 (30분)
+        issuer: ${AUTH_SERVER_ACCESS_TOKEN_ISSUER:self} # access token 발급자. 기본 self
+      refresh-token:
+        lifespan: ${AUTH_SERVER_REFRESH_TOKEN_LIFESPAN:1800000} # refresh token 수명. 기본 1800000초 (30000분)
+#    resource:
+#      jwk:
+#        source: file-path # file-path | url
+#        url: ${RESOURCE_SERVER_JWK_URL:http://192.168.100.10:8888/public_key.jwk} # http(s) url
+#        file-path: ${RESOURCE_SERVER_JWK_FILE_PATH:classpath:test_public_key.json} # classpath, file, 혹은 일반 경로 모두 사용 가능. default: classpath:test_public_key.json
+#        key-id: ${RESOURCE_SERVER_KEY_ID:test-key} # file-path 에서 읽어올 때에만 필요한 값. ID와 일치하는 키가 없는 경우 맨 첫번째 키를 불러옴. default: test-key
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc: DEBUG

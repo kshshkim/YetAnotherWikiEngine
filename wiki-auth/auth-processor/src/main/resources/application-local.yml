@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    # datasource configuration example.
+    # It may also work with RDBMSs other than MySQL, but not tested.
+    url: jdbc:mysql://192.168.100.10:3306/auth_test  #?rewriteBatchedStatements=true
+    username: root
+    password: test1234
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jdbc:
+    batch_size: 100
+    show-sql: true
+  jpa:
+    open-in-view: false
+    hibernate:
+#      ddl-auto: create
+      jdbc:
+        show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.springframework.jdbc: DEBUG
+    dev.prvt: DEBUG
