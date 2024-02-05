@@ -1,9 +1,9 @@
 plugins {
-    id 'java'
+    java
 }
 
-group = 'dev.prvt.yawiki'
-version = '0.0.1-SNAPSHOT'
+group = "dev.prvt.yawiki"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -12,6 +12,6 @@ repositories {
 dependencies {
 }
 
-test {
+tasks.test {
     useJUnitPlatform()
 }
